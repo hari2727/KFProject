@@ -1,0 +1,16 @@
+<div>
+    <kf-card>
+        <div kf-card-header class="title">
+            <kf-icon class="icon" *ngIf="icon !== null" [icon]="icon" size="lg"></kf-icon>
+            <h4 class="fw-bold">{{ title }}</h4>
+            <a *ngIf="action !== null" (click)="actionClicked.emit()">{{ action }}</a>
+            <div class="toggle" (click)="toggleContent()">
+                <span class="subtext-sm fw-semibold text-uppercase">{{ getToggleText() }}</span>
+                <kf-icon class="icon" [icon]="getToggleIcon()" color="primary" size="sm"></kf-icon>
+            </div>
+        </div>
+        <div class="content" *ngIf="contentVisible">
+            <ng-content></ng-content>
+        </div>
+    </kf-card>
+</div>

@@ -1,0 +1,820 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import * as typeorm from 'typeorm';
+import { AddNewSubcategories, SubcategoryType } from './responsibilities.interface';
+import { ResponsibilitiesRepository } from './responsibilities.repository';
+import { ModelQuery, NewModelDBResponseMock } from './responsibilities.service.fixture';
+
+jest.mock('typeorm', () => {
+    const actual = jest.requireActual('typeorm');
+    return {
+        ...actual,
+        getManager: jest.fn(),
+        getConnection: jest.fn(),
+    };
+});
+
+const modelId = 'THYT-RFSR-THST-IKJS';
+
+describe('ResponsibilitiesRepository', () => {
+    let module: TestingModule;
+    let mssqlService: ResponsibilitiesRepository;
+
+    beforeAll(async () => {
+        module = await Test.createTestingModule({
+            providers: [ResponsibilitiesRepository],
+        }).compile();
+
+        mssqlService = module.get(ResponsibilitiesRepository);
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+        jest.clearAllTimers();
+    });
+
+    describe('getOldModelResponsibilities', () => {
+        test('should call escapeQueryWithParameters and query methods', async () => {
+            const dbQuery = `exec CMM.dbo.GetClientCategories
+                            @InputModelGUID=:ModelId,
+                            @InputModelVersion=:ModelVersion,
+                            @LCID=:LCID,
+                            @JobSectionCode=:JobSectionCode,
+                            @ClientID=:ClientId`;
+            const params = {
+                ModelId: modelId,
+                ModelVersion: 1.0,
+                LCID: 'en',
+                JobSectionCode: 'RESPONSIBILITY',
+                ClientId: 23139,
+            };
+            const escapeQueryWithParametersMock = jest.fn().mockReturnValue(['query', 'params']);
+            (typeorm as any).getConnection = () => ({
+                driver: {
+                    escapeQueryWithParameters: escapeQueryWithParametersMock,
+                },
+            });
+
+            const query = jest.fn().mockReturnValue(NewModelDBResponseMock);
+            (typeorm as any).getManager = () => ({
+                query,
+            });
+            await mssqlService.getOldModelResponsibilities(ModelQuery, modelId);
+            const [queryStr, paramsObj] = await escapeQueryWithParametersMock();
+            expect(escapeQueryWithParametersMock).toHaveBeenCalledWith(dbQuery, params, {});
+            expect(query).toHaveBeenLastCalledWith(queryStr, paramsObj);
+        });
+
+        test('should throw exception', async () => {
+            jest.spyOn(mssqlService as any, 'executeQueryWithEscapeParams').mockImplementationOnce(async () => {
+                throw new Error('Error in running modle responsibilities status quey from DB');
+            });
+            let e;
+            try {
+                await mssqlService.getOldModelResponsibilities(ModelQuery, modelId);
+            } catch (err) {
+                e = err;
+            }
+            expect(e.message).toEqual('Error in running modle responsibilities status quey from DB');
+        });
+    });
+
+    describe('getResponsibilitiesStatus', () => {
+        test('should return data from db', async () => {
+            const escapeQueryWithParametersMock = jest.fn().mockReturnValue(['query', 'params']);
+            (typeorm as any).getConnection = () => ({
+                driver: {
+                    escapeQueryWithParameters: escapeQueryWithParametersMock,
+                },
+            });
+
+            const query = jest.fn().mockReturnValue(NewModelDBResponseMock);
+            (typeorm as any).getManager = () => ({
+                query,
+            });
+            await mssqlService.getResponsibilitiesStatus(ModelQuery);
+            const [queryStr, paramsObj] = await escapeQueryWithParametersMock();
+            expect(escapeQueryWithParametersMock).toHaveBeenCalled();
+            expect(query).toHaveBeenLastCalledWith(queryStr, paramsObj);
+        });
+
+        test('should throw exception', async () => {
+            jest.spyOn(mssqlService as any, 'executeQueryWithEscapeParams').mockImplementationOnce(async () => {
+                throw new Error('Error in running modle responsibilities status quey from DB');
+            });
+            let e;
+            try {
+                await mssqlService.getResponsibilitiesStatus(ModelQuery);
+            } catch (err) {
+                e = err;
+            }
+            expect(e.message).toEqual('Error in running modle responsibilities status quey from DB');
+        });
+    });
+
+    describe('getNewModelResponsibilities', () => {
+        test('should call escapeQueryWithParameters and query methods', async () => {
+            const dbQuery = `exec CMM.dbo.Get_RespSkillModel
+                            @InputModelGUID=:ModelId,
+                            @InputModelVersion=:ModelVersion,
+                            @LCID=:LCID,
+                            @JobSectionCode=:JobSectionCode,
+                            @ClientID=:ClientId`;
+            const params = {
+                ModelId: modelId,
+                ModelVersion: 1.0,
+                LCID: 'en',
+                JobSectionCode: 'RESPONSIBILITY',
+                ClientId: 23139,
+            };
+            const escapeQueryWithParametersMock = jest.fn().mockReturnValue(['query', 'params']);
+            (typeorm as any).getConnection = () => ({
+                driver: {
+                    escapeQueryWithParameters: escapeQueryWithParametersMock,
+                },
+            });
+
+            const query = jest.fn().mockReturnValue(NewModelDBResponseMock);
+            (typeorm as any).getManager = () => ({
+                query,
+            });
+            await mssqlService.getNewModelResponsibilities(ModelQuery, modelId);
+            const [queryStr, paramsObj] = await escapeQueryWithParametersMock();
+            expect(escapeQueryWithParametersMock).toHaveBeenCalledWith(dbQuery, params, {});
+            expect(query).toHaveBeenLastCalledWith(queryStr, paramsObj);
+        });
+
+        test('should throw exception', async () => {
+            jest.spyOn(mssqlService as any, 'executeQueryWithEscapeParams').mockImplementationOnce(async () => {
+                throw new Error('Error in running modle responsibilities status quey from DB');
+            });
+            let e;
+            try {
+                await mssqlService.getNewModelResponsibilities(ModelQuery, modelId);
+            } catch (err) {
+                e = err;
+            }
+            expect(e.message).toEqual('Error in running modle responsibilities status quey from DB');
+        });
+    });
+
+    describe('responsibilitiesPublish', () => {
+        test('should call stored proc with clientId', async () => {
+            const typeormQuery = jest.fn();
+            (typeorm as any).getManager = jest.fn().mockReturnValue({
+                query: typeormQuery,
+            });
+
+            await mssqlService.responsibilitiesPublish(1234);
+            expect(typeorm.getManager().query).toBeCalledWith(
+                `Exec SuccessProfile.dbo.transfer_Client_JDModelItems_toSuccessProfile  1234, '${SubcategoryType.RESPONSIBILITY}'`,
+            );
+        });
+
+        test('should throw exception', async () => {
+            const typeormQuery = jest.fn(async () => {
+                throw new Error('Error in running modle responsibilities publish quey from DB');
+            });
+            (typeorm as any).getManager = jest.fn().mockReturnValue({
+                query: typeormQuery,
+            });
+            let e;
+            try {
+                await mssqlService.responsibilitiesPublish(1234);
+            } catch (err) {
+                e = err;
+            }
+            expect(e.message).toEqual('Error in running modle responsibilities publish quey from DB');
+        });
+    });
+
+    describe('getResponsibilityModelDetailId', () => {
+        test('should call stored proc with clientId', async () => {
+            let sql = `EXEC CMM.dbo.GetOneSubCategoryWithLevels  @ClientId =:ClientId, @LCID =:LCID, @JobSubCategoryID =:JobSubCategoryId`;
+            const typeormQuery = jest.fn();
+            (typeorm as any).getManager = jest.fn().mockReturnValue({
+                query: typeormQuery,
+            });
+            const queryParams = {
+                ClientId: 23139,
+                LCID: 'en',
+                JobSubCategoryId: 1234,
+            };
+            const escapeQueryWithParametersMock = jest.fn().mockReturnValue(['query', 'params']);
+            (typeorm as any).getConnection = () => ({
+                driver: {
+                    escapeQueryWithParameters: escapeQueryWithParametersMock,
+                },
+            });
+            await mssqlService.getResponsibilityModelDetailId(ModelQuery, 1234);
+            const [queryStr, paramsObj] = await escapeQueryWithParametersMock();
+            expect(escapeQueryWithParametersMock).toHaveBeenCalledWith(sql, queryParams, {});
+            expect(typeormQuery).toHaveBeenLastCalledWith(queryStr, paramsObj);
+        });
+        test('should throw exception', async () => {
+            jest.spyOn(mssqlService as any, 'executeQueryWithEscapeParams').mockImplementationOnce(async () => {
+                throw new Error('Error in running getResponsibilityDetailId status query from DB');
+            });
+            let e;
+            try {
+                await mssqlService.getResponsibilityModelDetailId(ModelQuery, 123);
+            } catch (err) {
+                e = err;
+            }
+            expect(e.message).toEqual('Error in running getResponsibilityDetailId status query from DB');
+        });
+    });
+
+    describe('itemModificationSubCategory', () => {
+        const time = new Date().toISOString();
+        test('should call insert script with query params', async () => {
+            const typeormQuery = jest.fn();
+            (typeorm as any).getManager = jest.fn().mockReturnValue({
+                query: typeormQuery,
+            });
+            const escapeQueryWithParametersMock = jest.fn().mockReturnValue(['dbQuery', 'params']);
+            (typeorm as any).getConnection = () => ({
+                driver: {
+                    escapeQueryWithParameters: escapeQueryWithParametersMock,
+                },
+            });
+            const dbQuery = `
+            DECLARE @tablevar TABLE (ItemModificationID BIGINT)
+            insert into CMM.dbo.ItemModificationSubCategory (ItemType, CompetencyModelGUID, CompetencyModelVersion, LCID, ClientID, ModifiedBy, InsertDate, ModificationComplete)
+            OUTPUT INSERTED.ItemModificationID INTO @tablevar
+            values (:Type,
+                    :ModelId,
+                    :ModelVersion,
+                    :LCID,
+                    :ClientId,
+                    :UserID,
+                    :TimeStamp, 0)
+            SELECT ItemModificationID AS ItemID FROM @tablevar`;
+
+            const insertQueryParams = {
+                Type: SubcategoryType.RESPONSIBILITY,
+                ModelId: '20B4BA29-8050-48BD-8623-46FC14B7E165',
+                ModelVersion: 1234,
+                LCID: 'en',
+                ClientId: 1234,
+                UserID: 2345,
+                TimeStamp: time,
+            };
+
+            const query = jest.fn().mockReturnValue({});
+            (typeorm as any).getManager = () => ({
+                query,
+            });
+            await mssqlService.itemModificationSubCategory(
+                SubcategoryType.RESPONSIBILITY, {
+                    preferredLocale: 'en',
+                    preferredClientId: 1234,
+                    modelVersion: 1234,
+                    modelId: '20B4BA29-8050-48BD-8623-46FC14B7E165',
+                    loggedInUserClientId: 1234,
+                    userId: 2345,
+                    locale: 'en',
+                },
+                time,
+            );
+
+            const [queryStr, paramsObj] = await escapeQueryWithParametersMock();
+            expect(escapeQueryWithParametersMock).toHaveBeenCalledWith(dbQuery, insertQueryParams, {});
+            expect(query).toHaveBeenLastCalledWith(queryStr, paramsObj);
+        });
+        test('should throw exception', async () => {
+            jest.spyOn(mssqlService as any, 'executeQueryWithEscapeParams').mockImplementationOnce(async () => {
+                throw new Error('Error in running ItemModificationID DB script for modelId ${query.modelId}');
+            });
+            let e;
+            try {
+                await mssqlService.itemModificationSubCategory(
+                    SubcategoryType.RESPONSIBILITY,  {
+                        preferredLocale: 'en',
+                        preferredClientId: 1234,
+                        modelVersion: 1234,
+                        modelId: 'TYPO90',
+                        loggedInUserClientId: 1234,
+                        userId: 2345,
+                        locale: 'en',
+                    },
+                    time,
+                );
+            } catch (err) {
+                e = err;
+            }
+            expect(e.message).toEqual('Error in running ItemModificationID DB script for modelId ${query.modelId}');
+        });
+    });
+
+    describe('addJobSubCategory', () => {
+        test('should call stored proc with params', async () => {
+            const escapeQueryWithParametersMock = jest.fn().mockReturnValue(['dbQuery', 'params']);
+            (typeorm as any).getConnection = () => ({
+                driver: {
+                    escapeQueryWithParameters: escapeQueryWithParametersMock,
+                },
+            });
+
+            const query = jest.fn().mockReturnValue({ JobSubCategoryID: 'subcategory', JobCategoryID: 'jobcategory' });
+            (typeorm as any).getManager = () => ({
+                query,
+            });
+            const storedProcQuery = `
+                exec CMM.dbo.AddJobSubCategory
+                @JobCategoryID=:JobCategoryID,
+                @JobSubCategoryName=:JobSubCategoryName,
+                @JobSubCategoryDescription=:JobSubCategoryDescription,
+                @UserID=:UserID,
+                @ClientId=:ClientId,
+                @JobSectionCode=:JobSectionCode,
+                @JobSubFamilyID=:JobSubFamilyID,
+                @LCID=:LCID`;
+
+            const jobLevelDetailProcParams = {
+                JobCategoryID: 1233,
+                JobSubCategoryName: 'test',
+                JobSubCategoryDescription: 'test45',
+                UserID: 1234,
+                ClientId: 9243,
+                JobSectionCode: 'RESPONSIBILITY',
+                JobSubFamilyID: 'S0138297002',
+                LCID: 'en',
+            };
+
+            await mssqlService.addJobSubCategory({
+                jobCategoryID: 1233,
+                jobSubCategoryName: 'test',
+                userID: 1234,
+                clientId: 9243,
+                jobSectionCode: SubcategoryType.RESPONSIBILITY,
+                jobSubFamilyID: 'S0138297002',
+                jobSubCategoryDescription: 'test45',
+                lcid: 'en',
+            });
+            const [queryStr, paramsObj] = await escapeQueryWithParametersMock();
+            expect(escapeQueryWithParametersMock).toHaveBeenCalledWith(storedProcQuery, jobLevelDetailProcParams, {});
+            expect(query).toHaveBeenLastCalledWith(queryStr, paramsObj);
+        });
+
+        test('should throw exception', async () => {
+            jest.spyOn(mssqlService as any, 'executeQueryWithEscapeParams').mockImplementationOnce(async () => {
+                throw new Error('Error in running AddJobSubCategory stored proc for sub-family id RESPONSIBILITY');
+            });
+            let e;
+            try {
+                await mssqlService.addJobSubCategory({
+                    jobCategoryID: 1233,
+                    jobSubCategoryName: 'test',
+                    userID: 1234,
+                    clientId: 9243,
+                    jobSectionCode: SubcategoryType.RESPONSIBILITY,
+                    jobSubFamilyID: 'S0138297002',
+                    jobSubCategoryDescription: 'test45',
+                    lcid: 'en',
+                });
+            } catch (err) {
+                e = err;
+            }
+            expect(e.message).toEqual('Error in running AddJobSubCategory stored proc for sub-family id RESPONSIBILITY');
+        });
+    });
+
+    describe('addJobLevelDetail', () => {
+        const storedProcQuery = `
+            exec CMM.dbo.AddJobLevelDetail
+            @JobCategoryID=:JobCategoryID,
+            @JobLevelDetailOrder=:JobLevelDetailOrder,
+            @JobSubCategoryID=:JobSubCategoryID,
+            @JobLevelDetailDescription=:JobLevelDetailDescription,
+            @LCID=:LCID`;
+
+        const jobLevelDetailProcParams = {
+            JobCategoryID: '1233',
+            JobLevelDetailOrder: 1,
+            JobSubCategoryID: '419647',
+            JobLevelDetailDescription: 'testing description',
+            LCID: 'en',
+        };
+
+        test('should call stored proc with params', async () => {
+            const escapeQueryWithParametersMock = jest.fn().mockReturnValue(['dbQuery', 'params']);
+            (typeorm as any).getConnection = () => ({
+                driver: {
+                    escapeQueryWithParameters: escapeQueryWithParametersMock,
+                },
+            });
+
+            const query = jest.fn().mockReturnValue({ JobLevelDetailID: '1234' });
+            (typeorm as any).getManager = () => ({
+                query,
+            });
+
+            await mssqlService.addJobLevelDetail({
+                jobCategoryID: '1233',
+                jobLevelDetailOrder: 1,
+                jobSubCategoryID: '419647',
+                jobLevelDetailDescription: 'testing description',
+                lcid: 'en',
+            });
+            const [queryStr, paramsObj] = await escapeQueryWithParametersMock();
+            expect(escapeQueryWithParametersMock).toHaveBeenCalledWith(storedProcQuery, jobLevelDetailProcParams, {});
+            expect(query).toHaveBeenLastCalledWith(queryStr, paramsObj);
+        });
+
+        test('should throw exception', async () => {
+            jest.spyOn(mssqlService as any, 'executeQueryWithEscapeParams').mockImplementationOnce(async () => {
+                throw new Error('Error in running AddJobLevelDetail stored proc');
+            });
+            let e;
+            try {
+                await mssqlService.addJobLevelDetail({
+                    jobCategoryID: '1233',
+                    jobLevelDetailOrder: 1234,
+                    jobSubCategoryID: 'response.JobSubCategoryID',
+                    jobLevelDetailDescription: 'testing description',
+                    lcid: 'en',
+                });
+            } catch (err) {
+                e = err;
+            }
+            expect(e.message).toEqual('Error in running AddJobLevelDetail stored proc');
+        });
+    });
+
+    describe('ItemModificationSubCategoryDetails', () => {
+        const values = [
+            `(:ItemModificationID0,
+            :JobCategoryID0,
+            :JobSubCategoryID0,
+            :JobSubCategoryName0,
+            :JobLevelDetailDescription0,
+            :JobLevelDetailID0,
+            :JobLevelDetailOrder0,
+            :JobSubfamilyId0,
+            :JobSubCategoryDescription0,
+            :isCustomLevel0,
+            :LCID0)`,
+        ];
+
+        const valueParams = {
+            ItemModificationID0: 1234,
+            JobCategoryID0: 'JobCategoryID',
+            JobSubCategoryID0: 'JobSubCategoryID',
+            JobSubCategoryName0: 'subCategory.name',
+            JobLevelDetailDescription0: 'description.description',
+            JobLevelDetailID0: 'jobLevelDetailsResponse.JobLevelDetailID',
+            JobLevelDetailOrder0: 'description.level',
+            JobSubfamilyId0: '',
+            JobSubCategoryDescription0: 'subCategory.definition',
+            isCustomLevel0: 0,
+            LCID0: 'en',
+        };
+        const dbQuery = `
+            Insert into CMM.dbo.ItemModificationSubCategoryDetails (ItemModificationID, JobCategoryID, JobSubCategoryID, JobSubCategoryName, JobLevelDetailDescription, JobLevelDetailID, JobLevelDetailOrder, JobSubfamilyId, JobSubCategoryDescription, isCustomLevel, LCID)
+            VALUES ${values}`;
+
+        test('should call insert query', async () => {
+            const escapeQueryWithParametersMock = jest.fn().mockReturnValue(['dbQuery', 'params']);
+            (typeorm as any).getConnection = () => ({
+                driver: {
+                    escapeQueryWithParameters: escapeQueryWithParametersMock,
+                },
+            });
+
+            const query = jest.fn().mockReturnValue({});
+            (typeorm as any).getManager = () => ({
+                query,
+            });
+
+            await mssqlService.itemModificationSubCategoryDetails(values, valueParams);
+            const [queryStr, paramsObj] = await escapeQueryWithParametersMock();
+            expect(escapeQueryWithParametersMock).toHaveBeenCalledWith(dbQuery, valueParams, {});
+            expect(query).toHaveBeenLastCalledWith(queryStr, paramsObj);
+        });
+
+        test('should throw exception', async () => {
+            jest.spyOn(mssqlService as any, 'executeQueryWithEscapeParams').mockImplementationOnce(async () => {
+                throw new Error('Error in running ItemModificationSubCategoryDetails insert query');
+            });
+            let e;
+            try {
+                await mssqlService.itemModificationSubCategoryDetails(values, valueParams);
+            } catch (err) {
+                e = err;
+            }
+            expect(e.message).toEqual('Error in running ItemModificationSubCategoryDetails insert query');
+        });
+    });
+
+    describe('getResponsibilityDescriptions', () => {
+        const storedProcQuery = `Use successprofile DECLARE @ModelID Int, @CustModelID Int, @ClientID Int, @LCID NVARCHAR(20), @JobSectionName NVARCHAR (40)
+            SET @ClientID =:ClientId
+            SET @LCID =:LCID
+            SET @JobSectionName =:JobSectionName
+
+            SELECT @ModelID = JobdescriptionModelID FROM Successprofile.dbo.ClientStandardModelMapping WHERE ClientID = @ClientID AND IsActive = 1
+
+            SELECT TOP 1 @CustModelID = MAX(JobDescriptionModelID)	FROM CMM.dbo.JobDescriptionModel WHERE ClientId = @ClientID AND isActive = 1
+
+            SELECT
+                  DJL.JobSubCategoryName,
+                  DJL.JobLevel,
+                  COALESCE(DJLT.JobLevelLabel,DJL.JobLevelLabel) AS JobLevelLabel,
+                  COALESCE(DJLT.JobLevelDescription, DJL.JobLevelDescription) AS JobLevelDescription
+              FROM [SuccessProfile].[dbo].[DefaultJobLevelDescriptions]  DJL
+              LEFT JOIN DefaultJobLevelDescriptionsTranslation DJLT
+                ON (DJL.JobSectionName = DJLT.JobSectionName AND DJL.JobLevel = DJLT.JobLevel AND DJLT.JobDescriptionModelID = @CustModelID AND LCID = @LCID)
+              WHERE DJL.JobSectionName= @JobSectionName AND DJL.JobdescriptionModelID = @ModelID
+              ORDER BY DJL.JobLevel`;
+
+        const valueParams = {
+            ClientId: 26406,
+            LCID: 'en',
+            JobSectionName: SubcategoryType.RESPONSIBILITY,
+        };
+
+        test('should call stored proc with params', async () => {
+            const escapeQueryWithParametersMock = jest.fn().mockReturnValue(['dbQuery', 'params']);
+            (typeorm as any).getConnection = () => ({
+                driver: {
+                    escapeQueryWithParameters: escapeQueryWithParametersMock,
+                },
+            });
+
+            const query = jest.fn().mockReturnValue({});
+            (typeorm as any).getManager = () => ({
+                query,
+            });
+
+            await mssqlService.getResponsibilityDescriptions(26406, 'en', SubcategoryType.RESPONSIBILITY);
+            const [queryStr, paramsObj] = await escapeQueryWithParametersMock();
+            expect(escapeQueryWithParametersMock).toHaveBeenCalledWith(storedProcQuery, valueParams, {});
+            expect(query).toHaveBeenLastCalledWith(queryStr, paramsObj);
+        });
+
+        test('should throw exception', async () => {
+            jest.spyOn(mssqlService as any, 'executeQueryWithEscapeParams').mockImplementationOnce(async () => {
+                throw new Error('Error in running GetResponsibilityDescriptions query');
+            });
+            let e;
+            try {
+                await mssqlService.getResponsibilityDescriptions(26406, 'en', SubcategoryType.RESPONSIBILITY);
+            } catch (err) {
+                e = err;
+            }
+            expect(e.message).toEqual('Error in running GetResponsibilityDescriptions query');
+        });
+    });
+
+    describe('selectUser', () => {
+        const sql = `
+            use SuccessProfile;
+            declare @personId Bigint, @locale nvarchar(10);
+            set @personId=:PersonID;
+            set @locale=:Locale;
+            
+            SELECT P.PersonID, 
+                    P.ClientID, 
+                    P.FirstName, 
+                    P.LastName, 
+                    P.JobTitle, 
+                    dbo.fn_GetUnixTimeStamp(P.CreatedOn) AS CreatedOn, 
+                    dbo.fn_GetUnixTimeStamp(P.ModifiedOn) AS ModifiedOn, 
+                    P.EMail,
+            
+                    P.PhoneNumber, 
+                    P.JobRoleTypeID, 
+                    P.GradeID, 
+                    GT.Name JobGrade, 
+                    WU.UserName, 
+                    C.ClientName companyName, 
+                    CJT.ClientJobTitleID JobId, 
+                    JFT.JobFamilyID, 
+            
+                    JFT.Name JobFamilyName, 
+                    JSF.JobSubFamilyID, 
+                    JSFT.Name JobSubFamilyName, 
+                    JRTT.Name JobRoleTypeName, 
+                    JRT.GradeScale,
+                    PD.DocumentID AS SuccessProfileId,
+                    P.LoginAs as LoginAs,
+                          P.ExternalUUID,
+                    C.ExternalUUID
+            
+            FROM dbo.Person AS P
+            
+            INNER JOIN Activate.dbo.WebUser AS WU ON P.PersonID=WU.UserId
+            
+            INNER JOIN dbo.Client AS C ON P.ClientId = C.ClientID
+            
+            LEFT OUTER JOIN dbo.ClientJobTitles AS CJT ON P.JobRoleTypeID = CJT.JobRoleTypeID
+            
+            LEFT OUTER JOIN Activate.dbo.PersonDocument AS PD ON PD.PersonID = P.PersonID
+            
+            LEFT OUTER JOIN dbo.GradeTranslations AS GT ON (P.GradeID=GT.GradeID AND GT.LCID=@locale)
+            
+            LEFT OUTER JOIN dbo.JobRoleTypeTranslations AS JRTT ON (P.JobRoleTypeID = JRTT.JobRoleTypeID AND JRTT.LCID =@locale)
+            
+            LEFT OUTER JOIN dbo.JobRoleType AS JRT ON JRTT.JobRoleTypeID = JRT.JobRoleTypeID
+            
+            LEFT OUTER JOIN dbo.JobSubFamilyTranslations AS JSFT ON (JRT.JobSubFamilyID = JSFT.JobSubFamilyID AND JSFT.LCID=@locale)
+            
+            LEFT OUTER JOIN dbo.JobSubFamily AS JSF ON JSFT.JobSubFamilyID = JSF.JobSubFamilyID
+            
+            LEFT OUTER JOIN dbo.JobFamilyTranslations AS JFT ON (JSF.JobFamilyID=JFT.JobFamilyID AND JFT.LCID=@locale)
+            
+            WHERE P.PersonID = @personId`;
+
+            const valueParams = {
+                PersonID: 1234,
+                Locale: 'en',
+            };
+
+            test('should call sql script with params', async () => {
+                const escapeQueryWithParametersMock = jest.fn().mockReturnValue(['dbQuery', 'params']);
+                (typeorm as any).getConnection = () => ({
+                    driver: {
+                        escapeQueryWithParameters: escapeQueryWithParametersMock,
+                    },
+                });
+    
+                const query = jest.fn().mockReturnValue({});
+                (typeorm as any).getManager = () => ({
+                    query,
+                });
+    
+                await mssqlService.selectUser(1234, 'en');
+                const [queryStr, paramsObj] = await escapeQueryWithParametersMock();
+                expect(escapeQueryWithParametersMock).toHaveBeenCalledWith(sql, valueParams, {});
+                expect(query).toHaveBeenLastCalledWith(queryStr, paramsObj);
+            });
+
+            test('should throw exception', async () => {
+                jest.spyOn(mssqlService as any, 'executeQueryWithEscapeParams').mockImplementationOnce(async () => {
+                    throw new Error('Error in running selectUser query');
+                });
+                let e;
+                try {
+                    await mssqlService.selectUser(1234, 'en');
+                } catch (err) {
+                    e = err;
+                }
+                expect(e.message).toEqual('Error in running selectUser query');
+            });
+    });
+
+    describe('getClientSettings', () => {
+        const sql = `SELECT TOP(1) * from SuccessProfile.dbo.JobSectionClientSettings where clientID=:ClientID`;
+
+            const valueParams = {
+                ClientID: 12464,
+            };
+
+            test('should call get client settings with params', async () => {
+                const escapeQueryWithParametersMock = jest.fn().mockReturnValue(['dbQuery', 'params']);
+                (typeorm as any).getConnection = () => ({
+                    driver: {
+                        escapeQueryWithParameters: escapeQueryWithParametersMock,
+                    },
+                });
+    
+                const query = jest.fn().mockReturnValue({});
+                (typeorm as any).getManager = () => ({
+                    query,
+                });
+    
+                await mssqlService.getClientSettings(12464);
+                const [queryStr, paramsObj] = await escapeQueryWithParametersMock();
+                expect(escapeQueryWithParametersMock).toHaveBeenCalledWith(sql, valueParams, {});
+                expect(query).toHaveBeenLastCalledWith(queryStr, paramsObj);
+            });
+
+            test('should throw exception', async () => {
+                jest.spyOn(mssqlService as any, 'executeQueryWithEscapeParams').mockImplementationOnce(async () => {
+                    throw new Error('Error in running getClientSettings query');
+                });
+                let e;
+                try {
+                    await mssqlService.getClientSettings(12464);
+                } catch (err) {
+                    e = err;
+                }
+                expect(e.message).toEqual('Error in running getClientSettings query');
+            });
+    });
+
+    describe('searchSubCategory', () => {
+        const sql = `use SuccessProfile;
+            Declare @JobModelID BigInt, @SectionName nvarchar(20), @LCID nvarchar(20)
+            Set @JobModelID=:JobModelID;
+            set @SectionName=:SectionName;
+            Set @LCID=:LCID;
+            SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+            SELECT
+                JS.JobSectionID,
+                COALESCE(JST.JobSectionName, JS.JobSectionName) AS JobSectionName,
+                COALESCE(JST.JobSectionDescription, JS.JobSectionDescription) AS JobSectionDescription,
+                JC.JobCategoryID,
+                COALESCE(JCT.JobCategoryName, JC.JobCategoryName) AS JobCategoryName,
+                COALESCE(JCT.JobCategoryDescription, JC.JobCategoryDescription) AS JobCategoryDescription,
+                JSC.JobSubCategoryID,
+                COALESCE(JSCT.JobSubCategoryName, JSC.JobSubCategoryName) AS JobSubCategoryName,
+                COALESCE(JSCT.JobSubCategoryDescription, JSC.JobSubCategoryDescription) AS JobSubCategoryDefinition,
+                COALESCE(JLDT.JobLevelDetailDescription, JLD.JobLevelDetailDescription) AS JobSubCategoryDescription,
+                JL.JobLevelOrder AS JobLevelOrder,
+                JSC.ShortProfile AS ShortProfile,
+                COALESCE (JLT.JobLevelLabel,JL.JobLevelLabel) AS JobLevelLabel ,
+                JSCC.GlobalSubCategoryCode
+            FROM (Select JobSectionID from JobDescriptionModelItems where JobDescriptionModelID = @JobModelID and SectionProductID = 1) JDMI 
+                INNER JOIN (SELECT * FROM JobSection where JobSectionCode = @SectionName) JS on JS.JobSectionID = JDMI.JobSectionID
+                LEFT OUTER JOIN (SELECT * FROM JobSectionTranslation WHERE LCID=@LCID) JST ON JST.JobSectionID = JS.JobSectionID
+                INNER JOIN JobCategory JC ON JS.JobSectionID = JC.JobSectionID
+                LEFT OUTER JOIN (SELECT * FROM JobCategoryTranslation WHERE LCID=@LCID) JCT ON JCT.JobCategoryID = JC.JobCategoryID
+                INNER JOIN 
+                    (
+                        SELECT * FROM JobSubCategory jsc
+                        WHERE JobSourceID = 0 AND DisplayJobSubCategory=1
+                            AND (((JobSubCategoryCde <> '' AND JobSubCategoryCde IS NOT NULL) OR ISNULL(LCID, @LCID) = @LCID) OR EXISTS (SELECT 1 FROM JobSubCategoryTranslation jsct WHERE
+							jsct.JobSubCategoryID = jsc.JobSubCategoryID and jsct.lcid = @lcid))
+                    ) JSC ON JC.JobCategoryID = JSC.JobCategoryID
+            LEFT OUTER JOIN (SELECT * FROM JobSubCategoryTranslation WHERE LCID=@LCID) JSCT 
+                ON JSCT.JobSubCategoryID = JSC.JobSubCategoryID 
+            Inner Join JobLevelDetail JLD ON JLD.JobSubCategoryID = JSC.JobSubCategoryID AND JLD.UseDefaultDescription=0 
+            LEFT OUTER JOIN (SELECT * FROM JobLevelDetailTranslation WHERE LCID=@LCID) JLDT ON JLDT.JobLevelDetailCode = JLD.JobLevelDetailCode and JLD.ISClientCustomized = 0
+            Inner Join JobLevel JL ON JLD.JobLevelID=JL.JobLevelID
+            LEFT OUTER JOIN (SELECT * FROM JobLevelTranslation WHERE LCID=@LCID) AS JLT ON (JL.JobLevelID=JLT.JobLevelID)
+            LEFT OUTER JOIN JobSubCategoryCodes AS JSCC ON (JSC.JobSubCategoryCde=JSCC.JobSubCategoryCde)
+            ORDER BY COALESCE(JSCT.JobSubCategoryName, JSC.JobSubCategoryName)  COLLATE SQL_Latin1_General_CP850_CI_AS  ASC`;
+
+            const params = {
+                JobModelID: 2,
+                SectionName: SubcategoryType.RESPONSIBILITY,
+                LCID: 'en',
+            };
+
+            test('should get category ids for passed params', async () => {
+                const escapeQueryWithParametersMock = jest.fn().mockReturnValue(['dbQuery', 'params']);
+                (typeorm as any).getConnection = () => ({
+                    driver: {
+                        escapeQueryWithParameters: escapeQueryWithParametersMock,
+                    },
+                });
+    
+                const query = jest.fn().mockReturnValue({});
+                (typeorm as any).getManager = () => ({
+                    query,
+                });
+    
+                await mssqlService.searchSubCategory(2, SubcategoryType.RESPONSIBILITY, 'en');
+                const [queryStr, paramsObj] = await escapeQueryWithParametersMock();
+                expect(escapeQueryWithParametersMock).toHaveBeenCalledWith(sql, params, {});
+                expect(query).toHaveBeenLastCalledWith(queryStr, paramsObj);
+            });
+
+            test('should throw exception', async () => {
+                jest.spyOn(mssqlService as any, 'executeQueryWithEscapeParams').mockImplementationOnce(async () => {
+                    throw new Error('Error in running searchSubCategory query');
+                });
+                let e;
+                try {
+                    await mssqlService.searchSubCategory(2, SubcategoryType.RESPONSIBILITY, 'en');
+                } catch (err) {
+                    e = err;
+                }
+                expect(e.message).toEqual('Error in running searchSubCategory query');
+            });
+    });
+
+    describe('updateJobSubCategory', () => {
+        test('should call insert query for db', async () => {
+            const typeormQuery = jest.fn();
+            (typeorm as any).getManager = jest.fn().mockReturnValue({
+                update: typeormQuery,
+            });
+
+            await mssqlService.updateJobSubCategory(1234, 1234, 1);
+            expect(typeorm.getManager().update).toBeCalledWith(
+                'CMM.dbo.JobSubCategory',
+                { JobSubCategoryID: 1234, JobCategoryID: 1234 },
+                { DisplayJobSubCategory: 1 },
+            );
+        });
+
+        test('should throw exception', async () => {
+            const typeormQuery = jest.fn(async () => {
+                throw new Error('Error in running updateJobSubCategory query');
+            });
+            (typeorm as any).getManager = jest.fn().mockReturnValue({
+                update: typeormQuery,
+            });
+
+            let e;
+            try {
+                await mssqlService.updateJobSubCategory(1234, 1234, 1);
+            } catch (err) {
+                e = err;
+            }
+            expect(e.message).toEqual('Error in running updateJobSubCategory query');
+        });
+    });
+});

@@ -1,0 +1,46 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/mixins.scss';
+
+.card-container {
+    background-color: $white;
+    padding: $large-padding;
+    padding-top: $small-margin;
+    margin-bottom: $small-gutter;
+    box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.2);
+    border-top: 2px solid $black;
+
+    &.lg {
+        width: $wide-section-width;
+    }
+
+    &.md {
+        width: $section-width;
+    }
+
+    .title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        kf-icon:first-of-type {
+            margin-right: 18px;
+            font-size: 30px;
+        }
+
+        h4 {
+            flex: 1;
+        }
+
+        span.tc-icon > kf-icon {
+            font-size: 18px;
+            margin-right: 0px;
+            cursor: pointer;
+        }
+    }
+
+    .description {
+        margin-top: 8px;
+        margin-bottom: 0;
+        min-height: 36px;
+    }
+}

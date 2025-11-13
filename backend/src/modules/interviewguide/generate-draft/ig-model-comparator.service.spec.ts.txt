@@ -1,0 +1,44 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { IgModelComparator } from './ig-model-comparator';
+import { IgMock } from '../mock/ig-mocks';
+
+describe('IgModelComparator', () => {
+    let module: TestingModule;
+    let igModelComparator: IgModelComparator;
+
+    beforeAll(async () => {
+        module = await Test.createTestingModule({
+            providers: [
+                IgModelComparator
+            ],
+        }).compile();
+
+        igModelComparator = module.get(IgModelComparator);
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+        jest.clearAllTimers();
+    });
+
+    test('should be defined', () => {
+        expect(igModelComparator).toBeDefined();
+    });
+
+    describe('areCompetenciesEqual', () => {
+        test('should return true when comp equal', async () => {
+            // Act
+            const result = igModelComparator.areCompetenciesEqual(IgMock.igCmsMappedCompBin, IgMock.igCmsMappedCompBin);
+
+            // Assert
+            expect(result).toBeTruthy();
+        });
+        test('should return false when comp not equal', async () => {
+            // Act
+            const result = igModelComparator.areCompetenciesEqual(IgMock.igCmsMappedCompBin, IgMock.igCmsMappedCompMcx);
+
+            // Assert
+            expect(result).toBeFalsy();
+        });
+    });
+});

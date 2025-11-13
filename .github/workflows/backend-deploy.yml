@@ -1,0 +1,65 @@
+name: kfone-profile-manager-api-deploy
+run-name: kfone-profile-manager-api-deploy-${{ inputs.environment }}-${{ inputs.region }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: 'Environment'
+        required: true
+        default: dev
+        options:
+          - sbx
+          - dev
+          - qa1
+          - stg
+          - prd
+      region:
+        type: choice
+        description: 'AWS Region'
+        required: true
+        default: us-east-1
+        options:
+          - us-east-1
+          - us-west-2
+          - eu-central-1
+          - eu-west-1
+      imageTag:
+        type: string
+        description: 'Image Tag'
+        required: true
+jobs:
+  EnvSetup:
+    uses: HayGroup/kfone-common/.github/workflows/workflow-env-setup-0.0.1.yml@main
+    secrets: inherit
+    with:
+      envFile: './backend/variables/${{inputs.region}}/${{inputs.environment}}.env,./backend/variables/common.env'
+      environment: ${{inputs.environment}}
+      region: '${{inputs.region}}'
+
+  Deploy:
+    uses: HayGroup/kfone-common/.github/workflows/docker-api-deploy-openshift-0.0.1.yml@main
+    needs: [EnvSetup]
+    secrets: inherit
+    with:
+      environment: '${{inputs.environment}}'
+      region: '${{inputs.region}}'
+      imageTag: '${{inputs.imageTag}}'
+      imageRepository: '${{ fromjson(needs.EnvSetup.outputs.envars).imageRepository }}'
+      appName: '${{ fromjson(needs.EnvSetup.outputs.envars).appName }}'
+      namespace: '${{ fromjson(needs.EnvSetup.outputs.envars).namespace }}'
+      hostName: '${{ fromjson(needs.EnvSetup.outputs.envars).hostName }}'
+      moduleChartName: '${{ fromjson(needs.EnvSetup.outputs.envars).moduleChartName }}'
+      moduleChartVersion: '${{ fromjson(needs.EnvSetup.outputs.envars).moduleChartVersion }}'
+      certificateArn: '${{ fromjson(needs.EnvSetup.outputs.envars).certificateArn }}'
+      cpuLimits: '${{ fromjson(needs.EnvSetup.outputs.envars).cpuLimits }}'
+      cpuRequests: '${{ fromjson(needs.EnvSetup.outputs.envars).cpuRequests }}'
+      memoryLimits: '${{ fromjson(needs.EnvSetup.outputs.envars).memoryLimits }}'
+      memoryRequests: '${{ fromjson(needs.EnvSetup.outputs.envars).memoryRequests }}'
+      livenessProbeScheme: '${{ fromjson(needs.EnvSetup.outputs.envars).livenessProbeScheme }}'
+      readinessProbeScheme: '${{ fromjson(needs.EnvSetup.outputs.envars).readinessProbeScheme }}'
+      variablesFile: 'backend/variables/${{inputs.region}}/${{inputs.environment}}.yaml'
+      enableAppConfig: true
+      enableCredentialsRequest: true
+      #existingServiceAccountName: '${{ fromjson(needs.EnvSetup.outputs.envars).namespace }}-sa'

@@ -1,0 +1,95 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+# dist
+dist-ssr
+public/kfone_config
+coverage
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# synced folders from _app
+/src/assets
+#_kfcore-less
+
+# compiled output
+/dist
+/tmp
+/out-tsc
+/logs
+/release
+
+# dependencies
+/node_modules
+
+# ng-packagr Temp Folder
+.ng_pkg_build/
+
+# Generated Library Files except in release folder
+kfhub*.tgz
+# dist/kfhub*.tgz
+# dist.tgz
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.kfbuild
+.kfrelease
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+/.angular/cache
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+testem.log
+/typings
+
+# e2e
+/e2e/*.js
+/e2e/*.map
+
+# System Files
+.DS_Store
+Thumbs.db
+
+#  Build Files
+.kfbuild
+
+# local kfhub_lib
+/kfhub_lib
+/kfhub_thcl_lib
+
+/documentation

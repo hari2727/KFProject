@@ -1,0 +1,76 @@
+<span class="body-text fw-bold skill-filter-title">{{ 'pm.compareTo' | translate }}:</span>
+<kfthcl-dropdown
+    [originYFallback]="false"
+    [originXFallback]="false"
+    [originX]="'end'"
+    [overlayWidth]="300"
+    [insideClick]="true"
+    [overlayCustomClass]="'skills-filter-overlay-container'"
+    (onOpenChange)="openChange($event)"
+>
+    <kfthcl-dropdown-toggle>
+        <div class="toggler" [class.open]="isOpen">
+            <a class="link color-dark fw-regular dropdown-toggle">{{ skillsFilterLabel }}</a>
+            <kf-icon color="primary" size="xs" [icon]="isOpen ? 'arrow-up' : 'arrow-down'"></kf-icon>
+        </div>
+    </kfthcl-dropdown-toggle>
+    <kfthcl-dropdown-overlay>
+        <div class="scroll-container">
+            <div class="section">
+                <div class="section-header" (click)="updateSkillsFilter('market')">
+                    <kfthcl-indicator shape="circle" [ngModel]="isMarketFilter"></kfthcl-indicator>
+                    <span class="body-text">{{ 'pm.overallMarket' | translate }}</span>
+                </div>
+            </div>
+            <div class="section" *ngIf="industriesFilterData?.length">
+                <div class="section-header" (click)="openFilterDropdown('industry')">
+                    <kfthcl-indicator shape="circle" [ngModel]="isIndustryFilter"> </kfthcl-indicator>
+                    <span class="section-header-caption body-text">{{ 'pm.industry' | translate }}</span>
+                    <kf-icon size="xs" color="primary" [icon]="showIndustries ? 'arrow-up' : 'arrow-down'"></kf-icon>
+                </div>
+                <div *ngIf="showIndustries" class="section-filter"><kf-input type="search" [placeholder]="'lib.searchPlaceholder' | translate" [(ngModel)]="industryFilter" (ngModelChange)="industryFilterChange()"></kf-input></div>
+                <div *ngIf="showIndustries" class="section-data">
+                    <ng-container *ngFor="let item of industriesFilterData; trackBy:trackById">
+                        <div *ngIf="!item.isHidden" (click)="updateSkillsFilter('industry', item)" [ngClass]="{'selected': item.isSelected}" class="section-item">
+                            <!-- <kfthcl-indicator [ngModel]="item.isSelected"></kfthcl-indicator> -->
+                            <span class="body-text">{{ item.name }}</span>
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
+            <div class="section" *ngIf="true"> <!-- DISABLE PEERS IF NEEDED -->
+                <div class="section-header" (click)="openFilterDropdown('peers')">
+                    <kfthcl-indicator shape="circle" [ngModel]="isPeerFilter"></kfthcl-indicator>
+                    <span class="section-header-caption body-text">{{ 'pm.peers' | translate }}</span>
+                    <kf-icon size="xs" color="primary" [icon]="showPeers ? 'arrow-up' : 'arrow-down'"></kf-icon>
+                </div>
+                <div *ngIf="showPeers" class="section-filter"><kf-input type="search" [placeholder]="'lib.searchPlaceholder' | translate" [(ngModel)]="peersFilter" (ngModelChange)="peersFilterChange()"></kf-input></div>
+                <div *ngIf="showPeers" class="section-data">
+                    <!-- <div class="selected-items" *ngIf="showPeers && isPeerFilter && peersFilterData">
+                        <ng-container *ngFor="let item of selectedSkillFilter; trackBy:trackById">
+                            <div class="selected-item">
+                                <span class="selected-item-text" kf-text>{{ item.name }}</span>
+                                <kf-icon size="sm" color="primary" class="selected-item-remove" (click)="updateSkillsFilter('peers', item)" icon="close"></kf-icon>
+                            </div>
+                        </ng-container>
+                    </div> -->
+                    <div class="section-data" *ngIf="showPeers && peersFilterData && peersFilter.length >= minCharCount">
+                        <ng-container *ngFor="let item of peersFilterData; trackBy:trackById">
+                            <div (click)="updateSkillsFilter('peers', item)" [ngClass]="{'selected': item.isSelected}" class="section-item">
+                                <!-- <kfthcl-indicator [ngModel]="item.isSelected"></kfthcl-indicator> -->
+                                <span class="body-text">{{ item.name }}</span>
+                            </div>
+                        </ng-container>
+                    </div>
+                    <div *ngIf="showPeers && !peersFilterData && peersFilter.length >= minCharCount">
+                    </div>
+                    <div *ngIf="showPeers && peersFilter.length < minCharCount">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="controlls">
+            <button class="btn" [disabled]="!isChanged" (click)="updateFilters()">{{ 'lib.actionApply' | translate }}</button>
+        </div>
+    </kfthcl-dropdown-overlay>
+</kfthcl-dropdown>

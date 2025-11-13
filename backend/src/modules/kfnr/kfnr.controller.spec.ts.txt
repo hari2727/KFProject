@@ -1,0 +1,67 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { KfTarcSuccessProfilesDetailsService } from '../successprofiles-details/kftarc-success-profiles-details.service';
+import { KfnrController } from './kfnr.controller';
+import { GetClientJobIdQueryParams, SuccessProfileDetailRequest } from './kfnr.interface';
+import { KfnrRepository } from './kfnr.repository';
+import { KfnrService } from './kfnr.service';
+
+describe('KfnrController', () => {
+    let controller: KfnrController;
+    let service: KfnrService;
+    let mockRequest: SuccessProfileDetailRequest;
+    beforeEach(async () => {
+        mockRequest = {
+            body: {},         // Mock body if necessary
+            params: {},       // Mock URL params
+            query: {},        // Mock query parameters
+            headers: {},      // Mock headers
+            method: '',       // Mock HTTP method
+            url: '',          // Mock request URL
+            // Add other properties as needed, like `cookies`, `originalUrl`, `path`, etc.
+        } as SuccessProfileDetailRequest;
+        const module: TestingModule = await Test.createTestingModule({
+            controllers: [KfnrController],
+            providers: [KfnrService, KfnrRepository, KfTarcSuccessProfilesDetailsService],
+        }).compile();
+
+        controller = module.get<KfnrController>(KfnrController);
+        service = module.get<KfnrService>(KfnrService);
+    });
+
+    it('should be defined', () => {
+        expect(controller).toBeDefined();
+    });
+    it('getSpid should work', async () => {
+        const getSpIdSpy = jest.spyOn(service, 'getSpId').mockResolvedValue({ spId: 123 });
+        const query = {
+            bicCode: 'test',
+            versionNo: '1',
+        };
+        await controller.getSpid(query);
+        expect(getSpIdSpy).toBeCalledWith('test', '1');
+        expect(controller.getSpid(query)).resolves.toEqual({ spId: 123 });
+    });
+    it('should return clientJobId response when service call is successful', async () => {
+        // Arrange
+        const query: GetClientJobIdQueryParams = { jobCode: '10001', grade: '27' };
+        const serviceResponse = { clientJobId: 12345 };
+        jest.spyOn(service,'getClientJobDetail').mockResolvedValue(serviceResponse);
+
+        // Act
+        const result = await controller.getClientJobDetail(query, mockRequest);
+
+        // Assert
+        expect(result).toEqual(serviceResponse);
+        expect(service.getClientJobDetail).toHaveBeenCalledWith(query.jobCode, query.grade, mockRequest);
+    });
+    it('should throw an error when service call fails', async () => {
+        // Arrange
+        const query: GetClientJobIdQueryParams = { jobCode: '10001', grade: '27' };
+        const error = new Error('500 Internal Server Error');
+        jest.spyOn(service,'getClientJobDetail').mockRejectedValue(error);
+
+        // Act & Assert
+        await expect(controller.getClientJobDetail(query, mockRequest)).rejects.toThrow(error);
+        expect(service.getClientJobDetail).toHaveBeenCalledWith(query.jobCode, query.grade, mockRequest);
+    });
+});

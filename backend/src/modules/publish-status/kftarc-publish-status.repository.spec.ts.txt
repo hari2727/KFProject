@@ -1,0 +1,67 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { PublishStatusRepository } from './kftarc-publish-status.repository';
+import { GetPublishStatusMock as mock } from './kftarc-publish-status.fixture';
+import { PublishStatus } from './kftarc-publish-status.enum';
+
+describe('PublishStatusRepository', () => {
+    let module: TestingModule;
+    let mssqlService: PublishStatusRepository;
+
+    beforeAll(async () => {
+        module = await Test.createTestingModule({
+            providers: [ PublishStatusRepository ],
+        }).compile();
+
+        mssqlService = module.get(PublishStatusRepository);
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+        jest.clearAllTimers();
+    });
+
+    describe('getPublishStatusData', () => {
+        test('should return data from db', async () => {
+            // Arrange
+            jest.spyOn(mssqlService, 'query').mockImplementationOnce(()=> new Promise( (res) => res(mock.mockDbData)));
+
+            // Act
+            const result = await mssqlService.getPublishStatusData(mock.queryParams);
+
+            // Assert
+            expect(result).toEqual(mock.mockDbData);
+        });
+        test('should throw HttpException on error', async () => {
+            // Arrange
+            jest.spyOn(mssqlService, 'query').mockImplementationOnce(()=> {throw new Error()});
+
+            // Act
+            const resultF = mssqlService.getPublishStatusData(mock.queryParams);
+            // Assert
+            await expect(resultF).rejects.toThrowError();
+        });
+    });
+
+    describe('updateBulkBCPublishingStatus', () => {
+        test('should insert data into db', async () => {
+            // Arrange
+            jest.spyOn(mssqlService, 'query').mockImplementationOnce(()=> new Promise( (res) => res(mock.mockDbData)));
+
+            // Act
+            const result = await mssqlService.updateBulkBCPublishingStatus(mock.queryParams.loggedInUserClientId, +mock.republishBody.itemModification, PublishStatus.NOT_STARTED );
+
+            // Assert
+            expect(result).toBeUndefined();
+        });
+        test('should throw HttpException on error', async () => {
+            // Arrange
+            jest.spyOn(mssqlService, 'query').mockImplementationOnce(()=> {throw new Error()});
+
+            // Act
+            const resultF = mssqlService.updateBulkBCPublishingStatus(mock.queryParams.loggedInUserClientId, +mock.republishBody.itemModification, PublishStatus.NOT_STARTED );
+
+            // Assert
+            await expect(resultF).rejects.toThrowError();
+        });
+    });
+});

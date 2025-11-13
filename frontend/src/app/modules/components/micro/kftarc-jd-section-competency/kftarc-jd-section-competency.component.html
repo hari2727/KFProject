@@ -1,0 +1,48 @@
+<div class="section">
+    <div class="title-header-section">
+        <h4 *ngIf="isEditable || (!isEditable && showHideSection.hideSection)" class="title-header fw-bold"
+        [ngClass]="{'disableHeading' :(isEditable && !showHideSection.hideSection)}">{{ title }}</h4>
+        <div *ngIf="isToggle && isEditable">
+            <div class="toggle">
+                <kf-toggle size="sm" [selected]="showHideSection.hideSection" (selectionChange)="toggleSection($event)"></kf-toggle>
+                <span class="body-text fw-semibold">{{ 'lib.IncludeSection' | translate }}</span>
+            </div>
+            <div class="toggle" *ngIf="showHideSection.hideSection && !hideForTasks">
+                <kf-toggle size="sm" [selected]="showHideSection.hideSubCategoryNames" (selectionChange)="toggleTitle($event)"></kf-toggle>
+                <span class="body-text fw-semibold">{{ 'lib.IncludeTitle' | translate }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="content" [ngClass]="{'line' : ((!showHideSection.hideSection && !showHideSection.hideSubCategoryNames) || !showHideSection.hideSection) && isEditable}">
+        <kfthcl-draggable-container
+            *ngIf="showHideSection.hideSection"
+            [containerName]="sectionName"
+            [ngClass]="isEditable ? 'editable' : 'static-view'"
+            [collectionModel]="getCompetencyControls(sectionName)"
+            dragHandleClassName="handle"
+            [isDragEnabled]="isEditable"
+            (collectionChange)="onCompetencyCollectionChange($event, sectionName)">
+            <ng-template #cardTemplate let-item let-index="index">
+                <kf-icon
+                    *ngIf="showItem(item)"
+                    class="close"
+                    icon="close"
+                    (click)="onRemoveAction(item)"
+                ></kf-icon>
+                <kftarc-jd-draggable-competency
+                    class="competency"
+                    [form]="item"
+                    [itemModel]="item"
+                    [editable]="isEditable"
+                    [showHeader]="showHeader"
+                    [isDragEnabled]="isDragEnabled"
+                    [titleVisible]="showHideSection.hideSubCategoryNames"
+                    [sectionVisible]="showHideSection.hideSection"
+                    [removedItems]="removedIds"
+                    (formChanges)="onItemChanges($event, sectionName, item)">
+                </kftarc-jd-draggable-competency>
+            </ng-template>
+        </kfthcl-draggable-container>
+    </div>
+</div>

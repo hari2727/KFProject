@@ -1,0 +1,42 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import * as typeorm from 'typeorm';
+import { ProfileCollectionsRepository } from './profile-collections.repository';
+import { PCRawResponse } from './profile-collections.fixture';
+
+jest.mock('typeorm', () => {
+    const actual = jest.requireActual('typeorm');
+    return {
+        ...actual,
+        getManager: jest.fn(),
+        getConnection: jest.fn(),
+    };
+});
+
+describe('ProfileCollectionsRepository', () => {
+    let repository: ProfileCollectionsRepository;
+
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [ProfileCollectionsRepository],
+        }).compile();
+        repository = module.get<ProfileCollectionsRepository>(ProfileCollectionsRepository);
+    });
+
+    it('should be defined', () => {
+        expect(repository).toBeDefined();
+    });
+
+    test('should call escapeQueryWithParameters and query methods', async () => {
+        const clientId = 1;
+        const userId = 2;
+        const dbQuery = `exec [SuccessProfile].[dbo].[GetProfileCollectionForUser] @In_ClientID = ${clientId}, @In_UserID =${userId}`;
+
+        const query = jest.fn().mockReturnValue(PCRawResponse);
+        (typeorm as any).getManager = () => ({
+            query,
+        });
+        await repository.getProfileCollections(clientId, userId);
+        expect(query).toHaveBeenLastCalledWith(dbQuery);
+    });
+
+});

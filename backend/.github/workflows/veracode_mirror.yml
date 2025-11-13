@@ -1,0 +1,46 @@
+# ignore-processing
+name: Mirroring to Veracode scan source
+
+on:
+  push:
+    branches:
+      - 'release/**-202[4-9]'
+      - 'hotfix/**-202[4-9]'
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Setting Node 20
+        uses: actions/setup-node@v4.1.0
+        with:
+          node-version: 20.x
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+      - name: Handling changes
+        shell: bash
+        env:
+          SOURCE_REF: ${{ github.ref_name }}
+        run: |
+          REF_VERSION=`npm pkg get version --workspaces=false | tr -d \"`
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git clean -f -d
+          git fetch origin
+          git switch "${SOURCE_REF}"
+          git pull --rebase --no-edit -Xtheirs
+          git branch --set-upstream-to=origin/"${SOURCE_REF}" "${SOURCE_REF}"
+          git checkout main 2>/dev/null || git checkout -b main
+          # git branch --set-upstream-to=origin/main main 2>/dev/null
+          # git pull --rebase --no-edit -Xtheirs origin/main
+          git switch -c tmp "${SOURCE_REF}"
+          git merge --allow-unrelated-histories --no-edit -s ours main
+          git switch main
+          git merge --allow-unrelated-histories --no-edit --squash tmp
+          git branch -D tmp
+          echo "Mirrored ${SOURCE_REF} - ${REF_VERSION}" > last_mirror.txt
+          git add last_mirror.txt
+          git commit -am "Mirrored ${SOURCE_REF} - ${REF_VERSION}"
+          git push origin main

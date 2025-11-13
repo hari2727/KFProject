@@ -1,0 +1,17 @@
+ environmentVariables:
+  USE_JSON_LOGGER:
+    value: '"False"'
+  DEBUG:
+    value: 'deploy'
+  AWS_REGION:
+    value: 'us-east-1'
+  AWS_SECRET_NAME:
+    value: 'kfone-dev-use1-shared-kfone-core-user-pgsql-pwd'
+  NODE_TLS_REJECT_UNAUTHORIZED:
+    value: '"0"'
+  REMOTE_LOADER_DB_URL:
+    value: 'http://localhost:2772/applications/kfone-dev-use1-appconfig-app-001-common/environments/dev/configurations/PgSQL-shared'
+  REMOTE_LOADER_COMMONCONFIG_URL:
+    value: 'http://localhost:2772/applications/kfone-dev-use1-appconfig-app-001-common/environments/dev/configurations/Common-Config'
+  REMOTE_LOADER_LOGCONFIG_URL:
+    value: 'http://localhost:2772/applications/kfone-dev-use1-appconfig-app-001-common/environments/dev/configurations/Logging'

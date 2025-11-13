@@ -1,0 +1,223 @@
+<kf-page app="pm" class="page-container">
+    <kf-page-masthead class="head flex-wrap kf-class">
+        <h1 class="title mt-0 w-100 fs-h2-size fw-bold">
+            {{ "pm.jobProfileHistory" | translate }}
+        </h1>
+        <div class="d-flex flex-jc-between w-100">
+            <p class="sub-header body-text mb-0 fs-body fw-regular">
+                {{ "pm.jobProfileHistoryDescription" | translate }}
+            </p>
+        </div>
+        <hr class="w-100 my-4 border-button" />
+    </kf-page-masthead>
+    <kf-page-content>
+        <div class="fs-14 fw-regular result-text fs-body">
+            {{ "pm.labelShowing" | translate }} {{ dataSource.length }} of
+            {{ totalResults }}
+            {{ "pm.results" | translate }}
+        </div>
+        <div class="pc-custom-table fs-body d-flex flex-column">
+            <!-- Header Row -->
+            <div class="pc-table-header d-flex fs-body-sm">
+                <div
+                    *ngFor="let column of columnSource"
+                    class="pc-table-cell pointer text-uppercase fs-body fw-semibold text-left pt-16 pb-16 pl-50 fs-body-sm"
+                    (click)="sortData(column.key)"
+                >
+                    {{ column.label | translate }}
+                    <span
+                        [ngStyle]="{
+                            opacity: getSortIndicatorOpacity(column.key)
+                        }"
+                    >
+                        {{ getSortIndicator(column.key) }}
+                    </span>
+                </div>
+            </div>
+            <!-- Data Rows -->
+            <div class="d-flex flex-column pl-50">
+                <div
+                    *ngFor="let row of dataSource"
+                    class="pc-table-row d-flex pt-0 mb-4 flex-ai-center fs-body"
+                >
+                    <div
+                        *ngFor="let column of columnSource"
+                        class="pl-8 pt-16 pr-8 pb-16 text-left fw-regular table-col-cell fs-body"
+                        (click)="
+                            column.key === 'numberOfProfiles'
+                                ? openProfileDetailPopup(row)
+                                : null
+                        "
+                    >
+                        <span
+                            *ngIf="column.key === 'numberOfProfiles'"
+                            [ngClass]="{
+                                'link-text': column.key === 'numberOfProfiles'
+                            }"
+                            class="fs-body"
+                            >{{ row[column.key] }}
+                        </span>
+                        <span *ngIf="column.key === 'name'" class="body-text"
+                            >{{ row[column.key] }}
+                        </span>
+                        <span
+                            *ngIf="column.key === STATUS"
+                            [ngClass]="{
+                                'danger-text': row[column.key] === FAILED
+                            }"
+                            class="body-text"
+                            >{{ row[column.key] }}</span
+                        >
+                        <kf-icon
+                            *ngIf="
+                                column.key === STATUS &&
+                                row[column.key] === FAILED
+                            "
+                            icon="info-line"
+                            color="danger"
+                            size="sm"
+                            class="ml-4 pointer"
+                            pTooltip="{{'pm.exportFailed' | translate}}"
+                            tooltipPosition="top"
+                        ></kf-icon>
+                        <span *ngIf="column.key === EXPORTED_ON">{{
+                            row[column.key] | date : "MMM dd, y"
+                        }}</span>
+                        <span
+                            *ngIf="
+                                column.key === TYPE &&
+                                publishCenterType === DOWNLOAD &&
+                                (row[column.key] === EXCEL ||
+                                    row[column.key] === JSON || row[column.key] === CSV)
+                            "
+                            [ngClass]="{ 'btn-style': column.key === TYPE }"
+                            class="d-inline-flex flex-jc-center flex-ai-center fs-body-sm fw-regular pt-4 pl-8 pb-4 pr-8"
+                        >
+                            {{ "pm.downloaded" | translate }}
+                        </span>
+                        <span
+                            *ngIf="
+                                column.key === TYPE &&
+                                row[column.key] === HCM
+                            "
+                            [ngClass]="{ 'btn-style': column.key === TYPE }"
+                            class="d-inline-flex flex-jc-center flex-ai-center fs-body-sm fw-regular pt-4 pl-8 pb-4 pr-8 type-col"
+                        >
+                            {{ "pm.exportedToHcm" | translate }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- <div class="loading-box" *ngIf="isLoading">
+            <kf-svg-spinner class="spinner"></kf-svg-spinner>
+        </div> -->
+    </kf-page-content>
+    <kf-slide-up
+        [(visible)]="ismodelOpen"
+        [correctSize]="true"
+        styleClass="custom-modal"
+        [showHeader]="false"
+        [correctSize]="true"
+    >
+        <div class="profile-table">
+            <div
+                [ngSwitch]="currentPagePopup"
+                class="header-container d-flex flex-column"
+            >
+                <div
+                    class="custom-header fs-h2-size fw-bold"
+                    *ngSwitchCase="ProfileType.export"
+                >
+                    {{ "pm.profileExported" | translate }}
+                </div>
+                <div
+                    class="custom-header fs-h2-size fw-bold"
+                    *ngSwitchCase="ProfileType.download"
+                >
+                    {{ "pm.profileDownloaded" | translate }}
+                </div>
+                <div
+                    class="header-details d-flex flex-row flex-wrap align-items fs-body"
+                >
+                    <span
+                        >{{ "pm.noOfProfiles" | translate | titlecase }}:
+                        <div class="fw-semibold">&nbsp;{{ profileCount }}</div>
+                    </span>
+                    <span *ngIf="currentPagePopup === ProfileType.export"
+                        >{{ "pm.exportedBy" | translate }}:
+                        <div class="fw-semibold fs-body">
+                            &nbsp;{{  authorName }}
+                        </div></span
+                    >
+                    <span *ngIf="currentPagePopup === ProfileType.download"
+                        >{{ "pm.downloadBy" | translate }}:
+                        <div class="fw-semibold fs-body">
+                            &nbsp;{{ authorName }}
+                        </div></span
+                    >
+ 
+                    <span
+                        >{{ "pm.publishedBy" | translate }}:
+                        <div class="fw-semibold fs-body">
+                            &nbsp;{{ authorName }}
+                        </div></span
+                    >
+                    <span *ngIf="currentPagePopup === ProfileType.export"
+                        >{{ "pm.exportDate" | translate }}:
+                        <div class="fw-semibold fs-body">
+                            &nbsp;{{ downloadDate | date:'MMM dd, y'}}
+                        </div></span
+                    >
+                    <span *ngIf="currentPagePopup === ProfileType.download"
+                        >{{ "pm.downloadedOn" | translate }}:
+                        <div class="fw-semibold fs-body">
+                            &nbsp;{{ downloadDate | date:'MMM dd, y'}}
+                        </div></span
+                    >
+ 
+                    <span>
+                        {{ "pm.exportstatus" | translate  }}:
+                        <div class="fw-semibold fs-body">
+                            &nbsp;{{ CompletedStatus }}
+                        </div></span
+                    >
+                </div>
+            </div>
+        </div>
+        <div class="custom-table d-flex flex-column">
+            <!-- Header Row -->
+            <div class="table-header d-flex flex-row">
+                <div
+                    *ngFor="let column of exportedJobcolumnSource"
+                    class="table-cell text-capitalize font-cell fs-body-sm fw-semibold"
+                >
+                    {{ column.key | titlecase }}
+                </div>
+            </div>
+            <!-- Data Rows -->
+            <div class="d-flex flex-column">
+                <div
+                    *ngFor="let row of exportJobdataSource"
+                    class="table-row d-flex flex-row"
+                >
+                    <div
+                        *ngFor="let column of exportedJobcolumnSource"
+                        class="table-cell fw-regular"
+                    >
+                        <kf-icon
+                            *ngIf="column.key === 'NAME'"
+                            icon="custom"
+                            color="black"
+                            size="sm"
+                            class="mr-8 pointer"
+                            [pTooltip]="'info content'"
+                            tooltipPosition="top"
+                        ></kf-icon>
+                        <span class="body-text">{{ row[column.key] }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </kf-slide-up>
+</kf-page> 

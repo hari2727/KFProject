@@ -1,0 +1,8 @@
+<div class="card-container">
+    <div class="title">
+        <kf-icon [icon]="icon" color="dark"></kf-icon>
+        <h4>{{ title | translate }}</h4>
+        <ng-content select="[header]"></ng-content>
+    </div>
+    <ng-content></ng-content>
+</div>

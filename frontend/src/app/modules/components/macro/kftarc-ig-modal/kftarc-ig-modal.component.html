@@ -1,0 +1,68 @@
+<kf-modal width="740" *ngIf="visible" height="auto" title="{{ 'pm.interviewGuideTitle' | translate }}"
+    [(visible)]="visible" (visibleChange)="visibleHandler($event)">
+    <div class="wrapper">
+
+        <div class="body-content">{{ 'pm.interviewGuideDescription' | translate }}</div>
+        <div class="container">
+            <form class="controlls row ml-20" [formGroup]="fg">
+                <div class="col-6">
+                    <div>
+                        <div class="master-select">
+                            <kf-radio-button formControlName="radio" value="master"
+                                label="{{ 'pm.masterGuide' | translate }}"
+                                description="{{ 'pm.masterGuideDescr' | translate }}" [singleLine]="false">
+                            </kf-radio-button>
+                        </div>
+                        <div class="split-select">
+                            <kf-radio-button formControlName="radio" value="split"
+                                label="{{ 'pm.splitGuide' | translate }}"
+                                description="{{ 'pm.splitGuideDescr' | translate }}" [singleLine]="false">
+                            </kf-radio-button>
+                        </div>
+                    </div>
+                    <div class="split-count">
+                        <kf-dropdown [disabled]="igType === 'master'" formControlName="dd">
+                            <kf-dropdown-item *ngFor="let split of splits" [value]="split.counts"
+                                [label]="split.counts">
+                            </kf-dropdown-item>
+                        </kf-dropdown>
+                    </div>
+                    <div *ngIf="hasWarning()" class="warn">
+                        <kf-icon icon="warning-info" color="warning"></kf-icon>
+                        <span kf-text size="sm" weight="heavy"> {{ 'pm.igDuplicatesWarning' | translate }}</span>
+                    </div>
+                </div>
+                <div class="col-6 pl-40 border-left">
+                    <div class="d-flex flex-column flex-jc-end h-60">
+                        <h3 class="fs-body fw-bold mx-0 mb-16 mt-0">{{ 'pm.igFormat' | translate }}</h3>
+                        <div class="ig-format-radio-container">
+                            <div class="format-select">
+                                <kf-radio-button formControlName="igFormat" value="pdf"
+                                    label="{{ 'pm.pdf' | translate }}"
+                                    [singleLine]="true">
+                                </kf-radio-button>
+                            </div>
+                            <div class="format-select">
+                                <kf-radio-button formControlName="igFormat" value="docx"
+                                    label="{{ 'pm.wordDoc' | translate }}"
+                                    [singleLine]="true">
+                                </kf-radio-button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column flex-jc-end h-40">
+                        <h3 class="fs-body fw-bold mx-0 mb-16 mt-0">{{ 'pm.selectLanguageForPdf' | translate }}</h3>
+                        <kf-dropdown formControlName="language" placeholder="{{ 'lib.selectPlaceholder' | translate }}">
+                            <kf-dropdown-item label="{{ 'lib.selectPlaceholder' | translate }}"></kf-dropdown-item>
+                            <kf-dropdown-item *ngFor="let l of languages" [value]="l.id" [label]="l.name"></kf-dropdown-item>
+                        </kf-dropdown>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <footer>
+        <button class="btn btn-outline" (click)="close()">{{ 'pm.close' | translate }}</button>
+        <button class="btn" [disabled]="!fg.controls.language.value" (click)="download()">{{ 'lib.export' | translate }}</button>
+    </footer>
+</kf-modal>

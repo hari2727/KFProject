@@ -1,0 +1,10 @@
+<div class="card-container" [class.lg]="width === 'lg'">
+    <div class="title">
+        <kf-icon [icon]="icon" color="dark"></kf-icon>
+        <h4 class="fw-bold">{{ title | translate }}</h4>
+        <span (click)="onMagnify()" class="tc-icon">
+            <kf-icon icon="zoom" size="md" class="zoom-icon"></kf-icon>
+        </span>
+    </div>
+    <p class="subtext-sm description">{{ description | translate }}</p>
+</div>

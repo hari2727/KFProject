@@ -1,0 +1,238 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { MssqlUtils } from '../../common/common.utils';
+import { BmMssqlService } from './bm-mssql.service';
+import {
+    competencyLevelMock,
+    getDatasetFromStream,
+    getDatasetFromStreamParsed,
+    itemModificationId,
+    modelVersionMock,
+    spsDataQueryDecoded,
+    spsIdsDbMock,
+    spsMetadata,
+} from './bm.service.fixture';
+import { HttpException } from '@nestjs/common';
+
+const ormQueryMock = jest.fn(),
+    ormStreamMock = jest.fn();
+jest.mock('typeorm', () => {
+    const actual = jest.requireActual('typeorm');
+    return {
+        ...actual,
+        __esModule: true,
+        getConnection: jest.fn(() => {
+            return { createQueryRunner: () => ({ stream: () => ormStreamMock() }) };
+        }),
+        getManager: jest.fn(() => {
+            return { query: () => ormQueryMock() };
+        }),
+    };
+});
+
+describe('BmService', () => {
+    let module: TestingModule;
+    let mssqlService: BmMssqlService;
+
+    beforeAll(async () => {
+        module = await Test.createTestingModule({
+            providers: [BmMssqlService],
+        }).compile();
+
+        mssqlService = module.get(BmMssqlService);
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+        jest.clearAllTimers();
+    });
+
+    describe('getClientProfilesIdsForBulkBC', () => {
+        const q = spsDataQueryDecoded;
+        test('should return data from db', async () => {
+            // Arrange
+            ormQueryMock.mockResolvedValue(spsIdsDbMock);
+
+            // Act
+            const result = await mssqlService.getClientProfilesIdsForBulkBC(q.loggedInUserClientId, q.userId, q.locale);
+
+            // Assert
+            expect(result).toEqual(spsIdsDbMock);
+        });
+        test('should throw HttpException on error', async () => {
+            // Arrange
+            ormQueryMock.mockImplementationOnce(() => {
+                throw new Error();
+            });
+
+            // Act
+            const resultF = mssqlService.getClientProfilesIdsForBulkBC(q.loggedInUserClientId, q.userId, q.locale);
+
+            // Assert
+            await expect(resultF).rejects.toThrowError(HttpException);
+        });
+    });
+
+    describe('getBulkBCProfileMetadata', () => {
+        const q = spsDataQueryDecoded;
+        test('should return data from db', async () => {
+            // Arrange
+            ormQueryMock.mockResolvedValue(spsMetadata);
+
+            // Act
+            const result = await mssqlService.getBulkBCProfileMetadata(q.loggedInUserClientId, q.userId, q.locale);
+
+            // Assert
+            expect(result).toEqual(spsMetadata);
+        });
+        test('should throw HttpException on error', async () => {
+            // Arrange
+            ormQueryMock.mockImplementationOnce(() => {
+                throw new Error();
+            });
+
+            // Act
+            const resultF = mssqlService.getBulkBCProfileMetadata(q.loggedInUserClientId, q.userId, q.locale);
+
+            // Assert
+            await expect(resultF).rejects.toThrowError(HttpException);
+        });
+    });
+
+    describe('getClientsPublishedCompetencyModel', () => {
+        const q = spsDataQueryDecoded;
+        test('should return data from db', async () => {
+            // Arrange
+            ormQueryMock.mockResolvedValue(modelVersionMock);
+
+            // Act
+            const result = await mssqlService.getClientsPublishedCompetencyModel(q.loggedInUserClientId);
+
+            // Assert
+            expect(result).toEqual(modelVersionMock);
+        });
+        test('should throw HttpException on error', async () => {
+            // Arrange
+            ormQueryMock.mockImplementationOnce(() => {
+                throw new Error();
+            });
+
+            // Act
+            const resultF = mssqlService.getClientsPublishedCompetencyModel(q.loggedInUserClientId);
+
+            // Assert
+            await expect(resultF).rejects.toThrowError(HttpException);
+        });
+    });
+
+    describe('getClientPublishedCompetencies', () => {
+        const q = spsDataQueryDecoded;
+        test('should return data from db', async () => {
+            // Arrange
+            ormQueryMock.mockResolvedValue(competencyLevelMock);
+
+            // Act
+            const result = await mssqlService.getClientPublishedCompetencies(
+                modelVersionMock.CompetencyModelGUID,
+                modelVersionMock.CompetencyModelVersion,
+                modelVersionMock.LCID,
+            );
+
+            // Assert
+            expect(result).toEqual(competencyLevelMock);
+        });
+        test('should throw HttpException on error', async () => {
+            // Arrange
+            ormQueryMock.mockImplementationOnce(() => {
+                throw new Error();
+            });
+
+            // Act
+            const resultF = mssqlService.getClientPublishedCompetencies(
+                modelVersionMock.CompetencyModelGUID,
+                modelVersionMock.CompetencyModelVersion,
+                modelVersionMock.LCID,
+            );
+
+            // Assert
+            await expect(resultF).rejects.toThrowError(HttpException);
+        });
+    });
+
+    describe('getBulkBCClientsCompetencyLevels', () => {
+        const q = spsDataQueryDecoded;
+        test('should return data from db', async () => {
+            // Arrange
+            ormQueryMock.mockResolvedValue(competencyLevelMock);
+
+            // Act
+            const result = await mssqlService.getBulkBCClientsCompetencyLevels(q.loggedInUserClientId, q.locale, '1,2,3');
+
+            // Assert
+            expect(result).toEqual(competencyLevelMock);
+        });
+        test('should throw HttpException on error', async () => {
+            // Arrange
+            ormQueryMock.mockImplementationOnce(() => {
+                throw new Error();
+            });
+
+            // Act
+            const resultF = mssqlService.getBulkBCClientsCompetencyLevels(q.loggedInUserClientId, q.locale, '1,2,3');
+
+            // Assert
+            await expect(resultF).rejects.toThrowError(HttpException);
+        });
+    });
+
+    describe('insertBulkMapItemId', () => {
+        const q = spsDataQueryDecoded;
+        test('should insert data into db', async () => {
+            // Arrange
+            ormQueryMock.mockResolvedValue(undefined);
+
+            // Act
+            const result = await mssqlService.insertBulkMapItemId(q.loggedInUserClientId, q.userId);
+
+            // Assert
+            expect(result).toBeUndefined();
+        });
+        test('should throw HttpException on error', async () => {
+            // Arrange
+            ormQueryMock.mockImplementationOnce(() => {
+                throw new Error();
+            });
+
+            // Act
+            const resultF = mssqlService.insertBulkMapItemId(q.loggedInUserClientId, q.userId);
+
+            // Assert
+            await expect(resultF).rejects.toThrowError(HttpException);
+        });
+    });
+
+    describe('selectBulkMapItemId', () => {
+        const q = spsDataQueryDecoded;
+        test('should return data from db', async () => {
+            // Arrange
+            ormQueryMock.mockResolvedValue(itemModificationId);
+
+            // Act
+            const result = await mssqlService.selectBulkMapItemId(q.loggedInUserClientId);
+
+            // Assert
+            expect(result).toEqual(itemModificationId);
+        });
+        test('should throw HttpException on error', async () => {
+            // Arrange
+            ormQueryMock.mockImplementationOnce(() => {
+                throw new Error();
+            });
+
+            // Act
+            const resultF = mssqlService.selectBulkMapItemId(q.loggedInUserClientId);
+
+            // Assert
+            await expect(resultF).rejects.toThrowError(HttpException);
+        });
+    });
+});

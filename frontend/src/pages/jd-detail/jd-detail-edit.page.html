@@ -1,0 +1,324 @@
+<kf-page app="pm">
+    <kf-page-masthead class="masthead d-flex flex-row flex-ai-center">
+        <div *ngIf="!isNewJd">
+            <h1 class="header">{{ 'pm.editJobDescription' | translate }}</h1>
+            <p class="body-text sub-header">{{ 'pm.editReviewJobDescription' | translate }}</p>
+        </div>
+        <div *ngIf="isNewJd">
+            <h1 class="header">{{ 'pm.createJobDescription' | translate }}</h1>
+            <p class="body-text sub-header">{{ 'pm.createReviewJobDescription' | translate }}</p>
+        </div>
+    </kf-page-masthead>
+    <kf-page-content>
+        <form [formGroup]="form" (ngSubmit)="onShowSaveOrDiscardModal(true)">
+            <div *ngIf="!isNewJd && job.parentJobDetails" class="parent-job-details">
+                <kf-input formControlName="title" (keyup)="onJobFieldValueChange($event.target.value, ['title'])"
+                    class="description"
+                    [maxlength]="jobTitleMaxLength"></kf-input>
+                <span class="body-text color-primary fw-semibold jd-link line-clamp-2">{{
+                    'pm.successProfileBasedOn' | translate }}
+                    <a *ngIf="parentSP && parentSP.title" class="link fw-semibold" [routerLink]="parentSpUrl">
+                        {{ parentSP.title }}
+                        <ng-container *ngIf="parentSP.profileType !== 'CUSTOM_PROFILE'">
+                            <span *ngIf="parentSP.version && !parentSP.parentJobDetails">{{ 'pm.version' | translate }}
+                                {{parentSP.version
+                                }}</span>
+                            <span *ngIf="!parentSP.version && parentSP.parentJobDetails?.version">{{ 'pm.version' |
+                                translate }} {{
+                                parentSP.parentJobDetails.version }}</span>
+                        </ng-container>
+                    </a>
+                </span>
+            </div>
+
+            <div *ngIf="isNewJd" class="parent-job-details">
+                <kf-input formControlName="title" (keyup)="onJobFieldValueChange($event.target.value, ['title'])"
+                    class="description"
+                    [maxlength]="jobTitleMaxLength"></kf-input>
+                <span class="body-text color-primary fw-semibold jd-link line-clamp-2">{{
+                    'pm.successProfileBasedOn' | translate }}
+                    <a class="link fw-semibold" [routerLink]="parentSpUrl">
+                        {{ job.title }} <span *ngIf="job.version && job.profileType !== 'CUSTOM_PROFILE'">{{
+                            'pm.version' | translate }} {{ job.version }}</span>
+                    </a>
+                </span>
+            </div>
+
+            <div *ngIf="!job.parentJobDetails" class="parent-job-details">
+                <kf-input formControlName="title" (keyup)="onJobFieldValueChange($event.target.value, ['title'])"
+                    class="description"
+                    [maxlength]="jobTitleMaxLength"></kf-input>
+            </div>
+
+            <kftarc-jd-section-header-text class="d-block mt-16" title="{{ 'pm.aboutTheCompany' | translate }}"
+                (keyup)="onJobFieldValueChange($event.target.value, ['companyDescription'])"
+                formControlName="companyDescription" [maxlength]="900" [countVisible]="true" [showHideSection]="true">
+            </kftarc-jd-section-header-text>
+
+            <kftarc-jd-section-header-text class="d-block mt-16" title="{{ 'pm.jobPurpose' | translate }}"
+                (keyup)="onJobFieldValueChange($event.target.value, ['description'])" formControlName="description"
+                [maxlength]="2500" [countVisible]="true" [showHideSection]="true">
+            </kftarc-jd-section-header-text>
+
+            <div formArrayName="sections">
+                <div [formGroup]="secFormGroup"
+                    *ngFor="let secFormGroup of form.controls.sections['controls']; let sectionIndex = index">
+                    <div class="py-16" [class.border-bottom]="!secFormGroup.value.includeSection">
+                        <div class="d-flex flex-ai-center w-100">
+                            <h4 class="title-header mb-10 fw-bold"
+                                [class.color-medium]="!secFormGroup.value.includeSection">{{
+                                sections.get(secFormGroup.value.code) | translate }}</h4>
+                            <div class="ml-auto d-flex flex-ai-center">
+                                <ng-container *ngIf="secFormGroup.value.includeSection && secFormGroup.value.code !== 'CERTIFICATIONS'">
+                                    <kfthcl-slide-toggle
+                                        (change)="onItemValueChange(!secFormGroup.value.includeSubCategoryNames, secFormGroup.value.code, ['hideSubCategoryNames'])"
+                                        formControlName="includeSubCategoryNames">
+                                        <div class="ml-8 body-text fw-semibold">{{ 'lib.IncludeTitle' | translate }}
+                                        </div>
+                                    </kfthcl-slide-toggle>
+                                </ng-container>
+                            </div>
+                            <div class="d-flex flex-ai-center ml-16">
+                                <kfthcl-slide-toggle
+                                    (change)="onItemValueChange(!secFormGroup.value.includeSection, secFormGroup.value.code, ['hideSection']);switchFormControlsValidation(secFormGroup)"
+                                    formControlName="includeSection">
+                                    <div class="ml-8 body-text fw-semibold">{{ 'lib.IncludeSection' | translate }}</div>
+                                </kfthcl-slide-toggle>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ng-container *ngIf="secFormGroup.value.includeSection">
+                        <ng-container *ngIf="secFormGroup.value.code === secCodeEnum.Tech">
+
+                        </ng-container>
+                        <ng-container *ngIf="secFormGroup.value.code === secCodeEnum.Tools">
+                            <div cdkDropList
+                                class="section"
+                                (cdkDropListDropped)="onDropItem($event, secFormGroup.value.code, sectionIndex, 'toolsCommodities')">
+                                <div class="d-flex flex-row item" [formGroup]="toolsCommoditiesFormGroup"
+                                    *ngFor="let toolsCommoditiesFormGroup of secFormGroup.controls.toolsCommodities?.controls; let toolCmdIndex = index"
+                                    cdkDrag>
+                                    <div cdkDragHandle class="handle"></div>
+                                    <div class="py-8 px-16 flex-grow-1">
+
+                                        <ng-container *ngIf="secFormGroup.value.includeSubCategoryNames">
+                                            <kf-input class="mb-8" formControlName="title"
+                                                (keyup)="onItemValueChange($event.target.value, secFormGroup.value.code, ['toolsCommodities',toolCmdIndex,'title'])"
+                                                maxlength="250">
+                                            </kf-input>
+                                        </ng-container>
+
+                                        <div class="skills-container edit-mode" formArrayName="tools">
+                                            <thcl-chip-list class=".chip-list-stacked">
+                                                <thcl-chip [formGroup]="toolsFormGroup"
+                                                    *ngFor="let toolsFormGroup of toolsCommoditiesFormGroup.controls.tools?.controls; let toolIndex = index"
+                                                    (removed)="onItemRemove(secFormGroup.value.code, sectionIndex, ['toolsCommodities',toolCmdIndex,'tools'], toolIndex)"
+                                                    [removable]="true" [color]="'light'">
+                                                    <kf-input formControlName="title"
+                                                        (keyup)="onItemValueChange($event.target.value, secFormGroup.value.code, ['toolsCommodities',toolCmdIndex,'tools',toolIndex,'title'])"
+                                                        size="initial"></kf-input>
+                                                    <kf-icon thclChipRemove icon="close" size="xs" color="primary">
+                                                    </kf-icon>
+                                                </thcl-chip>
+                                                <thcl-chip class="add-chip">
+                                                    <a (click)="onAddTool([sectionIndex,'toolsCommodities',toolCmdIndex,'tools'])"
+                                                        class="add-skills">
+                                                        <kf-icon icon="add" color="primary" size="sm"></kf-icon>
+                                                        <div class="fs-body-xs color-primary fw-bold"
+                                                            style="padding-left: 5px;">{{ 'lib.add' | translate |
+                                                            uppercase }}
+                                                        </div>
+                                                    </a>
+                                                </thcl-chip>
+                                            </thcl-chip-list>
+                                        </div>
+                                    </div>
+                                    <kf-icon class="close flex-as-center mr-8" icon="close"
+                                        (click)="onRemoveItem(secFormGroup.value.code, sectionIndex, toolCmdIndex, 'toolsCommodities')">
+                                    </kf-icon>
+                                </div>
+                            </div>
+                        </ng-container>
+                        <ng-container *ngIf="secFormGroup.value.code === secCodeEnum.Tasks">
+                            <div cdkDropList
+                                class="section"
+                                (cdkDropListDropped)="onDropItem($event, secFormGroup.value.code, sectionIndex, 'tasks')">
+                                <div class="d-flex flex-row item" [formGroup]="taskFormGroup"
+                                    *ngFor="let taskFormGroup of secFormGroup.controls.tasks.controls; let taskIndex = index"
+                                    cdkDrag>
+                                    <div cdkDragHandle class="handle"></div>
+                                    <div class="py-8 px-16 flex-grow-1">
+                                        <kf-input class="w-100" type="textarea" formControlName="name"
+                                            (keyup)="onItemValueChange($event.target.value, secFormGroup.value.code, ['tasks' ,taskIndex, 'name'])"
+                                            maxlength="12000">
+                                        </kf-input>
+                                    </div>
+                                    <kf-icon class="close flex-as-center mr-8" icon="close"
+                                        (click)="onRemoveItem(secFormGroup.value.code, sectionIndex, taskIndex, 'tasks')">
+                                    </kf-icon>
+                                </div>
+                            </div>
+                        </ng-container>
+                        <ng-container
+                            *ngIf="secFormGroup.value.code === secCodeEnum.Resp || secFormGroup.value.code === secCodeEnum.BhvrSkills || secFormGroup.value.code === secCodeEnum.TchnSkills">
+                            <div cdkDropList
+                                class="section"
+                                (cdkDropListDropped)="onDropSubCtg($event, secFormGroup.value.code, sectionIndex)">
+                                <div class="d-flex flex-row item" [formGroup]="subCtgFormGroup"
+                                    *ngFor="let subCtgFormGroup of secFormGroup.controls.subCtgs?.controls; let subCtgIndex = index"
+                                    cdkDrag>
+                                    <div cdkDragHandle class="handle"></div>
+                                    <div class="py-8 px-16 flex-grow-1">
+
+                                        <ng-container *ngIf="secFormGroup.value.includeSubCategoryNames">
+                                            <kf-input class="mb-8" formControlName="name"
+                                                (keyup)="onSubCtgChange(subCtgFormGroup.value, subCtgFormGroup.value.id, secFormGroup.value.code)"
+                                                maxlength="250">
+                                            </kf-input>
+                                        </ng-container>
+
+                                        <kf-input class="w-100" type="textarea" formControlName="description"
+                                            (keyup)="onSubCtgChange(subCtgFormGroup.value, subCtgFormGroup.value.id, secFormGroup.value.code)"
+                                            maxlength="12000">
+                                        </kf-input>
+
+                                        <!-- <div class="mt-8 ml-16"
+                                            *ngIf="secFormGroup.value.code === secCodeEnum.TchnSkills && subCtgFormGroup.controls.dependents.value">
+                                            <div class="color-medium subtext-sm fw-bold">{{ 'lib.skills'
+                                                | translate | uppercase }}</div>
+                                            <div class="body-text mt-8">
+                                                {{subCtgFormGroup.controls.dependents.value}}</div>
+                                        </div> -->
+                                    </div>
+                                    <kf-icon class="close flex-as-center mr-8" icon="close"
+                                        (click)="onRemoveSubCtg(subCtgFormGroup.value.id, secFormGroup.value.code, sectionIndex, subCtgIndex)">
+                                    </kf-icon>
+                                </div>
+                            </div>
+                        </ng-container>
+                        <ng-container *ngIf="secFormGroup.value.code === 'CERTIFICATIONS'">
+                            <div cdkDropList
+                                class="section"
+                                (cdkDropListDropped)="onDropCert($event, sectionIndex)">
+                                <div class="d-flex flex-row item" [formGroup]="certFormGroup"
+                                    *ngFor="let certFormGroup of secFormGroup.controls.certs?.controls; let certIndex = index"
+                                    cdkDrag>
+                                    <div cdkDragHandle class="handle"></div>
+                                    <div class="py-8 px-16 flex-grow-1">
+
+                                        <ng-container *ngIf="secFormGroup.value.includeSubCategoryNames">
+                                            <kf-input class="mb-8" formControlName="name" [displayErrorForce]="true"
+                                                (keyup)="onCertChange(certFormGroup.value)" maxlength="250">
+                                            </kf-input>
+                                        </ng-container>
+
+                                        <kf-input class="w-100" type="textarea" formControlName="description"
+                                            (keyup)="onCertChange(certFormGroup.value)" maxlength="12000">
+                                        </kf-input>
+                                    </div>
+                                    <kf-icon class="close flex-as-center mr-8" icon="close"
+                                        (click)="onRemoveCert(certFormGroup.value, sectionIndex, certIndex)">
+                                    </kf-icon>
+                                </div>
+                            </div>
+
+
+                            <div class="mt-8 d-flex flex-row flex-ai-center add-button px-24 py-16" (click)="onAddCert(sectionIndex)">
+                                <kf-icon class="mr-8" icon="add" color="primary" size="md"></kf-icon>
+                                <a class="body-text fw-semibold color-primary">{{ 'lib.add' | translate | uppercase }} {{
+                                    'pm.certificationTitle' | translate | uppercase }}</a>
+                            </div>
+                        </ng-container>
+
+                        <ng-container
+                            *ngIf="secFormGroup.value.code === secCodeEnum.Education || secFormGroup.value.code === secCodeEnum.Experience">
+                            <div>
+                                <div class="d-flex flex-row item" [formGroup]="subCtgFormGroup"
+                                    *ngFor="let subCtgFormGroup of secFormGroup.controls.subCtgs?.controls; let subCtgIndex = index">
+                                    <div class="py-8 pr-16 flex-grow-1">
+
+                                        <ng-container *ngIf="secFormGroup.value.includeSubCategoryNames">
+                                            <kf-input class="mb-8" formControlName="name"
+                                                (keyup)="onSubCtgChange(subCtgFormGroup.value, subCtgFormGroup.value.id, secFormGroup.value.code)"
+                                                maxlength="250">
+                                            </kf-input>
+                                        </ng-container>
+
+                                        <kf-input class="w-100" type="textarea" formControlName="description"
+                                            (keyup)="onSubCtgChange(subCtgFormGroup.value, subCtgFormGroup.value.id, secFormGroup.value.code)"
+                                            maxlength="12000">
+                                        </kf-input>
+                                    </div>
+                                    <kf-icon class="close flex-as-center mr-8" icon="close"
+                                        (click)="onRemoveSubCtg(subCtgFormGroup.value.id, secFormGroup.value.code, sectionIndex, subCtgIndex)">
+                                    </kf-icon>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </ng-container>
+                </div>
+            </div>
+
+            <kftarc-jd-section-header-text class="d-block mt-16" title="{{ 'pm.additionalInformation' | translate }}"
+                (keyup)="onJobFieldValueChange($event.target.value, ['additionalComments'])"
+                formControlName="additionalComments" [maxlength]="900" [countVisible]="true" [showHideSection]="true">
+            </kftarc-jd-section-header-text>
+
+            <div class="actions d-flex flex-row flex-ai-center flex-jc-end">
+                <button (click)="onShowSaveOrDiscardModal(false)" type="button" class="btn btn-outline">
+                    {{ 'pm.cancel' | translate }}
+                </button>
+                <button type="submit" [disabled]="(isPristine && !isNewJd && !isCopyJd) || form.invalid" class="btn">
+                    {{ 'pm.save' | translate }}
+                </button>
+            </div>
+        </form>
+    </kf-page-content>
+</kf-page>
+
+
+<kf-modal class="pp-modal" title="{{ 'pm.JDtitle' | translate }}" size="sm" [closeOnEscape]="false" [modal]="true"
+    [dismissableMask]="false" [scrollable]="true" [(visible)]="showLeavingModal">
+    <div class="pp-modal-body">
+        <span class="body-text"> {{ (job.isTemplateJob ? 'pm.JDNewNavigateAway' : 'pm.JDcontent') | translate }}</span>
+    </div>
+    <footer>
+        <button class="btn" (click)="leavePage(false)">{{ 'pm.no' | translate }}</button>
+        <button class="btn btn-outline" (click)="leavePage(true)">{{ 'pm.yes' | translate }}</button>
+    </footer>
+</kf-modal>
+
+<kf-modal class="pp-modal" title="{{ 'pm.jobDescriptionSaveAll' | translate }}" size="sm" [closeOnEscape]="false"
+    [modal]="true" [dismissableMask]="false" [scrollable]="true" [(visible)]="showSaveAllModal">
+    <div class="pp-modal-body">
+        <span class="body-text">
+            {{ 'pm.JDSaveAllChanges' | translate }}
+        </span>
+    </div>
+    <footer>
+        <button (click)="onSave(false)" class="btn btn-outline">
+            {{ 'pm.no' | translate }}
+        </button>
+        <button (click)="onSave(true)" class="btn">
+            {{ 'pm.yes' | translate }}
+        </button>
+    </footer>
+</kf-modal>
+
+<kf-modal class="pp-modal" title="{{ 'pm.jobDescriptionDiscardAll' | translate }}" size="sm" [closeOnEscape]="false"
+    [modal]="true" [dismissableMask]="false" [scrollable]="true" [(visible)]="showDiscardAllModal">
+    <div class="pp-modal-body">
+        <span class="body-text">
+            {{ 'pm.JDDiscardAllChanges' | translate }}
+        </span>
+    </div>
+    <footer>
+        <button (click)="onDiscard(false)" class="btn">
+            {{ 'pm.no' | translate }}
+        </button>
+        <button (click)="onDiscard(true)" class="btn btn-outline">
+            {{ 'pm.yes' | translate }}
+        </button>
+    </footer>
+</kf-modal>

@@ -1,0 +1,111 @@
+import { Repository } from 'typeorm';
+import { KfTarcSpAndJdSearchParams, KfTarcSpAndJdSpResponse } from './kftarc-sp-and-jd-search.interface';
+import { KfTarcSpAndJdSearchRepository } from './kftarc-sp-and-jd-search.repository';
+import {
+    getSpsAndJdsSearchParams,
+    generateArrayFilledWithResultsOfCallback,
+    getRandomNumber,
+    getString,
+    getSuccessProfileSearchEntity,
+    getGrade,
+    nullifyRandomProperty,
+} from './kftarc-sp-and-jd-search.repository.fixture';
+
+jest.mock('typeorm', () => {
+    const actual = jest.requireActual('typeorm');
+    return {
+        ...actual,
+    };
+});
+
+describe('KfTarcSpAndJdSearchRepository', () => {
+    beforeEach(() => {
+        jest.resetAllMocks();
+    });
+
+    describe('Construction', () => {
+        test('Should be a Repository<KfTarcSuccessProfileSearchEntity>', () => {
+            expect(new KfTarcSpAndJdSearchRepository()).toBeInstanceOf(Repository);
+        });
+    });
+
+    describe('.getSpsAndJds method', () => {
+        let res: KfTarcSpAndJdSpResponse.MappedAndCountedDbResponse;
+        test('Retrieving error, query failed', async () => {
+            let repo = new KfTarcSpAndJdSearchRepository();
+            const searchParams: KfTarcSpAndJdSearchParams = getSpsAndJdsSearchParams();
+            const queryMock = jest.fn().mockImplementationOnce(async () => {
+                throw new Error(getString());
+            });
+            repo.query = queryMock;
+            const result = repo.getSpsAndJds(searchParams);
+            await expect(result).rejects.toThrowError(Error);
+        });
+
+        test('Retrieving result object with 0 found records', async () => {
+            let repo = new KfTarcSpAndJdSearchRepository();
+            const searchParams: KfTarcSpAndJdSearchParams = getSpsAndJdsSearchParams();
+            const queryMock = jest.fn().mockResolvedValueOnce([]);
+            const mapSpsAndJdsMock = jest.fn().mockReturnValueOnce([]);
+            repo.query = queryMock;
+            repo.mapSpsAndJds = mapSpsAndJdsMock;
+            res = await repo.getSpsAndJds(searchParams);
+            expect(res).toEqual({ jobs: [], totalRecords: 0 });
+            // mapSpsAndJdsMock.mockRestore();
+        });
+
+        test('Retrieving fulfilled object', async () => {
+            let repo = new KfTarcSpAndJdSearchRepository();
+            const searchParams: KfTarcSpAndJdSearchParams = getSpsAndJdsSearchParams();
+            const successProfileSearchEntities = generateArrayFilledWithResultsOfCallback(getSuccessProfileSearchEntity);
+            const queryMock = jest.fn().mockResolvedValueOnce(successProfileSearchEntities);
+            const mapSpsAndJdsMock = jest.fn().mockReturnValueOnce(successProfileSearchEntities);
+            const desiredResult = { jobs: successProfileSearchEntities, totalRecords: successProfileSearchEntities[0].TotalRecords };
+            repo.query = queryMock;
+            repo.mapSpsAndJds = mapSpsAndJdsMock;
+            res = await repo.getSpsAndJds(searchParams);
+            expect(res).toEqual(desiredResult);
+        });
+    });
+
+    describe('.mapSpsAndJds method', () => {
+        test('Retrieving successfully mapped entities', async () => {
+            let repo = new KfTarcSpAndJdSearchRepository();
+            const successProfileSearchEntities = generateArrayFilledWithResultsOfCallback(getSuccessProfileSearchEntity);
+            const constructCustomGradeMock = jest.fn();
+            successProfileSearchEntities.forEach(successProfileSearchEntity => {
+                constructCustomGradeMock.mockImplementationOnce((referenceLevel: number, minGrade?: string, maxGrade?: string, gradeLabels?: string) => ({
+                    standardHayGrade: referenceLevel,
+                    min: minGrade,
+                    max: maxGrade,
+                    customGrades: gradeLabels,
+                }));
+            });
+            repo.constructCustomGrade = constructCustomGradeMock;
+            const res = repo.mapSpsAndJds(successProfileSearchEntities);
+            expect(res.length).toEqual(successProfileSearchEntities.length);
+            let randomNumber = getRandomNumber(0, res.length - 1);
+            expect(res[randomNumber].enableProfileMatchTool).toEqual(expect.any(Boolean));
+            expect(res[randomNumber].enableProfileMatchTool).toEqual(!!successProfileSearchEntities[randomNumber]);
+            randomNumber = getRandomNumber(0, res.length - 1);
+            expect(res[randomNumber].grade).toEqual({
+                standardHayGrade: successProfileSearchEntities[randomNumber].ReferenceLevel,
+                min: successProfileSearchEntities[randomNumber].MinGrade,
+                max: successProfileSearchEntities[randomNumber].MaxGrade,
+                customGrades: successProfileSearchEntities[randomNumber].CustomGrade,
+            });
+            randomNumber = getRandomNumber(0, res.length - 1);
+            expect(res[randomNumber].source[0].id).toEqual(parseInt(successProfileSearchEntities[randomNumber].JobSourceID));
+        });
+    });
+
+    describe('.removeEmptyProperties method', () => {
+        test('Deleting null properties', async () => {
+            let repo = new KfTarcSpAndJdSearchRepository();
+            const grade = getGrade();
+            const deletedPropertyName = nullifyRandomProperty(grade);
+            repo.removeEmptyProperties(grade);
+            expect(grade[deletedPropertyName]).toBeUndefined();
+        });
+    });
+});

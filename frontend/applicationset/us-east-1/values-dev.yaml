@@ -1,0 +1,276 @@
+repoURL: kfydigital.jfrog.io/kf1-helm-dev-local
+repoType: helmOCI
+app_name: profile-manager-ui
+helmChartName: kf-argocd-ui
+argoCDNamespace: apps-gitops
+appSetEnv: dev
+appCluster: app01
+
+generatorsList:
+  # DEV env
+  - clusters:
+      selector:
+        matchLabels:
+          kf-env: 'dev'
+          type: app
+          name: app01
+      values:
+        environment: dev
+        baseimage: kfydigital.jfrog.io/kf1-docker-dev-local/kfone-profile-manager/ui
+        repository: kfydigital.jfrog.io/kf1-docker-dev-local/kfone-profile-manager/ui
+        imageTag: '<< imageTag >>'
+        helmRevision: '0.1.1'
+        appFQDN: profilemanager.kornferrytalent-dev.com ## need to add profile-manager.. something fully qualified domain name
+        externalSecretEnv: ocp-dev
+        apiUrl: https://api.kornferrytalent-dev.com ## need to add spring url
+        kfTalentSuiteUrl: https://home.kornferrytalent-dev.com
+        iamRegistryUrl: https://admin.kornferrytalent-dev.com
+        insightsRegistryUrl: https://analytics.kornferrytalent-dev.com
+        tableauReportUrl: https://reports.kornferrytalent-dev.com
+        tableauDashboards: '{\"assessment-consumption\":\"ConsumptionDashboard/Consumption\",\"development-roadmap\":\"ScalableAnalytics/Dashboard1\"}'
+
+valuesList:
+  valuesObject:
+    appName: 'profile-manager-ui'
+    namespace: 'profile-manager'
+    image: '{{ values.baseimage }}:{{ values.imageTag }}' ## Using runtime imageTag as input here.
+    appFQDN: '{{ values.appFQDN }}'
+    externalSecret:
+      env: '{{ values.externalSecretEnv }}'
+    microfrontends:
+      moduleName: kfone_profile_manager
+      env:
+        enabled: true
+        variables:
+          API_URL: '{{ values.apiUrl }}'
+          KF_TALENT_SUITE: '{{ values.kfTalentSuiteUrl }}'
+          TABLEAU_URL: '{{ values.tableauReportUrl }}'
+          TABLEAU_DASHBOARDS: '{{ values.tableauDashboards }}'
+          environment: '{{ values.environment }}'
+      moduleRegistry:
+        enabled: true
+        registry:
+          {
+            '$schema': '../schema/registry.json',
+            'modules':
+              [
+                {
+                  'name': 'iam_module',
+                  'displayName': 'IAM Module',
+                  'remoteUrl': '{{ values.iamRegistryUrl }}/assets/remoteEntry.js',
+                  'exposes':
+                    [
+                      { 'name': 'Client', 'displayName': 'client', 'route': '/client' },
+                      {
+                        'name': 'ImportDashboard',
+                        'displayName': 'Import Client Data',
+                        'route': '/client/:clientId',
+                      },
+                      {
+                        'name': 'UserAccess',
+                        'displayName': 'User Access',
+                        'route': '/client/:clientId/user-access',
+                      },
+                      { 'name': 'Team', 'displayName': 'Team', 'route': '/client/:clientId/team' },
+                      {
+                        'name': 'EditTeam',
+                        'displayName': 'Edit Team',
+                        'route': '/client/:clientId/team/:teamId',
+                      },
+                      {
+                        'name': 'ImportClientData',
+                        'displayName': 'Import Client Data',
+                        'route': '/import/:dataImport/:clientId',
+                      },
+                      {
+                        'name': 'ExternalDashboard',
+                        'displayName': 'External Dashboard',
+                        'route': '/:product/:clientId',
+                      },
+                      {
+                        'name': 'AddEditUser',
+                        'displayName': 'AddEditUser',
+                        'route': '/client/:clientId/user-access/:action',
+                      },
+                      {
+                        'name': 'ManageClient',
+                        'displayName': 'Manage Client',
+                        'route': '/manage-client/:clientId?',
+                      },
+                    ],
+                },
+                {
+                  "name": "kfone-insights",
+                  "displayName": "KFOne Insights",
+                  "remoteUrl": "{{ values.insightsRegistryUrl }}/assets/remoteEntry.js",
+                  "exposes":
+                    [
+                      {
+                        "name": "AssessmentAnalytics",
+                        "displayName": "Assessment Analytics",
+                        "route": "/assessment-consumption"
+                      },
+                      {
+                        "name": "ScalableAnalytics",
+                        "displayName": "Scalable Analytics",
+                        "route": "/development-roadmap"
+                      },
+                      {
+                        "name": "AssessmentAnalytics",
+                        "displayName": "Assessment Analytics",
+                        "route": "/assessment-analytics"
+                      },
+                      {
+                        "name": "ScalableAnalytics",
+                        "displayName": "Scalable Analytics",
+                        "route": "/scalable-analytics"
+                      }
+                    ],
+                },
+                {
+                  'name': 'kfone-listen',
+                  'displayName': 'KFOne Listen',
+                  'remoteUrl': '{{ values.listenRegistryUrl }}/assets/remoteEntry.js',
+                  'exposes':
+                    [
+                      {
+                        'name': 'SurveyAnalyticsList',
+                        'displayName': 'Survey Analytics List',
+                        'route': '/survey-analytics-list',
+                      },
+                      {
+                        'name': 'SurveyAnalyticsCreate',
+                        'displayName': 'Survey Analytics Create New Survey',
+                        'route': '/survey-analytics-create',
+                      },
+                      {
+                        'name': 'SurveyAnalyticsResponse',
+                        'displayName': 'Survey Analytics Response Upload Screen',
+                        'route': '/survey-analytics-response/:surveyKey',
+                      },
+                      {
+                        'name': 'SurveyAnalyticsMapping',
+                        'displayName': 'Survey Analytics Mapping Response Screen',
+                        'route': '/survey-analytics-mapping/:surveyKey',
+                      },
+                    ],
+                },
+                {
+                  'name': 'kfone-user-experience',
+                  'displayName': 'KFOne User Experience',
+                  'remoteUrl': '{{ values.userExperienceRegistryUrl }}/assets/remoteEntry.js',
+                  'exposes':
+                    [
+                      {
+                        'name': 'UserExperience',
+                        'displayName': 'User Experience',
+                        'route': '/user-experience',
+                      },
+                      {
+                        'name': 'UserExperienceWelcome',
+                        'displayName': 'User Experience Welcome',
+                        'route': '/user-experience/welcome',
+                      },
+                      {
+                        'name': 'UserExperienceOnboarding',
+                        'displayName': 'User Experience Onboarding',
+                        'route': '/user-experience/onboarding',
+                      },
+                      {
+                        'name': 'UserExperienceDashboard',
+                        'displayName': 'User Experience Dashboard',
+                        'route': '/user-experience/dashboard',
+                      },
+                      {
+                        'name': 'UserExperienceSessionWillEndSoon',
+                        'displayName': 'User Experience Session Will End Soon',
+                        'route': '/user-experience/session-will-end-soon',
+                      },
+                      {
+                        'name': 'UserExperienceSessionTimeout',
+                        'displayName': 'User Experience Session Timeout',
+                        'route': '/user-experience/session-timeout',
+                      },
+                    ],
+                },
+                {
+                  'name': 'kfone-workflow-orchestration',
+                  'displayName': 'KFOne Workflow Orchestration',
+                  'remoteUrl': '{{ values.workflowRegistryUrl }}/assets/remoteEntry.js',
+                  'exposes':
+                    [
+                      {
+                        'name': 'CampaignManagement',
+                        'displayName': 'Campaign Management',
+                        'route': '/campaign-management',
+                      },
+                      {
+                        'name': 'TalentGroupManagement',
+                        'displayName': 'Talent Group Management',
+                        'route': '/talent-group-management',
+                      },
+                      {
+                        'name': 'EmailTemplateManagement',
+                        'displayName': 'Email Template Management',
+                        'route': '/email-template-management',
+                      },
+                      {
+                        'name': 'TalentGroupList',
+                        'displayName': 'Talent Group List',
+                        'route': '/talent-group-list',
+                      },
+                      {
+                        'name': 'EmailTemplateList',
+                        'displayName': 'Email Template List',
+                        'route': '/email-template-list',
+                      },
+                      {
+                        'name': 'CampaignDashboard',
+                        'displayName': 'Campaign Dashboard',
+                        'route': '/campaign-dashboard',
+                      },
+                      {
+                        'name': 'CampaignList',
+                        'displayName': 'Campaign List',
+                        'route': '/campaign-list',
+                      },
+                      {
+                        'name': 'TalentGroupListByKey',
+                        'displayName': 'Talent Group List By Key',
+                        'route': '/talent-group/:talent_group_key',
+                      },
+                      {
+                        'name': 'CampaignReviewByKey',
+                        'displayName': 'Campaign Review By Key',
+                        'route': '/campaign-review/:campaign_key',
+                      },
+                    ],
+                },
+                {
+                  'name': 'kfone-payequity',
+                  'displayName': 'Pay Equity Module',
+                  'remoteUrl': '{{ values.payEquityRegistryUrl }}/assets/remoteEntry.js',
+                  'exposes':
+                    [{ 'name': 'PayEquity', 'displayName': 'Pay Equity', 'route': '/payequity' }],
+                },
+              ],
+          }
+
+revision: '{{ values.helmRevision }}'
+namespaceDestination: 'profile-manager'
+
+syncPolicyList:
+  retry:
+    limit: -1
+  automated:
+    prune: true
+    selfHeal: true
+  syncOptions:
+    - ApplyOutOfSyncOnly=true
+    # - CreateNamespace=true
+    - PruneLast=true
+
+ignoreDifferences:
+  - jsonPointers:
+      - /imagePullSecrets
+    kind: ServiceAccount

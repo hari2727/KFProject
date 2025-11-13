@@ -1,0 +1,215 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/mixins.scss';
+
+
+.header {
+	font-size: 34px;
+	line-height: normal;
+	letter-spacing: 0.51px;
+	margin-bottom: 12px;
+	margin-top: 0;
+}
+
+.sub-header {
+  width: 50%;
+  margin-bottom: 0;
+}
+
+.disableDownload {
+    opacity: 0.7;
+    pointer-events: none !important;
+    user-select: none !important;
+}
+
+.matrix-download {
+    cursor: pointer;
+    display: inline-block;
+    letter-spacing: 1.2px;
+    position: relative;
+    margin-right: 25px;
+}
+
+.matrix {
+    margin: $default-margin 0;
+}
+
+.matrix-legend {
+    margin: $default-margin 0 $largest-margin;
+    background: $_white;
+    padding: $large-padding 0;
+
+    > div {
+        display: flex;
+        justify-content: space-between;
+
+        > div {
+            min-width: 140px;
+            margin: $small-margin $default-margin;
+            white-space: nowrap;
+        }
+    }
+
+    .range,
+    .type {
+        position: relative;
+        padding-left: 24px;
+
+        &:before {
+            position: absolute;
+            top: 4px;
+            left: 0;
+            content: '';
+            display: block;
+            width: 12px;
+            height: 12px;
+        }
+    }
+
+    .type {
+        &:before {
+            background: #000;
+        }
+    }
+
+    .type.type-best-job-profile {
+        &:before {
+            border-radius: 6px;
+        }
+    }
+
+    .range4-8 {
+        &:before {
+            background: #32b561;
+        }
+    }
+    .range9-13 {
+        &:before {
+            background: #32b5a0;
+        }
+    }
+    .range10-14 {
+        &:before {
+            background: #3acdd2;
+        }
+    }
+    .range15-19 {
+        &:before {
+            background: #45b7de;
+        }
+    }
+    .range20-23 {
+        &:before {
+            background: #458dde;
+        }
+    }
+    .range24 {
+        &:before {
+            background: #566fd6;
+        }
+    }
+
+    .type-custom {
+        padding-left: 27px;
+        &:before {
+            transform: rotate(45deg);
+            left: 5px;
+            width: 10px;
+            height: 10px;
+        }
+    }
+    .type-best {
+    }
+    .type-best-job-profile {
+        flex-grow: 1;
+    }
+}
+
+.popup-data {
+    padding: $large-padding;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .kf-icon-custom,
+    .kf-icon-profile-function {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .margin-top {
+        margin-top: $default-margin;
+        margin-bottom: 8px;
+        .kf-text {
+            font-size: 12px;
+            letter-spacing: 0.2px;
+        }
+    }
+    .margin-top + div .kf-text {
+        font-size: 12px;
+        letter-spacing: 0.2px;
+    }
+    .margin-bottom {
+        margin-bottom: $default-margin;
+    }
+    .compare-checkbox {
+        height: $default-margin;
+    }
+    .title-popup {
+        word-wrap: break-word;
+    }
+}
+
+.bucket-container {
+    width: 100%;
+    background-color: black;
+    z-index: 1000;
+    position: fixed;
+    bottom: $footerHeight - 1;
+}
+
+.bucket-padder-collapsed {
+    height: 64px;
+}
+
+.bucket-padder-expanded {
+    height: 190px;
+}
+
+.warning-msg {
+    max-width: 250px;
+    margin: $small-margin auto 0;
+    span {
+        color: $red;
+    }
+}
+
+::ng-deep .body {
+    padding: 0 !important;
+
+    .section .section-header:hover {
+        background-color: $_lighter-grey;
+        position: relative;
+    }
+
+    .section-header {
+        position: relative;
+    }
+
+    .item {
+        padding-top: 10px !important;
+        padding-bottom: 10px;
+    }
+
+    ::ng-deep .items{
+        cursor: pointer;
+    }
+
+    ::ng-deep .items.ng-star-inserted:hover {
+        background-color: $_lighter-grey;
+    }
+
+    .section-header + .items {
+        padding-top: 10px !important;
+    }
+}

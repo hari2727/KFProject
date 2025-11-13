@@ -1,0 +1,14 @@
+{
+    "awsRegion": "us-east-1",
+    "awsProfile": "kfawsdeployerec2",
+    "targetBase": "s3://stagingproductshub.kornferry.com",
+    "cloudfrontDistributionId": "E2F2VUEIF9EC3Y",
+    "invalidateCloudFront": true,
+    "put": [
+        {
+            "when": "documentation",
+            "source": "documentation/",
+            "target": "documentation/kfhub_tarc_svc_nest/"
+        }
+    ]
+}

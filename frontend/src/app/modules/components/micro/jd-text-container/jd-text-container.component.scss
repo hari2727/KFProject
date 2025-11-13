@@ -1,0 +1,17 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+
+:host {
+    display: block;
+}
+
+kf-input {
+    width: 100%;
+}
+
+.counter{
+    display: block;
+    color: #464646;
+    font-weight: 500;
+    margin-top: 10px;
+    font-size: 12px;
+}

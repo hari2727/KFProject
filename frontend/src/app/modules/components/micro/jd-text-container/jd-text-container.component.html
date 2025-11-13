@@ -1,0 +1,19 @@
+<kf-input *ngIf="formControlName !== 'info'"
+    type="textarea"
+    [resize]="resize"
+    [(ngModel)]="text"
+    [disabled]="!editing"
+    maxlength="900"
+></kf-input>
+<kf-input *ngIf="formControlName === 'info'"
+    type="textarea"
+    [resize]="resize"
+    [(ngModel)]="text"
+    [disabled]="!editing"
+></kf-input>
+<span *ngIf="formControlName !== 'info' && editing" class="counter">{{ 900 - text.length }} {{ 'pm.left' | translate }}</span>
+<div *ngIf="!disabled">
+    <button class="btn" *ngIf="!editing" (click)="edit()">Edit</button>
+    <button class="btn" *ngIf="editing" (click)="save()">Save</button>
+    <button class="btn btn-outline" *ngIf="editing" (click)="cancel()">Cancel</button>
+</div>

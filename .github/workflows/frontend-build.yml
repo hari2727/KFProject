@@ -1,0 +1,25 @@
+#  must be changed
+name: kfone-profile-manager-ui-build
+run-name: kfone-profile-manager-ui-build-${{ inputs.environment }}
+
+# This is the trigger for the workflow, mostly common for all the workflows
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: 'Environment'
+        required: true
+        default: dev
+        options:
+          - dev
+
+jobs:
+  Build:
+    uses: HayGroup/kfone-common/.github/workflows/docker-build-push-0.0.1.yml@main # Common template for the deploy jobs, provided by devops team.
+    secrets: inherit
+    with:
+      dockerBaseImage: 'kf-one/hardened-nginx:1.0.2' 
+      dockerRepository: 'kfone-profile-manager/ui' # must be changed
+      environment: '${{inputs.environment}}'
+      workspace: 'frontend' # can be used as-is, considering the current template folder structure

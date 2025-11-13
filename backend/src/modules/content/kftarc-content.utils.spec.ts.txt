@@ -1,0 +1,863 @@
+import { KfTarcContentInterface } from './kftarc-content.interface';
+import { KfTarcUtil } from './kftarc-content.utils';
+
+describe('KfTarcUtil', () => {
+    let tarcUtil: KfTarcUtil;
+
+    beforeAll(() => {
+        tarcUtil = new KfTarcUtil();
+    });
+
+    afterAll(() => {
+        jest.clearAllMocks();
+    });
+
+    describe('rules', () => {
+        const obj = {
+            JobSectionCode: '',
+        } as KfTarcContentInterface.ContentBody;
+
+        test(`should return ruleOne, ruleTwo and ruleThree false if JobSectionCode is not a ${KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS} and not ${KfTarcContentInterface.Skills.TECHNICAL_SKILLS}`, () => {
+            // Act
+            const result = tarcUtil.rules(obj);
+
+            // Assert
+            expect(result).toEqual({
+                ruleOne: false,
+                ruleTwo: false,
+                ruleThree: false,
+            });
+        });
+
+        test(`should return ruleOne and ruleTwo true, ruleThree false if JobSectionCode is ${KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS}`, () => {
+            // Act
+            const result = tarcUtil.rules({ ...obj, JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS });
+
+            // Assert
+            expect(result).toEqual({
+                ruleOne: true,
+                ruleTwo: true,
+                ruleThree: false,
+            });
+        });
+
+        test(`should return ruleOne and ruleThree true, ruleTwo false if JobSectionCode is ${KfTarcContentInterface.Skills.TECHNICAL_SKILLS}`, () => {
+            // Act
+            const result = tarcUtil.rules({ ...obj, JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS });
+
+            // Assert
+            expect(result).toEqual({
+                ruleOne: true,
+                ruleTwo: false,
+                ruleThree: true,
+            });
+        });
+    });
+
+    describe('ruleOne', () => {
+        test('should leave empty result and deleteArrayById', () => {
+            // Arrange
+            const body = [
+                [{ JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS }, { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS }, { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS }],
+            ] as KfTarcContentInterface.ContentBody[][];
+
+            // Act
+            const result = tarcUtil.ruleOne(body);
+
+            // Assert
+            expect(result).toEqual({
+                result: [],
+                deleteArrayById: [],
+            });
+        });
+
+        test(`should delete first array and set ${KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS} and ${KfTarcContentInterface.Skills.TECHNICAL_SKILLS} rank 1`, () => {
+            // Arrange
+            const body = [
+                [{ JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS }, { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS }],
+            ] as KfTarcContentInterface.ContentBody[][];
+
+            // Act
+            const result = tarcUtil.ruleOne(body);
+
+            // Assert
+            expect(result).toEqual({
+                result: [
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, rank: '1' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, rank: '1' },
+                ],
+                deleteArrayById: [0],
+            });
+        });
+
+        test('should not set rank greater than 5', () => {
+            // Arrange
+            const body = [
+                [{ JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS }, { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS }, { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS }],
+                [
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS },
+                ],
+                [
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS },
+                ],
+                [
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS },
+                ],
+                [{ JobSectionCode: '' }, { JobSectionCode: '' }, { JobSectionCode: '' }, { JobSectionCode: '' }],
+                [
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS },
+                ],
+                [
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS },
+                ],
+            ] as KfTarcContentInterface.ContentBody[][];
+
+            // Act
+            const result = tarcUtil.ruleOne(body);
+
+            // Assert
+            expect(
+                Math.max.apply(
+                    null,
+                    result.result.map(res => parseInt(res.rank, 10)),
+                ),
+            ).toBeLessThan(6);
+        });
+    });
+
+    describe('ruleTwo', () => {
+        test(`should exclude data if JobSectionCode ${KfTarcContentInterface.Skills.TECHNICAL_SKILLS}`, () => {
+            // Arrange
+            const body = [
+                [{ JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS }],
+            ] as KfTarcContentInterface.ContentBody[][];
+
+            // Act
+            const result = tarcUtil.ruleTwo(body, 1);
+
+            // Assert
+            expect(result).toEqual({
+                result: [
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, rank: '2' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, rank: '3' },
+                ],
+                deleteArrayById: [0, 2],
+            });
+        });
+
+        test('should not set rank greater than 5', () => {
+            // Arrange
+            const body = [
+                [{ JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS }],
+            ] as KfTarcContentInterface.ContentBody[][];
+
+            // Act
+            const result = tarcUtil.ruleTwo(body, 0);
+
+            // Assert
+            expect(
+                Math.max.apply(
+                    null,
+                    result.result.map(res => parseInt(res.rank, 10)),
+                ),
+            ).toBeLessThan(6);
+        });
+    });
+
+    describe('ruleThree', () => {
+        test(`should exclude data if JobSectionCode ${KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS}`, () => {
+            // Arrange
+            const body = [
+                [{ JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS }],
+            ] as KfTarcContentInterface.ContentBody[][];
+
+            // Act
+            const result = tarcUtil.ruleThree(body, 1);
+
+            // Assert
+            expect(result).toEqual({
+                result: [
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, rank: '2' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, rank: '3' },
+                ],
+                deleteArrayById: [0, 2],
+            });
+        });
+
+        test('should not set rank greater than 5', () => {
+            // Arrange
+            const body = [
+                [{ JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS }],
+                [{ JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS }],
+            ] as KfTarcContentInterface.ContentBody[][];
+
+            // Act
+            const result = tarcUtil.ruleThree(body, 0);
+
+            // Assert
+            expect(
+                Math.max.apply(
+                    null,
+                    result.result.map(res => parseInt(res.rank, 10)),
+                ),
+            ).toBeLessThan(6);
+        });
+    });
+
+    describe('groupByLearningAssetID', () => {
+        test('should group by LearningAssetID and sort by LearningAssetName', () => {
+            // Arrange
+            const body = [
+                { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'b' },
+                { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'a' },
+                { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'b' },
+                { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'a' },
+                { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'c' },
+                { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'c' },
+                { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'c' },
+                { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'c' },
+            ] as KfTarcContentInterface.ContentBody[];
+
+            // Act
+            const result = tarcUtil.groupByLearningAssetID(body);
+
+            // Assert
+            expect(result).toEqual([
+                [
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'a' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'b' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'c' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'c' },
+                ],
+                [
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'a' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'b' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'c' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'c' },
+                ],
+            ]);
+        });
+
+        test('should group by LearningAssetID and sort by group length', () => {
+            // Arrange
+            const body = [
+                { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'b' },
+                { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'a' },
+                { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'b' },
+                { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'a' },
+                { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'c' },
+                { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'c' },
+                { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'c' },
+            ] as KfTarcContentInterface.ContentBody[];
+
+            // Act
+            const result = tarcUtil.groupByLearningAssetID(body);
+
+            // Assert
+            expect(result).toEqual([
+                [
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'a' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'b' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'c' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'c' },
+                ],
+                [
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'a' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'b' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'c' },
+                ],
+            ]);
+        });
+        test('should group by LearningAssetID and sort by group length and LearningAssetName', () => {
+            // Arrange
+            const body = [
+                { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'b' },
+                { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'a' },
+                { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'e' },
+                { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'd' },
+                { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'c' },
+                { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'c' },
+                { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'c' },
+                { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'd' },
+            ] as KfTarcContentInterface.ContentBody[];
+
+            // Act
+            const result = tarcUtil.groupByLearningAssetID(body);
+
+            // Assert
+            expect(result).toEqual([
+                [
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'a' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'b' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'c' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'd' },
+                ],
+                [
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'c' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'c' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'd' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'e' },
+                ],
+            ]);
+        });
+
+        test('should group by LearningAssetID and sort by group length and LearningAssetName', () => {
+            // Arrange
+            const body = [
+                { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'b' },
+                { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'a' },
+                { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'e' },
+                { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'd' },
+                { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'c' },
+                { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'c' },
+                { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'c' },
+                { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'd' },
+            ] as KfTarcContentInterface.ContentBody[];
+
+            // Act
+            const result = tarcUtil.groupByLearningAssetID(body);
+
+            // Assert
+            expect(result).toEqual([
+                [
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'a' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'b' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'c' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'd' },
+                ],
+                [
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'c' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'c' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'd' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'e' },
+                ],
+            ]);
+        });
+    });
+
+    describe('mapLearningContent', () => {
+        test('should map data', () => {
+            // Arrange
+            const body: KfTarcContentInterface.ContentBody[] = [
+                {
+                    LearningAssetID: 1,
+                    LearningAssetName: '',
+                    LearningAssetDescription: '',
+                    JobSectionID: 1,
+                    JobSectionCode: '',
+                    JobSectionname: '',
+                    JobCategoryID: 1,
+                    JobCategoryName: '',
+                    JobSubCategoryID: 1,
+                    JobSubcategoryCde: '1',
+                    JobSubCategoryName: '',
+                    LevelName: '',
+                    SubLevelName: '',
+                    rank: '',
+                },
+                {
+                    LearningAssetID: 2,
+                    LearningAssetName: '',
+                    LearningAssetDescription: '',
+                    JobSectionID: 2,
+                    JobSectionCode: '',
+                    JobSectionname: '',
+                    JobCategoryID: 2,
+                    JobCategoryName: '',
+                    JobSubCategoryID: 2,
+                    JobSubcategoryCde: '2',
+                    JobSubCategoryName: '',
+                    LevelName: '',
+                    SubLevelName: '',
+                    rank: '',
+                },
+                {
+                    LearningAssetID: 1,
+                    LearningAssetName: '',
+                    LearningAssetDescription: '',
+                    JobSectionID: 1,
+                    JobSectionCode: '',
+                    JobSectionname: '',
+                    JobCategoryID: 3,
+                    JobCategoryName: '',
+                    JobSubCategoryID: 3,
+                    JobSubcategoryCde: '1',
+                    JobSubCategoryName: '',
+                    LevelName: '',
+                    SubLevelName: '',
+                    rank: '',
+                },
+                {
+                    LearningAssetID: 2,
+                    LearningAssetName: '',
+                    LearningAssetDescription: '',
+                    JobSectionID: 2,
+                    JobSectionCode: '',
+                    JobSectionname: '',
+                    JobCategoryID: 2,
+                    JobCategoryName: '',
+                    JobSubCategoryID: 2,
+                    JobSubcategoryCde: '2',
+                    JobSubCategoryName: '',
+                    LevelName: '',
+                    SubLevelName: '',
+                    rank: '',
+                },
+                {
+                    LearningAssetID: 2,
+                    LearningAssetName: '',
+                    LearningAssetDescription: '',
+                    JobSectionID: 2,
+                    JobSectionCode: '',
+                    JobSectionname: '',
+                    JobCategoryID: 2,
+                    JobCategoryName: '',
+                    JobSubCategoryID: 2,
+                    JobSubcategoryCde: '3',
+                    JobSubCategoryName: '',
+                    LevelName: '',
+                    SubLevelName: '',
+                    rank: '',
+                },
+            ];
+
+            // Act
+            const result = tarcUtil.mapLearningContent(body);
+
+            // Assert
+            expect(result).toEqual({
+                sections: [
+                    {
+                        categories: [
+                            {
+                                id: 1,
+                                name: '',
+                                subCategories: [
+                                    {
+                                        descriptions: [
+                                            {
+                                                name: '',
+                                            },
+                                        ],
+                                        globalCode: undefined,
+                                        id: undefined,
+                                        learningContent: [
+                                            {
+                                                description: '',
+                                                id: 1,
+                                                name: '',
+                                                rank: 0,
+                                            },
+                                        ],
+                                        spCode: '1',
+                                    },
+                                ],
+                            },
+                            {
+                                id: 3,
+                                name: '',
+                                subCategories: [
+                                    {
+                                        descriptions: [
+                                            {
+                                                name: '',
+                                            },
+                                        ],
+                                        globalCode: undefined,
+                                        id: undefined,
+                                        learningContent: [
+                                            {
+                                                description: '',
+                                                id: 1,
+                                                name: '',
+                                                rank: 0,
+                                            },
+                                        ],
+                                        spCode: '1',
+                                    },
+                                ],
+                            },
+                        ],
+                        code: '',
+                        id: 1,
+                        name: '',
+                    },
+                    {
+                        categories: [
+                            {
+                                id: 2,
+                                name: '',
+                                subCategories: [
+                                    {
+                                        descriptions: [
+                                            {
+                                                name: '',
+                                            },
+                                        ],
+                                        globalCode: undefined,
+                                        id: undefined,
+                                        learningContent: [
+                                            {
+                                                description: '',
+                                                id: 2,
+                                                name: '',
+                                                rank: 0,
+                                            },
+                                            {
+                                                description: '',
+                                                id: 2,
+                                                name: '',
+                                                rank: 0,
+                                            },
+                                        ],
+                                        spCode: '2',
+                                    },
+                                    {
+                                        descriptions: [
+                                            {
+                                                name: '',
+                                            },
+                                        ],
+                                        globalCode: undefined,
+                                        id: undefined,
+                                        learningContent: [
+                                            {
+                                                description: '',
+                                                id: 2,
+                                                name: '',
+                                                rank: 0,
+                                            },
+                                        ],
+                                        spCode: '3',
+                                    },
+                                ],
+                            },
+                        ],
+                        code: '',
+                        id: 2,
+                        name: '',
+                    },
+                ],
+            });
+        });
+    });
+
+    describe('addDelimiter', () => {
+        test('should join by delimiter', () => {
+            // Arrange
+            const data = [1, 2, 3, 4, 5];
+            const delimiter = '|';
+
+            // Act/Assert
+            expect(tarcUtil.addDelimiter(data, delimiter)).toEqual(data.join(delimiter));
+        });
+    });
+
+    describe('mapLearningContentPost', () => {
+        test('should map data', async () => {
+            // Arrange
+            const body = [
+                {
+                    LearningAssetID: 1,
+                    LearningAssetName: '',
+                    LearningAssetDescription: '',
+                    JobSectionID: 1,
+                    JobSectionCode: '',
+                    JobSectionname: '',
+                    JobCategoryID: 1,
+                    JobCategoryName: '',
+                    JobSubCategoryID: 1,
+                    JobSubcategoryCde: '1',
+                    JobSubCategoryName: '',
+                    LevelName: '',
+                    SubLevelName: '',
+                    rank: '',
+                    ModalityDurationDirectURLImage: 'a~1~x~I|2|3',
+                },
+                {
+                    LearningAssetID: 2,
+                    LearningAssetName: '',
+                    LearningAssetDescription: '',
+                    JobSectionID: 2,
+                    JobSectionCode: '',
+                    JobSectionname: '',
+                    JobCategoryID: 2,
+                    JobCategoryName: '',
+                    JobSubCategoryID: 2,
+                    JobSubcategoryCde: '2',
+                    JobSubCategoryName: '',
+                    LevelName: '',
+                    SubLevelName: '',
+                    rank: '',
+                    ModalityDurationDirectURLImage: 'a|b~2~y~II|c',
+                },
+                {
+                    LearningAssetID: 1,
+                    LearningAssetName: '',
+                    LearningAssetDescription: '',
+                    JobSectionID: 1,
+                    JobSectionCode: '',
+                    JobSectionname: '',
+                    JobCategoryID: 3,
+                    JobCategoryName: '',
+                    JobSubCategoryID: 3,
+                    JobSubcategoryCde: '1',
+                    JobSubCategoryName: '',
+                    LevelName: '',
+                    SubLevelName: '',
+                    rank: '',
+                    ModalityDurationDirectURLImage: 'a|b|c~3~z~III',
+                },
+                {
+                    LearningAssetID: 2,
+                    LearningAssetName: '',
+                    LearningAssetDescription: '',
+                    JobSectionID: 2,
+                    JobSectionCode: '',
+                    JobSectionname: '',
+                    JobCategoryID: 2,
+                    JobCategoryName: '',
+                    JobSubCategoryID: 2,
+                    JobSubcategoryCde: '2',
+                    JobSubCategoryName: '',
+                    LevelName: '',
+                    SubLevelName: '',
+                    rank: '',
+                    ModalityDurationDirectURLImage: '1|2|3',
+                },
+                {
+                    LearningAssetID: 2,
+                    LearningAssetName: '',
+                    LearningAssetDescription: '',
+                    JobSectionID: 2,
+                    JobSectionCode: '',
+                    JobSectionname: '',
+                    JobCategoryID: 2,
+                    JobCategoryName: '',
+                    JobSubCategoryID: 2,
+                    JobSubcategoryCde: '3',
+                    JobSubCategoryName: '',
+                    LevelName: '',
+                    SubLevelName: '',
+                    rank: '',
+                    ModalityDurationDirectURLImage: '',
+                },
+            ];
+
+            // Act
+            const result = await tarcUtil.mapLearningContentPost(body);
+
+            // Assert
+            expect(result).toEqual({
+                sections: [
+                    {
+                        categories: [
+                            {
+                                id: 1,
+                                name: '',
+                                subCategories: [
+                                    {
+                                        descriptions: [
+                                            {
+                                                name: '',
+                                            },
+                                        ],
+                                        globalCode: undefined,
+                                        id: undefined,
+                                        learningContent: [
+                                            {
+                                                description: '',
+                                                displayMessage: undefined,
+                                                id: 1,
+                                                modality: [
+                                                    {
+                                                        directURL: 'x',
+                                                        durationInMillis: 1,
+                                                        thumbImageURL: 'I',
+                                                        type: 'a',
+                                                    },
+                                                    {
+                                                        type: '2',
+                                                    },
+                                                    {
+                                                        type: '3',
+                                                    },
+                                                ],
+                                                name: '',
+                                                tiCourseId: undefined,
+                                            },
+                                        ],
+                                        spCode: '1',
+                                    },
+                                ],
+                            },
+                            {
+                                id: 3,
+                                name: '',
+                                subCategories: [
+                                    {
+                                        descriptions: [
+                                            {
+                                                name: '',
+                                            },
+                                        ],
+                                        globalCode: undefined,
+                                        id: undefined,
+                                        learningContent: [
+                                            {
+                                                description: '',
+                                                displayMessage: undefined,
+                                                id: 1,
+                                                modality: [
+                                                    {
+                                                        type: 'a',
+                                                    },
+                                                    {
+                                                        type: 'b',
+                                                    },
+                                                    {
+                                                        directURL: 'z',
+                                                        durationInMillis: 3,
+                                                        thumbImageURL: 'III',
+                                                        type: 'c',
+                                                    },
+                                                ],
+                                                name: '',
+                                                tiCourseId: undefined,
+                                            },
+                                        ],
+                                        spCode: '1',
+                                    },
+                                ],
+                            },
+                        ],
+                        code: '',
+                        id: 1,
+                        name: '',
+                    },
+                    {
+                        categories: [
+                            {
+                                id: 2,
+                                name: '',
+                                subCategories: [
+                                    {
+                                        descriptions: [
+                                            {
+                                                name: '',
+                                            },
+                                        ],
+                                        globalCode: undefined,
+                                        id: undefined,
+                                        learningContent: [
+                                            {
+                                                description: '',
+                                                displayMessage: undefined,
+                                                id: 2,
+                                                modality: [
+                                                    {
+                                                        type: 'a',
+                                                    },
+                                                    {
+                                                        directURL: 'y',
+                                                        durationInMillis: 2,
+                                                        thumbImageURL: 'II',
+                                                        type: 'b',
+                                                    },
+                                                    {
+                                                        type: 'c',
+                                                    },
+                                                ],
+                                                name: '',
+                                                tiCourseId: undefined,
+                                            },
+                                            {
+                                                description: '',
+                                                displayMessage: undefined,
+                                                id: 2,
+                                                modality: [
+                                                    {
+                                                        type: '1',
+                                                    },
+                                                    {
+                                                        type: '2',
+                                                    },
+                                                    {
+                                                        type: '3',
+                                                    },
+                                                ],
+                                                name: '',
+                                                tiCourseId: undefined,
+                                            },
+                                        ],
+                                        spCode: '2',
+                                    },
+                                    {
+                                        descriptions: [
+                                            {
+                                                name: '',
+                                            },
+                                        ],
+                                        globalCode: undefined,
+                                        id: undefined,
+                                        learningContent: [
+                                            {
+                                                description: '',
+                                                displayMessage: undefined,
+                                                id: 2,
+                                                modality: [{}],
+                                                name: '',
+                                                tiCourseId: undefined,
+                                            },
+                                        ],
+                                        spCode: '3',
+                                    },
+                                ],
+                            },
+                        ],
+                        code: '',
+                        id: 2,
+                        name: '',
+                    },
+                ],
+            });
+        });
+    });
+});

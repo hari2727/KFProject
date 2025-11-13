@@ -1,0 +1,54 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/mixins.scss';
+
+.noresults {
+    margin-top: -$size-16;
+}
+
+th {
+    padding: $size-16;
+}
+
+::ng-deep .context-menu-overlay-container {
+    .item:hover {
+        background-color: $dropdown-hover;
+    }
+}
+
+.context-menu-border {
+    border: 1px solid $silver-03;
+}
+
+.color-dark {
+    color: #212529;
+}
+
+.mb-450 {
+    @media (max-height: 1000px) { 
+        margin-bottom: 450px;
+    }
+}
+
+.disabled {
+    cursor: not-allowed!important;
+    color: $grey;
+}
+
+:host ::ng-deep table {
+    .cdk-column-name {
+        max-width: 45ch;
+        min-width: 30ch;
+    }
+    .cdk-column-grade {
+        max-width: 35ch;
+        .no-wrap {
+            white-space: nowrap;
+        }
+    }
+    .cdk-column-level {
+        min-width: 11ch;
+    }
+    .cdk-column-date {
+        max-width: 10ch;
+    }
+}

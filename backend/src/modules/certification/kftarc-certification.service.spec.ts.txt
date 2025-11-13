@@ -1,0 +1,1403 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { AppCode as ec } from '../../app.const';
+import { KfTarcCertificationInterface as Kf } from './kftarc-certification.interface';
+import { KfTarcCertificationService } from './kftarc-certification.service';
+import { KfTarcCertificationRepository } from './kftarc-certification.repository';
+import { HttpsService } from '../../_shared/https/https.service';
+import { HttpException } from '@nestjs/common';
+
+const escapeQueryWithParametersMock = jest.fn();
+const getManagerQuery = jest.fn();
+jest.mock('typeorm', () => {
+    const actual = jest.requireActual('typeorm');
+    return {
+        ...actual,
+        __esModule: true,
+        getManager: jest.fn(() => {
+            return { query: (q, w) => getManagerQuery(q, w) };
+        }),
+        getConnection: jest.fn(() => {
+            return { driver: { escapeQueryWithParameters: (q, w, e) => escapeQueryWithParametersMock(q, w, e) } };
+        }),
+    };
+});
+
+describe('KfTarcCertificationService', () => {
+    let module: TestingModule;
+    let tarcCertificationService: KfTarcCertificationService;
+    let https: HttpsService;
+    let kfTarcCertificationRepository: KfTarcCertificationRepository;
+
+    beforeEach(async () => {
+        module = await Test.createTestingModule({
+            providers: [KfTarcCertificationService, HttpsService, KfTarcCertificationRepository],
+        }).compile();
+        (https = module.get<HttpsService>(HttpsService)),
+            (tarcCertificationService = module.get(KfTarcCertificationService)),
+            (kfTarcCertificationRepository = module.get(KfTarcCertificationRepository));
+        jest.clearAllMocks();
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    const request = {
+        headers: {
+            authtoken: 'authToken',
+            'ps-session-id': 'ps-session-id',
+        },
+    } as Kf.RequestWithHeaders;
+
+    const loggedInUserClientId = 1;
+    const clientJobId = 1;
+    const query: Kf.PostCertificatesQueryParams | Kf.GetCertificatesQueryParams = {
+        loggedInUserClientId: loggedInUserClientId,
+        userId: 1,
+        clientJobId: clientJobId,
+        locale: 'en',
+    };
+    const successfulDatabaseResponse: Kf.DatabaseResponse = {
+        StatusCode: 200,
+        ExceptionCode: ec.SUCCESS,
+    };
+
+    describe('getCertificates', () => {
+
+        test('should return response when dbResponse with certificates has only one nullish entry', async () => {
+            const getPermissionsSpy = jest.spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'getPermissions').mockResolvedValueOnce({} as any);
+            const dbResponse: Kf.RenamedDatabaseDTO[] = [
+                {
+                    certificateId: 0,
+                    clientID: '',
+                    clientJobId: 0,
+                    code: '',
+                    name: '',
+                    description: '',
+                    order: 0,
+                    hideSection: 0,
+                    maxCode: 0,
+                    isDeleted: 0,
+                },
+            ];
+
+            const selectCertificatesFromDBSpy = jest
+                .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectCertificatesFromDB')
+                .mockResolvedValueOnce(dbResponse);
+            const res: Kf.GetCertificatesResponse = {
+                code: 'CERTTIFICATIONS',
+                name: 'Licenses and Certifications',
+                hideSection: false,
+                hideNames: false,
+                certs: [],
+            };
+            const result = await tarcCertificationService.getCertificates(query, request);
+
+            expect(getPermissionsSpy).toHaveBeenCalledWith(request);
+            expect(selectCertificatesFromDBSpy).toHaveBeenCalledWith(query);
+            expect(result).toEqual(res);
+        });
+
+        test('should return response when dbResponse with certificates has only one nullish entry', async () => {
+            const dbResponse: Kf.RenamedDatabaseDTO[] = [
+                {
+                    certificateId: 1,
+                    clientID: '1',
+                    clientJobId: 1,
+                    code: 'ABCD1',
+                    name: 'Title 1',
+                    description: 'Description 1',
+                    order: 0,
+                    hideSection: 0,
+                    maxCode: 1,
+                    isDeleted: 0,
+                },
+                {
+                    certificateId: 2,
+                    clientID: '2',
+                    clientJobId: 2,
+                    code: 'ABCD2',
+                    name: 'Title 2',
+                    description: 'Description 2',
+                    order: 0,
+                    hideSection: 0,
+                    maxCode: 2,
+                    isDeleted: 0,
+                },
+            ];
+
+            const getPermissionsSpy = jest.spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'getPermissions').mockResolvedValueOnce({} as any);
+            const selectCertificatesFromDBSpy = jest
+                .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectCertificatesFromDB')
+                .mockResolvedValueOnce(dbResponse);
+
+            const foundCertificates: Kf.FoundCertificate[] = [
+                {
+                    certificateId: 1,
+                    clientID: '1',
+                    clientJobId: 1,
+                    code: 'ABCD1',
+                    name: 'Title 1',
+                    description: 'Description 1',
+                    order: 0,
+                    isDeleted: 0,
+                },
+                {
+                    certificateId: 2,
+                    clientID: '2',
+                    clientJobId: 2,
+                    code: 'ABCD2',
+                    name: 'Title 2',
+                    description: 'Description 2',
+                    order: 0,
+                    isDeleted: 0,
+                },
+            ];
+            const res: Kf.GetCertificatesResponse = {
+                code: 'CERTTIFICATIONS',
+                name: 'Licenses and Certifications',
+                hideSection: false,
+                hideNames: false,
+                certs: foundCertificates,
+            };
+            const result = await tarcCertificationService.getCertificates(query, request);
+
+            expect(getPermissionsSpy).toHaveBeenCalledWith(request);
+            expect(selectCertificatesFromDBSpy).toHaveBeenCalledWith(query);
+            expect(result).toEqual(res);
+        });
+    });
+
+    describe('postCertificates', () => {
+
+        describe('POST operations', () => {
+            test('should insert one certificate and return successful code', async () => {
+                const getPermissionsSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'getPermissions')
+                    .mockResolvedValueOnce({} as any);
+                const execUpdateJobCertificateSectionSpy = jest
+                    .spyOn<KfTarcCertificationRepository, any>(kfTarcCertificationRepository, 'execUpdateJobCertificateSection')
+                    .mockImplementationOnce(() => {});
+                const missingCertificates: string[] = [];
+                const selectCertsMissingInDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectCertsMissingInDB')
+                    .mockResolvedValueOnce(missingCertificates);
+                let lastCertId = 1;
+                const selectLastCertIdExtractedFromCodeFromDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectLastCertIdExtractedFromCodeFromDB')
+                    .mockResolvedValueOnce(lastCertId);
+                const createCertificateSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'createCertificate')
+                    .mockImplementationOnce(() => {});
+                const hideSection = false;
+                const hideSectionNum = 0;
+                const cert: Kf.PostPayloadSinglCert = {
+                    method: Kf.HttpMethodType.POST,
+                    name: 'certName',
+                    description: 'certDescription',
+                };
+                const body: Kf.PostCertificatesPayload = {
+                    hideSection: hideSection,
+                    hideNames: false,
+                    certs: [cert],
+                };
+
+                const result = await tarcCertificationService.postCertificates(query, request, body);
+
+                expect(getPermissionsSpy).toHaveBeenCalledWith(request);
+                expect(execUpdateJobCertificateSectionSpy).toHaveBeenCalledWith(clientJobId, hideSectionNum);
+                expect(selectCertsMissingInDBSpy).toHaveBeenCalledWith(query, body.certs);
+                expect(selectLastCertIdExtractedFromCodeFromDBSpy).toHaveBeenCalledWith(query);
+                expect(createCertificateSpy).toHaveBeenCalledWith(query, cert, ++lastCertId);
+                expect(result.StatusCode).toEqual(200);
+                expect(result.ExceptionCode).toEqual(ec.SUCCESS);
+            });
+
+            test('should insert one certificate with undefined hideSection and return successful code', async () => {
+                const getPermissionsSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'getPermissions')
+                    .mockResolvedValueOnce({} as any);
+                const missingCertificates: string[] = [];
+                const selectCertsMissingInDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectCertsMissingInDB')
+                    .mockResolvedValueOnce(missingCertificates);
+                let lastCertId = 1;
+                const selectLastCertIdExtractedFromCodeFromDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectLastCertIdExtractedFromCodeFromDB')
+                    .mockResolvedValueOnce(lastCertId);
+                const createCertificateSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'createCertificate')
+                    .mockImplementationOnce(() => {});
+                const cert: Kf.PostPayloadSinglCert = {
+                    method: Kf.HttpMethodType.POST,
+                    name: 'certName',
+                    description: 'certDescription',
+                };
+                const body = {
+                    hideNames: false,
+                    certs: [cert],
+                };
+
+                const result = await tarcCertificationService.postCertificates(query, request, body as any);
+
+                expect(getPermissionsSpy).toHaveBeenCalledWith(request);
+                expect(selectCertsMissingInDBSpy).toHaveBeenCalledWith(query, body.certs);
+                expect(selectLastCertIdExtractedFromCodeFromDBSpy).toHaveBeenCalledWith(query);
+                expect(createCertificateSpy).toHaveBeenCalledWith(query, cert, ++lastCertId);
+                expect(result.StatusCode).toEqual(200);
+                expect(result.ExceptionCode).toEqual(ec.SUCCESS);
+            });
+
+            test('should insert some certificates and return successful code', async () => {
+                const getPermissionsSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'getPermissions')
+                    .mockResolvedValueOnce({} as any);
+                const execUpdateJobCertificateSectionSpy = jest
+                    .spyOn<KfTarcCertificationRepository, any>(kfTarcCertificationRepository, 'execUpdateJobCertificateSection')
+                    .mockImplementationOnce(() => {});
+                const missingCertificates: string[] = [];
+                const selectCertsMissingInDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectCertsMissingInDB')
+                    .mockResolvedValueOnce(missingCertificates);
+                let lastCertId = 1;
+                const selectLastCertIdExtractedFromCodeFromDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectLastCertIdExtractedFromCodeFromDB')
+                    .mockResolvedValueOnce(lastCertId);
+                const createCertificateSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'createCertificate')
+                    .mockImplementation(() => {});
+                const hideSection = false;
+                const hideSectionNum = 0;
+                const certs: Kf.PostPayloadSinglCert[] = [
+                    {
+                        method: Kf.HttpMethodType.POST,
+                        name: 'certName1',
+                        description: 'certDescription1',
+                    },
+                    {
+                        method: Kf.HttpMethodType.POST,
+                        name: 'certName2',
+                        description: 'certDescription2',
+                    },
+                ];
+                const body: Kf.PostCertificatesPayload = {
+                    hideSection: hideSection,
+                    hideNames: false,
+                    certs: certs,
+                };
+
+                const result = await tarcCertificationService.postCertificates(query, request, body);
+
+                expect(getPermissionsSpy).toHaveBeenCalledWith(request);
+                expect(execUpdateJobCertificateSectionSpy).toHaveBeenCalledWith(clientJobId, hideSectionNum);
+                expect(selectCertsMissingInDBSpy).toHaveBeenCalledWith(query, body.certs);
+                expect(selectLastCertIdExtractedFromCodeFromDBSpy).toHaveBeenCalledWith(query);
+                expect(createCertificateSpy).toHaveBeenCalledWith(query, certs[0], ++lastCertId);
+                expect(createCertificateSpy).toHaveBeenCalledWith(query, certs[1], ++lastCertId);
+                expect(result.StatusCode).toEqual(200);
+                expect(result.ExceptionCode).toEqual(ec.SUCCESS);
+            });
+
+            test('should insert some certificates, place them in right order and return successful code', async () => {
+                const getPermissionsSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'getPermissions')
+                    .mockResolvedValueOnce({} as any);
+                const execUpdateJobCertificateSectionSpy = jest
+                    .spyOn<KfTarcCertificationRepository, any>(kfTarcCertificationRepository, 'execUpdateJobCertificateSection')
+                    .mockImplementationOnce(() => {});
+                const missingCertificates: string[] = [];
+                const selectCertsMissingInDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectCertsMissingInDB')
+                    .mockResolvedValueOnce(missingCertificates);
+                let lastCertId = 1;
+                const selectLastCertIdExtractedFromCodeFromDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectLastCertIdExtractedFromCodeFromDB')
+                    .mockResolvedValueOnce(lastCertId);
+                const createCertificateSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'createCertificate')
+                    .mockImplementation(() => {});
+                const hideSection = false;
+                const hideSectionNum = 0;
+                const certs: Kf.PostPayloadSinglCert[] = [
+                    {
+                        method: Kf.HttpMethodType.POST,
+                        name: 'certName2',
+                        description: 'certDescription2',
+                        order: 2,
+                    },
+                    {
+                        method: Kf.HttpMethodType.POST,
+                        name: 'certName3',
+                        description: 'certDescription3',
+                        order: 3,
+                    },
+                    {
+                        method: Kf.HttpMethodType.POST,
+                        name: 'certName1',
+                        description: 'certDescription1',
+                        order: 1,
+                    },
+                ];
+                const body: Kf.PostCertificatesPayload = {
+                    hideSection: hideSection,
+                    hideNames: false,
+                    certs: certs,
+                };
+
+                const result = await tarcCertificationService.postCertificates(query, request, body);
+
+                expect(getPermissionsSpy).toHaveBeenCalledWith(request);
+                expect(execUpdateJobCertificateSectionSpy).toHaveBeenCalledWith(clientJobId, hideSectionNum);
+                expect(selectCertsMissingInDBSpy).toHaveBeenCalledWith(query, body.certs);
+                expect(selectLastCertIdExtractedFromCodeFromDBSpy).toHaveBeenCalledWith(query);
+                expect(createCertificateSpy).toHaveBeenCalledWith(query, certs[0], ++lastCertId);
+                expect(createCertificateSpy).toHaveBeenCalledWith(query, certs[1], ++lastCertId);
+                expect(createCertificateSpy).toHaveBeenCalledWith(query, certs[2], ++lastCertId);
+                expect(result.StatusCode).toEqual(200);
+                expect(result.ExceptionCode).toEqual(ec.SUCCESS);
+            });
+        });
+
+        describe('PUT operations', () => {
+            test(`should update one certificate and return successful code`, async () => {
+                const getPermissionsSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'getPermissions')
+                    .mockResolvedValueOnce({} as any);
+                const execUpdateJobCertificateSectionSpy = jest
+                    .spyOn<KfTarcCertificationRepository, any>(kfTarcCertificationRepository, 'execUpdateJobCertificateSection')
+                    .mockImplementationOnce(() => {});
+                const missingCertificates: string[] = [];
+                const selectCertsMissingInDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectCertsMissingInDB')
+                    .mockResolvedValueOnce(missingCertificates);
+                let lastCertId = 1;
+                const selectLastCertIdExtractedFromCodeFromDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectLastCertIdExtractedFromCodeFromDB')
+                    .mockResolvedValueOnce(lastCertId);
+                const updateCertificateSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'updateCertificate')
+                    .mockImplementationOnce(() => {});
+                const hideSection = false;
+                const hideSectionNum = 0;
+                const certs: Kf.PostPayloadSinglCert[] = [
+                    {
+                        method: Kf.HttpMethodType.PUT,
+                        name: 'certName1',
+                        description: 'certDescription1',
+                        order: 1,
+                    },
+                ];
+                const body: Kf.PostCertificatesPayload = {
+                    hideSection: hideSection,
+                    hideNames: false,
+                    certs: certs,
+                };
+
+                const result = await tarcCertificationService.postCertificates(query, request, body as any);
+                expect(getPermissionsSpy).toHaveBeenCalledWith(request);
+                expect(execUpdateJobCertificateSectionSpy).toHaveBeenCalledWith(clientJobId, hideSectionNum);
+                expect(selectCertsMissingInDBSpy).toHaveBeenCalledWith(query, body.certs);
+                expect(selectLastCertIdExtractedFromCodeFromDBSpy).toHaveBeenCalledWith(query);
+                expect(updateCertificateSpy).toHaveBeenCalledWith(query, certs[0]);
+                expect(result.StatusCode).toEqual(200);
+                expect(result.ExceptionCode).toEqual(ec.SUCCESS);
+            });
+
+            test('should update some certificates and return successful code', async () => {
+                const getPermissionsSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'getPermissions')
+                    .mockResolvedValueOnce({} as any);
+                const execUpdateJobCertificateSectionSpy = jest
+                    .spyOn<KfTarcCertificationRepository, any>(kfTarcCertificationRepository, 'execUpdateJobCertificateSection')
+                    .mockImplementationOnce(() => {});
+                const missingCertificates: string[] = [];
+                const selectCertsMissingInDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectCertsMissingInDB')
+                    .mockResolvedValueOnce(missingCertificates);
+                let lastCertId = 2;
+                const selectLastCertIdExtractedFromCodeFromDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectLastCertIdExtractedFromCodeFromDB')
+                    .mockResolvedValueOnce(lastCertId);
+                const updateCertificateSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'updateCertificate')
+                    .mockImplementation(() => {});
+                const hideSection = false;
+                const hideSectionNum = 0;
+                const certs: Kf.PostPayloadSinglCert[] = [
+                    {
+                        method: Kf.HttpMethodType.PUT,
+                        code: 'ABCD11_1',
+                        name: 'certName1',
+                    },
+                    {
+                        method: Kf.HttpMethodType.PUT,
+                        code: 'ABCD11_2',
+                        name: 'certName2',
+                        description: 'certDescription2',
+                    },
+                ];
+                const body: Kf.PostCertificatesPayload = {
+                    hideSection: hideSection,
+                    hideNames: false,
+                    certs: certs,
+                };
+
+                const result = await tarcCertificationService.postCertificates(query, request, body);
+
+                expect(getPermissionsSpy).toHaveBeenCalledWith(request);
+                expect(execUpdateJobCertificateSectionSpy).toHaveBeenCalledWith(clientJobId, hideSectionNum);
+                expect(selectCertsMissingInDBSpy).toHaveBeenCalledWith(query, body.certs);
+                expect(selectLastCertIdExtractedFromCodeFromDBSpy).toHaveBeenCalledWith(query);
+                expect(updateCertificateSpy).toHaveBeenCalledWith(query, certs[0]);
+                expect(updateCertificateSpy).toHaveBeenCalledWith(query, certs[1]);
+                expect(result.StatusCode).toEqual(200);
+                expect(result.ExceptionCode).toEqual(ec.SUCCESS);
+            });
+
+            test('should update some certificates, place them in right order and return successful code', async () => {
+                const getPermissionsSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'getPermissions')
+                    .mockResolvedValueOnce({} as any);
+                const execUpdateJobCertificateSectionSpy = jest
+                    .spyOn<KfTarcCertificationRepository, any>(kfTarcCertificationRepository, 'execUpdateJobCertificateSection')
+                    .mockImplementationOnce(() => {});
+                const missingCertificates: string[] = [];
+                const selectCertsMissingInDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectCertsMissingInDB')
+                    .mockResolvedValueOnce(missingCertificates);
+                let lastCertId = 1;
+                const selectLastCertIdExtractedFromCodeFromDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectLastCertIdExtractedFromCodeFromDB')
+                    .mockResolvedValueOnce(lastCertId);
+                const updateCertificateSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'updateCertificate')
+                    .mockImplementation(() => {});
+                const hideSection = false;
+                const hideSectionNum = 0;
+                const certs: Kf.PostPayloadSinglCert[] = [
+                    {
+                        method: Kf.HttpMethodType.PUT,
+                        code: 'ABCD11_4',
+                        name: 'certName4',
+                        description: 'certDescription4',
+                        order: 4,
+                    },
+                    {
+                        method: Kf.HttpMethodType.PUT,
+                        code: 'ABCD11_3',
+                        name: 'certName3',
+                        description: 'certDescription3',
+                        order: 3,
+                    },
+                    {
+                        method: Kf.HttpMethodType.PUT,
+                        code: 'ABCD11_2',
+                        name: 'certName2',
+                        description: 'certDescription2',
+                        order: 2,
+                    },
+                ];
+                const body: Kf.PostCertificatesPayload = {
+                    hideSection: hideSection,
+                    hideNames: false,
+                    certs: certs,
+                };
+
+                const result = await tarcCertificationService.postCertificates(query, request, body);
+
+                expect(getPermissionsSpy).toHaveBeenCalledWith(request);
+                expect(execUpdateJobCertificateSectionSpy).toHaveBeenCalledWith(clientJobId, hideSectionNum);
+                expect(selectCertsMissingInDBSpy).toHaveBeenCalledWith(query, body.certs);
+                expect(selectLastCertIdExtractedFromCodeFromDBSpy).toHaveBeenCalledWith(query);
+                expect(updateCertificateSpy).toHaveBeenCalledWith(query, certs[0]);
+                expect(updateCertificateSpy).toHaveBeenCalledWith(query, certs[1]);
+                expect(updateCertificateSpy).toHaveBeenCalledWith(query, certs[2]);
+                expect(result.StatusCode).toEqual(200);
+                expect(result.ExceptionCode).toEqual(ec.SUCCESS);
+            });
+
+            test('should throw an error because there are some missing certificates', async () => {
+                const getPermissionsSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'getPermissions')
+                    .mockResolvedValueOnce({} as any);
+                const execUpdateJobCertificateSectionSpy = jest
+                    .spyOn<KfTarcCertificationRepository, any>(kfTarcCertificationRepository, 'execUpdateJobCertificateSection')
+                    .mockImplementationOnce(() => {});
+                const missingCertificates: string[] = ['ABCD11_2', 'ABCD11_3'];
+                const selectCertsMissingInDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectCertsMissingInDB')
+                    .mockResolvedValueOnce(missingCertificates);
+                const hideSection = false;
+                const hideSectionNum = 0;
+                const certs: Kf.PostPayloadSinglCert[] = [
+                    {
+                        method: Kf.HttpMethodType.PUT,
+                        code: 'ABCD11_4',
+                        name: 'certName4',
+                        description: 'certDescription4',
+                        order: 4,
+                    },
+                    {
+                        method: Kf.HttpMethodType.PUT,
+                        code: 'ABCD11_3',
+                        name: 'certName3',
+                        description: 'certDescription3',
+                        order: 3,
+                    },
+                    {
+                        method: Kf.HttpMethodType.PUT,
+                        code: 'ABCD11_2',
+                        name: 'certName2',
+                        description: 'certDescription2',
+                        order: 2,
+                    },
+                ];
+                const body: Kf.PostCertificatesPayload = {
+                    hideSection: hideSection,
+                    hideNames: false,
+                    certs: certs,
+                };
+
+                let e: HttpException;
+                try {
+                    await tarcCertificationService.postCertificates(query, request, body);
+                } catch (err) {
+                    e = err;
+                }
+                expect(getPermissionsSpy).toHaveBeenCalledWith(request);
+                expect(execUpdateJobCertificateSectionSpy).toHaveBeenCalledWith(clientJobId, hideSectionNum);
+                expect(selectCertsMissingInDBSpy).toHaveBeenCalledWith(query, body.certs);
+                expect(e).toBeDefined();
+                expect(e.message).toEqual('Some certificates are missing in DB: ABCD11_2, ABCD11_3');
+                expect(e.getStatus()).toEqual(500);
+            });
+        });
+
+        describe('DELETE operations', () => {
+            test('should update some certificates as deleted and return successful code', async () => {
+                const getPermissionsSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'getPermissions')
+                    .mockResolvedValueOnce({} as any);
+                const execUpdateJobCertificateSectionSpy = jest
+                    .spyOn<KfTarcCertificationRepository, any>(kfTarcCertificationRepository, 'execUpdateJobCertificateSection')
+                    .mockImplementationOnce(() => {});
+                const missingCertificates: string[] = [];
+                const selectCertsMissingInDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectCertsMissingInDB')
+                    .mockResolvedValueOnce(missingCertificates);
+                let lastCertId = 2;
+                const selectLastCertIdExtractedFromCodeFromDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectLastCertIdExtractedFromCodeFromDB')
+                    .mockResolvedValueOnce(lastCertId);
+                const updateCertificateSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'updateCertificate')
+                    .mockImplementation(() => {});
+                const hideSection = false;
+                const hideSectionNum = 0;
+                const certs: Kf.PostPayloadSinglCert[] = [
+                    {
+                        method: Kf.HttpMethodType.DELETE,
+                        code: 'ABCD11_1',
+                        name: 'certName1',
+                    },
+                    {
+                        method: Kf.HttpMethodType.DELETE,
+                        code: 'ABCD11_2',
+                        name: 'certName2',
+                        description: 'certDescription2',
+                    },
+                ];
+                const body: Kf.PostCertificatesPayload = {
+                    code: 'code',
+                    hideSection: hideSection,
+                    hideNames: false,
+                    certs: certs,
+                };
+
+                const result = await tarcCertificationService.postCertificates(query, request, body);
+
+                expect(getPermissionsSpy).toHaveBeenCalledWith(request);
+                expect(execUpdateJobCertificateSectionSpy).toHaveBeenCalledWith(clientJobId, hideSectionNum);
+                expect(selectCertsMissingInDBSpy).toHaveBeenCalledWith(query, body.certs);
+                expect(selectLastCertIdExtractedFromCodeFromDBSpy).toHaveBeenCalledWith(query);
+                expect(updateCertificateSpy).toHaveBeenCalledWith(query, certs[0]);
+                expect(updateCertificateSpy).toHaveBeenCalledWith(query, certs[1]);
+                expect(result.StatusCode).toEqual(200);
+                expect(result.ExceptionCode).toEqual(ec.SUCCESS);
+            });
+        });
+
+        describe('each POST, PUT and DELETE operation is in one certificatebundle', () => {
+            test('should insert some certificates and update others, place them in right order and return successful code', async () => {
+                const getPermissionsSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'getPermissions')
+                    .mockResolvedValueOnce({} as any);
+                const execUpdateJobCertificateSectionSpy = jest
+                    .spyOn<KfTarcCertificationRepository, any>(kfTarcCertificationRepository, 'execUpdateJobCertificateSection')
+                    .mockImplementationOnce(() => {});
+                const missingCertificates: string[] = [];
+                const selectCertsMissingInDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectCertsMissingInDB')
+                    .mockResolvedValueOnce(missingCertificates);
+                let lastCertId = 1;
+                const selectLastCertIdExtractedFromCodeFromDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectLastCertIdExtractedFromCodeFromDB')
+                    .mockResolvedValueOnce(lastCertId);
+                const createCertificateSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'createCertificate')
+                    .mockImplementationOnce(() => {});
+                const updateCertificateSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'updateCertificate')
+                    .mockImplementation(() => {});
+                const hideSection = false;
+                const hideSectionNum = 0;
+                const certs: Kf.PostPayloadSinglCert[] = [
+                    {
+                        method: Kf.HttpMethodType.DELETE,
+                        code: 'ABCD11_2',
+                        name: 'certName2',
+                        description: 'certDescription2',
+                        order: 2,
+                    },
+                    {
+                        method: Kf.HttpMethodType.POST,
+                        name: 'certName4',
+                        description: 'certDescription4',
+                        order: 4,
+                    },
+                    {
+                        method: Kf.HttpMethodType.PUT,
+                        code: 'ABCD11_3',
+                        name: 'certName3',
+                        description: 'certDescription3',
+                        order: 3,
+                    },
+                    {
+                        method: Kf.HttpMethodType.PUT,
+                        code: 'ABCD11_1',
+                        name: 'certName1',
+                        description: 'certDescription1',
+                        order: 1,
+                    },
+                ];
+                const body: Kf.PostCertificatesPayload = {
+                    hideSection: hideSection,
+                    hideNames: false,
+                    certs: certs,
+                };
+
+                const result = await tarcCertificationService.postCertificates(query, request, body);
+
+                expect(getPermissionsSpy).toHaveBeenCalledWith(request);
+                expect(execUpdateJobCertificateSectionSpy).toHaveBeenCalledWith(clientJobId, hideSectionNum);
+                expect(selectCertsMissingInDBSpy).toHaveBeenCalledWith(query, body.certs);
+                expect(selectLastCertIdExtractedFromCodeFromDBSpy).toHaveBeenCalledWith(query);
+                //order of certificates in array cert was updated so that the last element is with POST method
+                expect(updateCertificateSpy).toHaveBeenCalledWith(query, certs[0]);
+                expect(updateCertificateSpy).toHaveBeenCalledWith(query, certs[1]);
+                expect(updateCertificateSpy).toHaveBeenCalledWith(query, certs[2]);
+                expect(createCertificateSpy).toHaveBeenCalledWith(query, certs[3], ++lastCertId);
+                expect(result.StatusCode).toEqual(200);
+                expect(result.ExceptionCode).toEqual(ec.SUCCESS);
+            });
+        });
+
+        describe('PUT and undefined operations', () => {
+            test('should specify undefined method of certificate as NOT_SPECIFIED, update all certificates and return successful code', async () => {
+                const getPermissionsSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'getPermissions')
+                    .mockResolvedValueOnce({} as any);
+                const execUpdateJobCertificateSectionSpy = jest
+                    .spyOn<KfTarcCertificationRepository, any>(kfTarcCertificationRepository, 'execUpdateJobCertificateSection')
+                    .mockImplementationOnce(() => {});
+                const missingCertificates: string[] = [];
+                const selectCertsMissingInDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectCertsMissingInDB')
+                    .mockResolvedValueOnce(missingCertificates);
+                let lastCertId = 1;
+                const selectLastCertIdExtractedFromCodeFromDBSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectLastCertIdExtractedFromCodeFromDB')
+                    .mockResolvedValueOnce(lastCertId);
+                const updateCertificateSpy = jest
+                    .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'updateCertificate')
+                    .mockImplementation(() => {});
+                const hideSection = false;
+                const hideSectionNum = 0;
+                const certs: Kf.PostPayloadSinglCert[] = [
+                    {
+                        method: Kf.HttpMethodType.PUT,
+                        code: 'ABCD11_4',
+                        name: 'certName4',
+                        description: 'certDescription4',
+                        order: 4,
+                    },
+                    {
+                        code: 'ABCD11_3',
+                        name: 'certName3',
+                        description: 'certDescription3',
+                        order: 3,
+                    },
+                    {
+                        method: Kf.HttpMethodType.PUT,
+                        code: 'ABCD11_2',
+                        name: 'certName2',
+                        description: 'certDescription2',
+                        order: 2,
+                    },
+                ];
+                const certsReordered: Kf.PostPayloadSinglCert[] = [
+                    {
+                        method: Kf.HttpMethodType.PUT,
+                        code: 'ABCD11_2',
+                        name: 'certName2',
+                        description: 'certDescription2',
+                        order: 1,
+                    },
+                    {
+                        method: Kf.HttpMethodType.NOT_SPECIFIED,
+                        code: 'ABCD11_3',
+                        name: 'certName3',
+                        description: 'certDescription3',
+                        order: 2,
+                    },
+                    {
+                        method: Kf.HttpMethodType.PUT,
+                        code: 'ABCD11_4',
+                        name: 'certName4',
+                        description: 'certDescription4',
+                        order: 3,
+                    },
+
+                ];
+                const body: Kf.PostCertificatesPayload = {
+                    hideSection: hideSection,
+                    hideNames: false,
+                    certs: certs,
+                };
+
+                const result = await tarcCertificationService.postCertificates(query, request, body);
+
+                expect(getPermissionsSpy).toHaveBeenCalledWith(request);
+                expect(execUpdateJobCertificateSectionSpy).toHaveBeenCalledWith(clientJobId, hideSectionNum);
+                expect(selectCertsMissingInDBSpy).toHaveBeenCalledWith(query, body.certs);
+                expect(selectLastCertIdExtractedFromCodeFromDBSpy).toHaveBeenCalledWith(query);
+                expect(updateCertificateSpy).nthCalledWith(1, query, certsReordered[0]);
+                expect(updateCertificateSpy).nthCalledWith(2, query, certsReordered[1]);
+                expect(updateCertificateSpy).nthCalledWith(3, query, certsReordered[2]);
+                expect(result.StatusCode).toEqual(200);
+                expect(result.ExceptionCode).toEqual(ec.SUCCESS);
+            });
+        });
+    });
+
+    describe('getPermissions', () => {
+        const kfhubApiHeadersDummy = {
+            authToken: 'authToken',
+            'ps-session-id': 'ps-session-id',
+            'application-name': 'PRODUCTS_HUB',
+            applicationName: 'TALENT_ARCHITECT',
+            'Content-Type': 'application/json',
+        };
+        test('should return permission', async () => {
+            //arrange
+            const getPermissionsUrlDummy = 'url';
+            const getPermissionsUrlSpy = jest.spyOn(tarcCertificationService, 'getPermissionsUrl').mockReturnValue(getPermissionsUrlDummy);
+
+            const authToken = request.headers.authtoken as string;
+            const psSessionId = request.headers['ps-session-id'];
+            const getKfhubApiHeadersSpy = jest.spyOn(tarcCertificationService, 'getKfhubApiHeaders').mockReturnValue(kfhubApiHeadersDummy);
+
+            const httpsServiceGetDummy: Kf.SuccessProfilesPermissions = {
+                access: 'access',
+                hasGradeAccess: true,
+                hasMarketInsightsAccess: true,
+                hasJobEvaluationAccess: true,
+                hasEditJobEvaluationAccess: true,
+                hasMarketInsightsSalaryDataAccess: true,
+                hasEditSPAccess: true,
+                hasOrgDemoGraphicAccess: true,
+                hasExecutiveGradingAccess: true,
+                hasCustomGrades: true,
+                hasPayDataCollectionOrgSurveyAccess: true,
+                hasPointValueAccess: true,
+                hasExecutiveAccessByPointValue: true,
+                pointValue: 1,
+            };
+
+            const httpsServiceGetSpy = jest.spyOn<HttpsService, any>(https, 'get').mockReturnValue(httpsServiceGetDummy);
+
+            //act
+            const result = await tarcCertificationService['getPermissions'](request);
+
+            //assert
+            expect(getPermissionsUrlSpy).toBeCalled();
+            expect(getKfhubApiHeadersSpy).toHaveBeenCalledWith(authToken, psSessionId);
+            expect(httpsServiceGetSpy).toHaveBeenCalledWith(getPermissionsUrlDummy, kfhubApiHeadersDummy);
+            expect(result).toEqual(httpsServiceGetDummy);
+        });
+        test(`should throw an error due to error in HttpsService's get method`, async () => {
+            const permissionsUrl = 'url';
+            const getPermissionsUrlSpy = jest
+                .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'getPermissionsUrl')
+                .mockReturnValueOnce(permissionsUrl);
+            const getKfhubApiHeadersSpy = jest
+                .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'getKfhubApiHeaders')
+                .mockReturnValueOnce(kfhubApiHeadersDummy);
+
+            const httpsServiceGetSpy = jest.spyOn<HttpsService, any>(https, 'get').mockImplementationOnce(async () => {
+                throw new Error('Error');
+            });
+
+            let e: HttpException;
+
+            try {
+                await tarcCertificationService['getPermissions'](request);
+            } catch (err) {
+                e = err;
+            }
+
+            expect(getPermissionsUrlSpy).toHaveBeenCalled();
+            expect(getKfhubApiHeadersSpy).toHaveBeenCalledWith(kfhubApiHeadersDummy.authToken, kfhubApiHeadersDummy['ps-session-id']);
+            expect(httpsServiceGetSpy).toHaveBeenCalledWith(permissionsUrl, kfhubApiHeadersDummy);
+            expect(e).toBeDefined();
+            expect(e.message).toEqual('Error');
+            expect(e.getStatus()).toEqual(500);
+        });
+    });
+
+    describe('renameCertificateColumns', () => {
+        test(`should return renamed certificates' columns`, async () => {
+            const dbData: Kf.DatabaseDTO[] = [
+                {
+                    CertificateId: 1,
+                    ClientID: '1',
+                    ClientJobId: 1,
+                    CertificateCode: 'CERT1_1',
+                    CertificateTitle: 'Title 1',
+                    CertificateDesc: 'Desc 1',
+                    CertificateOrder: 1,
+                    HideSection: 0,
+                    MaxCode: 3,
+                    IsDeleted: 0,
+                    CreatedBy: 'Owner',
+                    CreatedOn: '24-06-2022',
+                    ModifiedBy: 'Owner',
+                    ModifiedOn: '24-06-2022',
+                },
+                {
+                    CertificateId: 2,
+                    ClientID: '1',
+                    ClientJobId: 1,
+                    CertificateCode: 'CERT1_2',
+                    CertificateTitle: 'Title 2',
+                    CertificateDesc: 'Desc 2',
+                    CertificateOrder: 2,
+                    HideSection: 1,
+                    MaxCode: 3,
+                    IsDeleted: 0,
+                    CreatedBy: 'Owner',
+                    CreatedOn: '24-06-2022',
+                },
+                {
+                    CertificateId: 3,
+                    ClientID: '1',
+                    ClientJobId: 1,
+                    CertificateCode: 'CERT1_3',
+                    CertificateTitle: 'Title 3',
+                    CertificateDesc: 'Desc 3',
+                    CertificateOrder: 3,
+                    HideSection: 0,
+                    MaxCode: 3,
+                    IsDeleted: 1,
+                    CreatedBy: 'Owner',
+                    CreatedOn: '24-06-2022',
+                    ModifiedBy: 'Owner',
+                    ModifiedOn: '24-06-2022',
+                },
+            ];
+
+            const renamedDBData: Kf.RenamedDatabaseDTO[] = [
+                {
+                    certificateId: 1,
+                    clientID: '1',
+                    clientJobId: 1,
+                    code: 'CERT1_1',
+                    name: 'Title 1',
+                    description: 'Desc 1',
+                    order: 1,
+                    hideSection: 0,
+                    maxCode: 3,
+                    isDeleted: 0,
+                    createdBy: 'Owner',
+                    createdOn: '24-06-2022',
+                    modifiedBy: 'Owner',
+                    modifiedOn: '24-06-2022',
+                },
+                {
+                    certificateId: 2,
+                    clientID: '1',
+                    clientJobId: 1,
+                    code: 'CERT1_2',
+                    name: 'Title 2',
+                    description: 'Desc 2',
+                    order: 2,
+                    hideSection: 1,
+                    maxCode: 3,
+                    isDeleted: 0,
+                    createdBy: 'Owner',
+                    createdOn: '24-06-2022',
+                },
+                {
+                    certificateId: 3,
+                    clientID: '1',
+                    clientJobId: 1,
+                    code: 'CERT1_3',
+                    name: 'Title 3',
+                    description: 'Desc 3',
+                    order: 3,
+                    hideSection: 0,
+                    maxCode: 3,
+                    isDeleted: 1,
+                    createdBy: 'Owner',
+                    createdOn: '24-06-2022',
+                    modifiedBy: 'Owner',
+                    modifiedOn: '24-06-2022',
+                },
+            ];
+
+            const result = tarcCertificationService['renameCertificateColumns'](dbData);
+
+            expect(result).toEqual(renamedDBData);
+        });
+    });
+
+    describe('selectCertificatesFromDB', () => {
+        const clientJobCertificates: Kf.DatabaseDTO[] = [
+            {
+                CertificateId: 0,
+                ClientID: '',
+                ClientJobId: 0,
+                CertificateCode: '',
+                CertificateTitle: '',
+                CertificateDesc: '',
+                CertificateOrder: 0,
+                HideSection: 0,
+                IsDeleted: 0,
+                MaxCode: 0,
+            },
+        ];
+
+        test(`should throw an error due to error in renameCertificateColumns`, async () => {
+            const { loggedInUserClientId, clientJobId } = query;
+            // arrange
+            let e: HttpException;
+            const execGetClientJobCertificatesSpy = jest
+                .spyOn<KfTarcCertificationRepository, any>(kfTarcCertificationRepository, 'execGetClientJobCertificates')
+                .mockImplementationOnce(() => {
+                    throw new Error('Error in execGetClientJobCertificates');
+                });
+
+            // act
+            try {
+                await tarcCertificationService['selectCertificatesFromDB'](query);
+            } catch (err) {
+                e = err;
+            }
+            // assert
+            expect(execGetClientJobCertificatesSpy).toHaveBeenCalledWith(loggedInUserClientId, clientJobId);
+            expect(e).toBeDefined();
+            expect(e.message).toEqual('Error in execGetClientJobCertificates');
+            expect(e.getStatus()).toEqual(500);
+        });
+
+        test('should retrieve data drom DB and return renamedCertificateColumns', async () => {
+            const renamedDbData: Kf.RenamedDatabaseDTO[] = [
+                {
+                    certificateId: 1,
+                    clientID: '1',
+                    clientJobId: 1,
+                    code: 'CERT1_1',
+                    name: 'Title 1',
+                    description: 'Desc 1',
+                    order: 1,
+                    hideSection: 0,
+                    maxCode: 3,
+                    isDeleted: 0,
+                },
+                {
+                    certificateId: 2,
+                    clientID: '1',
+                    clientJobId: 1,
+                    code: 'CERT1_2',
+                    name: 'Title 2',
+                    description: 'Desc 2',
+                    order: 2,
+                    hideSection: 0,
+                    maxCode: 3,
+                    isDeleted: 1,
+                },
+                {
+                    certificateId: 3,
+                    clientID: '1',
+                    clientJobId: 1,
+                    code: 'CERT1_3',
+                    name: 'Title 3',
+                    description: 'Desc 3',
+                    order: 3,
+                    hideSection: 0,
+                    maxCode: 3,
+                    isDeleted: 0,
+                },
+            ];
+
+            const kfTarcCertificationRepositorySpy = jest
+                .spyOn(kfTarcCertificationRepository, 'execGetClientJobCertificates')
+                .mockResolvedValueOnce(clientJobCertificates);
+            const renameCertificateColumnsSpy = jest
+                .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'renameCertificateColumns')
+                .mockResolvedValueOnce(renamedDbData);
+            const { loggedInUserClientId, clientJobId } = query;
+            //act
+            const result = await tarcCertificationService['selectCertificatesFromDB'](query);
+            //assert
+            expect(kfTarcCertificationRepositorySpy).toHaveBeenCalledWith(loggedInUserClientId, clientJobId);
+            expect(renameCertificateColumnsSpy).toHaveBeenCalledWith(clientJobCertificates);
+            expect(result).toEqual(renamedDbData);
+        });
+    });
+
+    describe('selectCertsMissingInDB', () => {
+        test('should return nothing', async () => {
+            const body: Kf.PostPayloadSinglCert[] = [
+                { method: Kf.HttpMethodType.PUT, code: 'CERT11_1', description: 'Desc 1' },
+                { method: Kf.HttpMethodType.PUT, code: 'CERT11_2', description: 'Desc 2' },
+                { method: Kf.HttpMethodType.PUT, code: 'CERT11_3', description: 'Desc 3' },
+                { method: Kf.HttpMethodType.PUT, code: 'CERT11_4', description: 'Desc 4' },
+            ];
+
+            const dbResponse = [
+                {
+                    code: 'CERT11_1',
+                    title: 'Local Title 1',
+                    description: 'Local Desc 1',
+                    order: 1,
+                },
+                {
+                    code: 'CERT11_2',
+                    title: 'Local Title 2',
+                    description: 'Local Desc 2',
+                    order: 2,
+                },
+                {
+                    code: 'CERT11_3',
+                    title: 'Local Title 3',
+                    description: 'Local Desc 3',
+                    order: 3,
+                },
+                {
+                    code: 'CERT11_4',
+                    title: 'Local Title 4',
+                    description: 'Local Desc 4',
+                    order: 4,
+                },
+            ];
+            const selectCertificatesFromDBSpy = jest
+                .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectCertificatesFromDB')
+                .mockResolvedValueOnce(dbResponse);
+
+            const result = await tarcCertificationService['selectCertsMissingInDB'](query, body);
+
+            expect(selectCertificatesFromDBSpy).toHaveBeenCalledWith(query);
+            expect(result).toEqual([]);
+        });
+
+        test('should return non-empty array of missing certificates', async () => {
+            const body: Kf.PostPayloadSinglCert[] = [
+                { method: Kf.HttpMethodType.PUT, code: 'CERT11_1', description: 'Desc 1' },
+                { method: Kf.HttpMethodType.PUT, code: 'CERT11_2', description: 'Desc 2' },
+                { method: Kf.HttpMethodType.PUT, code: 'CERT11_3', description: 'Desc 3' },
+                { method: Kf.HttpMethodType.PUT, code: 'CERT11_4', description: 'Desc 4' },
+            ];
+
+            const dbResponse = [
+                {
+                    code: 'CERT11_1',
+                    title: 'Local Title 1',
+                    description: 'Local Desc 1',
+                    order: 1,
+                },
+                {
+                    code: 'CERT11_2',
+                    title: 'Local Title 2',
+                    description: 'Local Desc 2',
+                    order: 2,
+                },
+            ];
+
+            const missingCertificates = ['CERT11_3', 'CERT11_4'];
+
+            const selectCertificatesFromDBSpy = jest
+                .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectCertificatesFromDB')
+                .mockResolvedValueOnce(dbResponse);
+
+            const result = await tarcCertificationService['selectCertsMissingInDB'](query, body);
+
+            expect(selectCertificatesFromDBSpy).toHaveBeenCalledWith(query);
+            expect(result).toEqual(missingCertificates);
+        });
+
+        // test('should exclude certificates whose method is POST', async () => {
+        //     const body: Kf.PostPayloadSinglCert[] = [
+        //         { method: Kf.HttpMethodType.PUT, code: 'CERT11_1', description: 'Desc 1', name: 'anything' },
+        //         { method: Kf.HttpMethodType.PUT, code: 'CERT11_2', description: 'Desc 2', name: 'anything' },
+        //         { method: Kf.HttpMethodType.POST, code: 'CERT11_3', description: 'Desc 3', name: 'anything' },
+        //         { method: Kf.HttpMethodType.PUT, code: 'CERT11_4', description: 'Desc 4', name: 'anything' },
+        //     ];
+
+        //     const dbResponse = [
+        //         {
+        //             code: 'CERT11_1',
+        //             title: 'Local Title 1',
+        //             description: 'Local Desc 1',
+        //             order: 1,
+        //         },
+        //         {
+        //             code: 'CERT11_2',
+        //             title: 'Local Title 2',
+        //             description: 'Local Desc 2',
+        //             order: 2,
+        //         },
+        //     ];
+
+        //     const missingCertificates = ['CERT11_4'];
+
+        //     const selectCertificatesFromDBSpy = jest
+        //         .spyOn<KfTarcCertificationService, any>(tarcCertificationService, 'selectCertificatesFromDB')
+        //         .mockResolvedValueOnce(dbResponse);
+
+        //     const result = await tarcCertificationService['selectCertsMissingInDB'](query, body);
+
+        //     expect(selectCertificatesFromDBSpy).toHaveBeenCalledWith(query);
+        //     expect(result).toEqual(missingCertificates);
+        // });
+    });
+
+    describe('selectLastCertIdExtractedFromCodeFromDB', () => {
+        test('should throw an error due to exception in execGetClientJobCertificates', async () => {
+            let e: HttpException;
+
+            const execGetClientJobCertificatesSpy = jest
+                .spyOn<KfTarcCertificationRepository, any>(kfTarcCertificationRepository, 'execGetClientJobCertificates')
+                .mockImplementationOnce(async () => {
+                    throw new Error('Error in selectLastCertIdExtractedFromCodeFromDB');
+                });
+
+            try {
+                await tarcCertificationService['selectLastCertIdExtractedFromCodeFromDB'](query);
+            } catch (err) {
+                e = err;
+            }
+
+            expect(execGetClientJobCertificatesSpy).toHaveBeenCalledWith(loggedInUserClientId, clientJobId);
+            expect(e).toBeDefined();
+            expect(e.message).toEqual('Error in selectLastCertIdExtractedFromCodeFromDB');
+            expect(e.getStatus()).toEqual(500);
+        });
+
+        test(`should return 0 because specified client job doesn't have any certificates`, async () => {
+            const clientJobCertificates: Kf.DatabaseDTO[] = [
+                {
+                    CertificateId: 0,
+                    ClientID: '0',
+                    ClientJobId: 0,
+                    CertificateCode: '',
+                    CertificateTitle: '',
+                    CertificateDesc: '',
+                    CertificateOrder: 0,
+                    HideSection: 0,
+                    MaxCode: 0,
+                },
+            ];
+
+            const execGetClientJobCertificatesSpy = jest
+                .spyOn<KfTarcCertificationRepository, any>(kfTarcCertificationRepository, 'execGetClientJobCertificates')
+                .mockResolvedValueOnce(clientJobCertificates);
+            const lastCertId = 0;
+
+            const result = await tarcCertificationService['selectLastCertIdExtractedFromCodeFromDB'](query);
+
+            expect(execGetClientJobCertificatesSpy).toHaveBeenCalledWith(loggedInUserClientId, clientJobId);
+            expect(result).toEqual(lastCertId);
+        });
+
+        test(`should return maxCode equal to 2`, async () => {
+            const clientJobCertificates: Kf.DatabaseDTO[] = [
+                {
+                    CertificateId: 1,
+                    ClientID: '1',
+                    ClientJobId: 1,
+                    CertificateCode: 'ABCD11_1',
+                    CertificateTitle: 'Title 1',
+                    CertificateDesc: 'Desc 1',
+                    CertificateOrder: 1,
+                    HideSection: 0,
+                    IsDeleted: 1,
+                    MaxCode: 2,
+                },
+                {
+                    CertificateId: 2,
+                    ClientID: '1',
+                    ClientJobId: 1,
+                    CertificateCode: 'ABCD11_2',
+                    CertificateTitle: 'Title 2',
+                    CertificateDesc: 'Desc 2',
+                    CertificateOrder: 2,
+                    HideSection: 0,
+                    IsDeleted: 0,
+                    MaxCode: 2,
+                },
+            ];
+
+            const execGetClientJobCertificatesSpy = jest
+                .spyOn<KfTarcCertificationRepository, any>(kfTarcCertificationRepository, 'execGetClientJobCertificates')
+                .mockResolvedValueOnce(clientJobCertificates);
+            const lastCertId = 2;
+
+            const result = await tarcCertificationService['selectLastCertIdExtractedFromCodeFromDB'](query);
+
+            expect(execGetClientJobCertificatesSpy).toHaveBeenCalledWith(loggedInUserClientId, clientJobId);
+            expect(result).toEqual(lastCertId);
+        });
+    });
+
+    describe('createCertificate', () => {
+        test(`should throw an error due to an error in execCreateCertificateForClientJob`, async () => {
+            const cert = {
+                method: Kf.HttpMethodType.POST,
+            };
+
+            const nextCertId = 2;
+
+            let e: HttpException;
+            const execCreateCertificateForClientJobSpy = jest
+                .spyOn<KfTarcCertificationRepository, any>(kfTarcCertificationRepository, 'execCreateCertificateForClientJob')
+                .mockImplementationOnce(() => {
+                    throw new Error('Error in execCreateCertificateForClientJob');
+                });
+
+            const { loggedInUserClientId, clientJobId, userId } = { ...query, ...cert };
+            const name = undefined;
+            const description = undefined;
+            const order = undefined;
+            const code = `CERT${clientJobId}_${nextCertId}`;
+            // act
+            try {
+                await tarcCertificationService['createCertificate'](query, cert as any, nextCertId);
+            } catch (err) {
+                e = err;
+            }
+            // assert
+            expect(execCreateCertificateForClientJobSpy).toHaveBeenCalledWith(loggedInUserClientId, clientJobId, code, name, description, order, userId);
+            expect(e).toBeDefined();
+            expect(e.message).toEqual('Error in execCreateCertificateForClientJob');
+            expect(e.getStatus()).toEqual(500);
+        });
+
+        test(`should return successful database response`, async () => {
+            const cert: Kf.PostPayloadSinglCert = {
+                method: Kf.HttpMethodType.POST,
+                code: 'CERT1_2',
+                name: 'cert 2',
+                description: 'description 2',
+            };
+
+            const lastCertId = 2;
+
+            const execCreateCertificateForClientJobSpy = jest
+                .spyOn<KfTarcCertificationRepository, any>(kfTarcCertificationRepository, 'execCreateCertificateForClientJob')
+                .mockResolvedValueOnce(successfulDatabaseResponse);
+
+            const { loggedInUserClientId, clientJobId, code, userId, name, description, order } = { ...query, ...cert };
+
+            const result = await tarcCertificationService['createCertificate'](query, cert, lastCertId);
+
+            expect(execCreateCertificateForClientJobSpy).toHaveBeenCalledWith(loggedInUserClientId, clientJobId, code, name, description, order, userId);
+            expect(result.StatusCode).toEqual(200);
+            expect(result.ExceptionCode).toEqual(ec.SUCCESS);
+        });
+    });
+
+    describe('updateCertificate', () => {
+        test(`should throw an error due to an error in execUpdateCertificateForClientJob`, async () => {
+            const cert = {
+                method: Kf.HttpMethodType.PUT,
+            };
+            const isDeleted = cert.method === Kf.HttpMethodType.DELETE ? 1 : 0;
+
+            const execUpdateCertificateForClientJobSpy = jest
+                .spyOn<KfTarcCertificationRepository, any>(kfTarcCertificationRepository, 'execUpdateCertificateForClientJob')
+                .mockImplementationOnce(() => {
+                    throw new Error('Error in execUpdateCertificateForClientJob');
+                });
+
+            const { loggedInUserClientId, clientJobId, userId } = { ...query, ...cert };
+            const name = undefined;
+            const description = undefined;
+            const order = undefined;
+            const code = undefined;
+
+            let e: HttpException;
+
+            try {
+                await tarcCertificationService['updateCertificate'](query, cert as any);
+            } catch (err) {
+                e = err;
+            }
+
+            expect(execUpdateCertificateForClientJobSpy).toHaveBeenCalledWith(
+                loggedInUserClientId,
+                clientJobId,
+                code,
+                name,
+                description,
+                order,
+                isDeleted,
+                userId,
+            );
+            expect(e).toBeDefined();
+            expect(e.message).toEqual('Error in execUpdateCertificateForClientJob');
+            expect(e.getStatus()).toEqual(500);
+        });
+
+        test(`should return successful database response`, async () => {
+            const cert: Kf.PostPayloadSinglCert = {
+                method: Kf.HttpMethodType.PUT,
+                code: 'CERT1_2',
+                name: 'cert 2',
+                description: 'description 2',
+            };
+            const isDeleted = cert.method === Kf.HttpMethodType.DELETE ? 1 : 0;
+
+            const execUpdateCertificateForClientJobSpy = jest
+                .spyOn<KfTarcCertificationRepository, any>(kfTarcCertificationRepository, 'execUpdateCertificateForClientJob')
+                .mockResolvedValueOnce(successfulDatabaseResponse);
+
+            const { loggedInUserClientId, clientJobId, code, userId, name, description, order } = { ...query, ...cert };
+
+            const result = await tarcCertificationService['updateCertificate'](query, cert);
+
+            expect(execUpdateCertificateForClientJobSpy).toHaveBeenCalledWith(
+                loggedInUserClientId,
+                clientJobId,
+                code,
+                name,
+                description,
+                order,
+                isDeleted,
+                userId,
+            );
+            expect(result.StatusCode).toEqual(200);
+            expect(result.ExceptionCode).toEqual(ec.SUCCESS);
+        });
+    });
+});

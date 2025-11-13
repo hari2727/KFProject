@@ -1,0 +1,3 @@
+veracode_static_scan:
+  profile: 'KFD-PMNGR-KFHUB-TARC-LIB-UI'
+  analysis_branch: 'master'

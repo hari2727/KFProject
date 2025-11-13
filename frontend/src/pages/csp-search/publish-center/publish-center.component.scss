@@ -1,0 +1,169 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/mixins.scss';
+ 
+.border-button {
+    border: 0.5px solid rgba(0, 0, 0, 0.08);
+    margin-top: 20px;
+}
+ 
+.pointer {
+    cursor: pointer;
+}
+ 
+.danger-text {
+    color: $_light-red;
+}
+ 
+.link-text {
+    color: $blue;
+    font-weight: 700;
+    line-height: 20px;
+    cursor: pointer;
+}
+ 
+.inline-flex {
+    display: inline-flex;
+    justify-content: center;
+    column-gap: 5px;
+}
+ 
+.head {
+    padding-bottom: 20px;
+}
+ 
+.title {
+    margin-bottom: 20px;
+}
+ 
+.page-container {
+    min-height: 100vh;
+}
+ 
+.result-text {
+    font-family: "Proxima Nova";
+    margin-bottom: 20px;
+    color: $_light-black;
+}
+ 
+/***** Table Scss Start ******/
+ 
+.pc-custom-table {
+    font-family: "Proxima Nova";
+    width: 100%;
+    border: 1px solid $_grey-1;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    margin-bottom: 54px;
+}
+ 
+/* Header Row */
+.pc-table-header {
+    font-family: "Proxima Nova";
+    background-color: $_white;
+    margin-bottom: 20px;
+    padding-left: 50px;
+ 
+    .pc-table-cell {
+        flex: 1;
+        color: $blue;
+        font-family: "Proxima Nova";
+    }
+}
+ 
+/* Table Row */
+.pc-table-row {
+    background-color: $_white;
+    transition: background 0.2s;
+   color: $_light-black;
+    padding-left: 50px;
+    font-family: "Proxima Nova";
+}
+ 
+.table-col-cell {
+    flex: 1;
+ 
+    .btn-style {
+        width: auto;
+        height: 23px;
+        border-radius: 18px;
+        background: $page-background;
+        color: $_lighter-black;
+    }
+}
+
+.type-col {
+    font-family: 'Proxima Nova';
+}
+ 
+/***  Number of Profiles Popup ****/
+ 
+::ng-deep .slider-header {
+    border-bottom: none !important;
+    margin: 80px 0 0 !important;
+}
+ 
+::ng-deep .custom-modal {
+    background-color: $page-background !important;
+}
+ 
+.header-container {
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid $_grey-2;
+    gap: 5px;
+}
+ 
+.custom-header {
+    font-family: 'Proxima Nova';
+    color: $_light-black;
+    margin-bottom: 5px;
+}
+ 
+.header-details {
+    font-size: 14px;
+    color: $_light-black;
+    line-height: 1.6;
+    font-family: 'Proxima Nova';
+    gap: 32px
+}
+ 
+.header-details span,
+.header-details strong {
+    display: flex;
+    white-space: nowrap;
+    color: $_light-black;
+}
+ 
+.custom-table {
+    width: 100%;
+    overflow: hidden;
+    font-family: "Proxima Nova";
+    margin-bottom: 54px;
+}
+ 
+.table-header {
+    background-color: $_white;
+    padding: 8px 0;
+    margin-bottom: 20px;
+    .table-cell {
+        font-family: "Proxima Nova";
+        line-height: 20px;
+        text-transform: uppercase;
+    }
+}
+ 
+.table-cell {
+    flex: 1;
+    padding: 8px 52px;
+    text-align: left;
+    font-family: "Proxima Nova";
+    font-style: normal;
+}
+ 
+.table-row {
+    background-color: $_white;
+    padding: 8px 0;
+    transition: background 0.2s;
+    margin-bottom: 5px;
+    color: $_light-black;
+}

@@ -1,0 +1,1091 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { KfTarcCompareSkillsService } from './kftarc-skills-compare.service';
+
+import * as typeorm from 'typeorm';
+
+jest.mock('typeorm', () => {
+    const actual = jest.requireActual('typeorm');
+    return {
+        ...actual,
+        getManager: jest.fn(),
+        getConnection: jest.fn(),
+    };
+});
+
+describe('KfTarcCompareSkillsService', () => {
+    let compareSkillsService: KfTarcCompareSkillsService;
+    let module: TestingModule;
+
+    beforeAll(async () => {
+        module = await Test.createTestingModule({
+            providers: [KfTarcCompareSkillsService],
+        }).compile();
+
+        compareSkillsService = module.get<KfTarcCompareSkillsService>(KfTarcCompareSkillsService);
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    describe('compareSkills', () => {
+        const mockProfilesAndSkills: {
+            ClientJobID: number;
+            JobName: string;
+            ProfileType: string;
+            SourceTypeID: number;
+            SkillsName: string;
+        }[] = [
+            'Accounting',
+            'Analytical or scientific software',
+            'Customer relationship management (CRM) software',
+            'Enterprise resource planning (ERP)',
+            'Inventory management software',
+            'Procurement software',
+            'Project management software',
+        ]
+            .map(
+                (
+                    skill,
+                ): {
+                    ClientJobID: number;
+                    JobName: string;
+                    ProfileType: string;
+                    SourceTypeID: number;
+                    SkillsName: string;
+                }[] =>
+                    [
+                        {
+                            ClientJobID: 117269,
+                            JobName: 'Executive Secretaries and Executive Administrative Assistants I',
+                            ProfileType: 'CUSTOM_PROFILE',
+                        },
+                        {
+                            ClientJobID: 117270,
+                            JobName: 'Executive Secretaries and Executive Administrative Assistants II',
+                            ProfileType: 'BEST_IN_CLASS',
+                        },
+                        {
+                            ClientJobID: 117271,
+                            JobName: 'Executive Secretaries and Executive Administrative Assistants III',
+                            ProfileType: 'O_NET',
+                        },
+                        {
+                            ClientJobID: 117272,
+                            JobName: 'Executive Secretaries and Executive Administrative Assistants IV',
+                            ProfileType: 'CUSTOM_PROFILE',
+                        },
+                        {
+                            ClientJobID: 117273,
+                            JobName: 'Executive Secretaries and Executive Administrative Assistants V',
+                            ProfileType: 'BEST_IN_CLASS',
+                        },
+                        {
+                            ClientJobID: 117274,
+                            JobName: 'Executive Secretaries and Executive Administrative Assistants VI',
+                            ProfileType: 'O_NET',
+                        },
+                    ].map(job => ({ ...job, SourceTypeID: 3, SkillsName: skill })),
+            )
+            .reduce((acc, it) => acc.concat(it), []);
+        const details = [117269, 117270, 117271, 117272, 117273, 117274].map(id => {
+            const _id = id * 10;
+            return {
+                ClientJobID: id,
+                ParentJobID: _id,
+                ParentJobName: 'ParentJobName',
+                JobFamilyID: _id + 1,
+                JobFamilyName: 'JobFamilyName',
+                JobSubFamilyID: _id + 2,
+                JobSubFamilyName: 'JobSubFamilyName',
+                LevelCode: _id + 3,
+                LevelName: 'LevelName',
+                SubLevelCode: _id + 4,
+                SubLevelName: 'SubLevelName',
+            };
+        });
+        const query = {
+            loggedInUserClientId: 117269,
+            locale: 'en',
+        };
+        const body = {
+            jobTitle: 'Executive Secretaries and Executive Administrative Assistants IV',
+            skills: [
+                'Accounting',
+                'Customer relationship management (CRM) software',
+                'Project management software',
+                'Inventory management software',
+                'Enterprise resource planning (ERP)',
+                'Skill not from mock data',
+            ],
+        };
+
+        describe('if all details exists', () => {
+            beforeEach(() => {
+                jest.spyOn(compareSkillsService, 'getProfilesAndSkills').mockResolvedValueOnce(mockProfilesAndSkills);
+                jest.spyOn(compareSkillsService, 'getDetailsQuery').mockResolvedValueOnce(details);
+            });
+
+            test('should compare CUSTOM_PROFILE skills', async () => {
+                // Arrange
+                const expectedComparedSkills = {
+                    successProfiles: [
+                        { id: 117269, title: 'Executive Secretaries and Executive Administrative Assistants I', profileType: 'CUSTOM_PROFILE' },
+                    ].map(({ id, title, profileType }) => {
+                        const _id = id * 10;
+                        return {
+                            familyId: _id + 1,
+                            familyName: 'JobFamilyName',
+                            id,
+                            kfLevelMappings: {
+                                level: {
+                                    globalCode: _id + 4,
+                                    label: 'SubLevelName',
+                                },
+                                management: {
+                                    globalCode: _id + 3,
+                                    label: 'LevelName',
+                                },
+                            },
+                            parentJobDetails: {
+                                id: _id,
+                                title: 'ParentJobName',
+                            },
+                            profileType,
+                            skills: ['Skill not from mock data'],
+                            subFamilyId: _id + 2,
+                            subFamilyName: 'JobSubFamilyName',
+                            title,
+                        };
+                    }),
+                };
+
+                // Act
+                const comparedSkills = await compareSkillsService.compareSkills(query, { ...body, outputSPcount: 1 });
+
+                // Assert
+                expect(comparedSkills).toEqual(expectedComparedSkills);
+            });
+
+            test('should compare skills and compose CUSTOM_PROFILE and BEST_IN_CLASS', async () => {
+                // Arrange
+                const expectedComparedSkills = {
+                    successProfiles: [
+                        { id: 117269, title: 'Executive Secretaries and Executive Administrative Assistants I', profileType: 'CUSTOM_PROFILE' },
+                        { id: 117272, title: 'Executive Secretaries and Executive Administrative Assistants IV', profileType: 'CUSTOM_PROFILE' },
+                        { id: 117270, title: 'Executive Secretaries and Executive Administrative Assistants II', profileType: 'BEST_IN_CLASS' },
+                    ].map(({ id, title, profileType }) => {
+                        const _id = id * 10;
+                        return {
+                            familyId: _id + 1,
+                            familyName: 'JobFamilyName',
+                            id,
+                            kfLevelMappings: {
+                                level: {
+                                    globalCode: _id + 4,
+                                    label: 'SubLevelName',
+                                },
+                                management: {
+                                    globalCode: _id + 3,
+                                    label: 'LevelName',
+                                },
+                            },
+                            parentJobDetails: {
+                                id: _id,
+                                title: 'ParentJobName',
+                            },
+                            profileType,
+                            skills: ['Skill not from mock data'],
+                            subFamilyId: _id + 2,
+                            subFamilyName: 'JobSubFamilyName',
+                            title,
+                        };
+                    }),
+                };
+
+                // Act
+                const comparedSkills = await compareSkillsService.compareSkills(query, { ...body, outputSPcount: 3 });
+
+                // Assert
+                expect(comparedSkills).toEqual(expectedComparedSkills);
+            });
+
+            test('should compare skills and compose CUSTOM_PROFILE, BEST_IN_CLASS and other in result', async () => {
+                // Arrange
+                const expectedComparedSkills = {
+                    successProfiles: [
+                        { id: 117269, title: 'Executive Secretaries and Executive Administrative Assistants I', profileType: 'CUSTOM_PROFILE' },
+                        { id: 117272, title: 'Executive Secretaries and Executive Administrative Assistants IV', profileType: 'CUSTOM_PROFILE' },
+                        { id: 117270, title: 'Executive Secretaries and Executive Administrative Assistants II', profileType: 'BEST_IN_CLASS' },
+                        { id: 117273, title: 'Executive Secretaries and Executive Administrative Assistants V', profileType: 'BEST_IN_CLASS' },
+                        { id: 117271, title: 'Executive Secretaries and Executive Administrative Assistants III', profileType: 'O_NET' },
+                    ].map(({ id, title, profileType }) => {
+                        const _id = id * 10;
+                        return {
+                            familyId: _id + 1,
+                            familyName: 'JobFamilyName',
+                            id,
+                            kfLevelMappings: {
+                                level: {
+                                    globalCode: _id + 4,
+                                    label: 'SubLevelName',
+                                },
+                                management: {
+                                    globalCode: _id + 3,
+                                    label: 'LevelName',
+                                },
+                            },
+                            parentJobDetails: {
+                                id: _id,
+                                title: 'ParentJobName',
+                            },
+                            profileType,
+                            skills: ['Skill not from mock data'],
+                            subFamilyId: _id + 2,
+                            subFamilyName: 'JobSubFamilyName',
+                            title,
+                        };
+                    }),
+                };
+
+                // Act
+                const comparedSkills = await compareSkillsService.compareSkills(query, { ...body, outputSPcount: 5 });
+
+                // Assert
+                expect(comparedSkills).toEqual(expectedComparedSkills);
+            });
+        });
+
+        describe('if detail not found', () => {
+            beforeEach(() => {
+                jest.spyOn(compareSkillsService, 'getProfilesAndSkills').mockResolvedValueOnce(mockProfilesAndSkills);
+                jest.spyOn(compareSkillsService, 'getDetailsQuery').mockResolvedValueOnce([].concat(details.slice(0, 2), details.slice(3)));
+            });
+
+            test('should set undefined if there are no details to job', async () => {
+                // Arrange
+                const expectedComparedSkills = {
+                    successProfiles: [
+                        { id: 117269, title: 'Executive Secretaries and Executive Administrative Assistants I', profileType: 'CUSTOM_PROFILE' },
+                        { id: 117272, title: 'Executive Secretaries and Executive Administrative Assistants IV', profileType: 'CUSTOM_PROFILE' },
+                        { id: 117270, title: 'Executive Secretaries and Executive Administrative Assistants II', profileType: 'BEST_IN_CLASS' },
+                        { id: 117273, title: 'Executive Secretaries and Executive Administrative Assistants V', profileType: 'BEST_IN_CLASS' },
+                    ].map(({ id, title, profileType }) => {
+                        const _id = id * 10;
+                        return {
+                            familyId: _id + 1,
+                            familyName: 'JobFamilyName',
+                            id,
+                            kfLevelMappings: {
+                                level: {
+                                    globalCode: _id + 4,
+                                    label: 'SubLevelName',
+                                },
+                                management: {
+                                    globalCode: _id + 3,
+                                    label: 'LevelName',
+                                },
+                            },
+                            parentJobDetails: {
+                                id: _id,
+                                title: 'ParentJobName',
+                            },
+                            profileType,
+                            skills: ['Skill not from mock data'],
+                            subFamilyId: _id + 2,
+                            subFamilyName: 'JobSubFamilyName',
+                            title,
+                        };
+                    }),
+                };
+                expectedComparedSkills.successProfiles.push(undefined);
+
+                // Act
+                const comparedSkills = await compareSkillsService.compareSkills(query, { ...body, outputSPcount: 5 });
+
+                // Assert
+                expect(comparedSkills).toEqual(expectedComparedSkills);
+                jest.clearAllMocks();
+            });
+        });
+    });
+
+    describe('compareSkillsWithArya', () => {
+        test('should exclude skills', async () => {
+            // Arrange
+            const spSkills = 'skill2';
+            const aryaSkills = ['skill1', 'skill2', 'skill3'];
+            const expectedResult = ['skill1', 'skill3'];
+
+            // Act
+            const result = await compareSkillsService.compareSkillsWithArya(spSkills, aryaSkills);
+
+            // Assert
+            expect(result).toEqual(expectedResult);
+        });
+    });
+
+    describe('sortSkills', () => {
+        test('should sort by number of skills', async () => {
+            // Arrange
+            const data = [
+                {
+                    skills: [1, 2],
+                },
+                {
+                    skills: [1, 2, 3],
+                },
+            ];
+
+            // Act
+            const sorted = await compareSkillsService.sortSkills(data);
+
+            // Assert
+            expect(sorted).toEqual([
+                {
+                    skills: [1, 2, 3],
+                },
+                {
+                    skills: [1, 2],
+                },
+            ]);
+        });
+
+        test('should sort by title if skills lengths are equals', async () => {
+            // Arrange
+            const data = [
+                {
+                    title: 'd',
+                    skills: [4, 5],
+                },
+                {
+                    title: 'b',
+                    skills: [2],
+                },
+                {
+                    title: 'c',
+                    skills: [3],
+                },
+                {
+                    title: 'a',
+                    skills: [1],
+                },
+            ];
+
+            // Act
+            const sorted = await compareSkillsService.sortSkills(data);
+
+            // Assert
+            expect(sorted).toEqual([
+                {
+                    title: 'd',
+                    skills: [4, 5],
+                },
+                {
+                    title: 'a',
+                    skills: [1],
+                },
+                {
+                    title: 'b',
+                    skills: [2],
+                },
+                {
+                    title: 'c',
+                    skills: [3],
+                },
+            ]);
+        });
+    });
+
+    describe('getProfiles', () => {
+        test('should get profiles', async () => {
+            // Arrange
+            const mockProfilesAndSkills = [
+                {
+                    ClientJobID: 2,
+                    JobName: 'JobName2',
+                    ProfileType: 'ProfileType2',
+                    SkillsName: 'SkillsName6',
+                },
+                {
+                    ClientJobID: 1,
+                    JobName: 'JobName1',
+                    ProfileType: 'ProfileType1',
+                    SkillsName: 'SkillsName1',
+                },
+                {
+                    ClientJobID: 1,
+                    JobName: 'JobName1',
+                    ProfileType: 'ProfileType1',
+                    SkillsName: 'SkillsName2',
+                },
+                {
+                    ClientJobID: 2,
+                    JobName: 'JobName2',
+                    ProfileType: 'ProfileType2',
+                    SkillsName: 'SkillsName4',
+                },
+                {
+                    ClientJobID: 1,
+                    JobName: 'JobName1',
+                    ProfileType: 'ProfileType1',
+                    SkillsName: 'SkillsName3',
+                },
+
+                {
+                    ClientJobID: 2,
+                    JobName: 'JobName2',
+                    ProfileType: 'ProfileType2',
+                    SkillsName: 'SkillsName5',
+                },
+            ];
+            const expectedProfiles = [
+                {
+                    ClientJobID: 2,
+                    JobName: 'JobName2',
+                    ProfileType: 'ProfileType2',
+                    SkillsName: ['SkillsName6', 'SkillsName4', 'SkillsName5'],
+                },
+                {
+                    ClientJobID: 1,
+                    JobName: 'JobName1',
+                    ProfileType: 'ProfileType1',
+                    SkillsName: ['SkillsName1', 'SkillsName2', 'SkillsName3'],
+                },
+            ];
+            jest.spyOn(compareSkillsService, 'getProfilesAndSkills').mockResolvedValueOnce(mockProfilesAndSkills);
+
+            // Act
+            const profiles = await compareSkillsService.getProfiles({ loggedInUserClientId: 1, locale: 'en' }, { jobTitle: 'jobTitle' });
+
+            // Assert
+            expect(profiles).toEqual(expectedProfiles);
+        });
+    });
+
+    describe('getProfilesAndSkills', () => {
+        test('should call query with default location and totalJobNeeded if they not exist', async () => {
+            // Arrange
+            const query = jest.fn().mockReturnValue('');
+            const queryStr = `
+            exec GettopProfilesWithMissingSkills 1, '1', 'en', 50
+        `;
+            (typeorm as any).getManager.mockReturnValue({
+                query,
+            });
+
+            // Act
+            await compareSkillsService.getProfilesAndSkills(1, '1');
+
+            // Assert
+            expect(query).toHaveBeenCalledWith(queryStr);
+        });
+
+        test('should return data from DB', async () => {
+            // Arrange
+            const dataFromDB = 'dataFromDB';
+            const query = jest.fn().mockReturnValue(dataFromDB);
+            const queryStr = `
+            exec GettopProfilesWithMissingSkills 1, '1', 'ru', 1
+        `;
+            (typeorm as any).getManager.mockReturnValue({
+                query,
+            });
+
+            // Act
+            const profilesAndSkills = await compareSkillsService.getProfilesAndSkills(1, '1', 'ru', 1);
+
+            // Assert
+            expect(profilesAndSkills).toEqual(dataFromDB);
+            expect(query).toHaveBeenCalledWith(queryStr);
+        });
+    });
+
+    describe('getProfilesAndSkillsV1', () => {
+        test('should call query with default location and totalJobNeeded if they not exist', async () => {
+            // Arrange
+            const escapeQueryWithParametersMock = jest.fn().mockReturnValue(['query', 'params']);
+            (typeorm as any).getConnection = () => ({
+                driver: {
+                    escapeQueryWithParameters: escapeQueryWithParametersMock,
+                },
+            });
+
+            const query = jest.fn().mockReturnValue('');
+            (typeorm as any).getManager = () => ({
+                query,
+            });
+
+            // Act
+            await compareSkillsService.getProfilesAndSkillsV1('1', '1', 'skill1|skill2', 10);
+
+            // Assert
+            expect(escapeQueryWithParametersMock).toHaveBeenCalledWith(
+                expect.anything(),
+                {
+                    jobTitle: '1',
+                    clientId: 1,
+                    skills: 'skill1|skill2',
+                    locale: 'en',
+                    totalJobsNeeded: 50,
+                    outputSPcount: 10,
+                },
+                {},
+            );
+            expect(query).toHaveBeenCalled();
+        });
+
+        test('should return data from DB', async () => {
+            // Arrange
+            const escapeQueryWithParametersMock = jest.fn().mockReturnValue(['query', 'params']);
+            (typeorm as any).getConnection = () => ({
+                driver: {
+                    escapeQueryWithParameters: escapeQueryWithParametersMock,
+                },
+            });
+
+            const dataFromDB = 'dataFromDB';
+            const query = jest.fn().mockReturnValue(dataFromDB);
+            (typeorm as any).getManager = () => ({
+                query,
+            });
+
+            // Act
+            const profilesAndSkills = await compareSkillsService.getProfilesAndSkillsV1(1, '1', 'skill1|skill2', 10, 'ru', 1);
+
+            // Assert
+            expect(profilesAndSkills).toEqual(dataFromDB);
+            expect(escapeQueryWithParametersMock).toHaveBeenLastCalledWith(
+                expect.anything(),
+                {
+                    jobTitle: '1',
+                    clientId: 1,
+                    skills: 'skill1|skill2',
+                    locale: 'ru',
+                    totalJobsNeeded: 1,
+                    outputSPcount: 10,
+                },
+                {},
+            );
+            expect(query).toHaveBeenCalled();
+        });
+
+        test('should escape skills as XML string', async () => {
+            // Arrange
+            const escapeQueryWithParametersMock = jest.fn().mockReturnValue(['query', 'params']);
+            (typeorm as any).getConnection = () => ({
+                driver: {
+                    escapeQueryWithParameters: escapeQueryWithParametersMock,
+                },
+            });
+
+            const dataFromDB = 'dataFromDB';
+            const query = jest.fn().mockReturnValue(dataFromDB);
+            (typeorm as any).getManager = () => ({
+                query,
+            });
+
+            // Act
+            const profilesAndSkills = await compareSkillsService.getProfilesAndSkillsV1(1, '1', 'amp &| apos \'| quot "| lt <| gt > | &', 10, 'de', 1);
+
+            // Assert
+            expect(profilesAndSkills).toEqual(dataFromDB);
+            expect(escapeQueryWithParametersMock).toHaveBeenLastCalledWith(
+                expect.anything(),
+                {
+                    jobTitle: '1',
+                    clientId: 1,
+                    skills: 'amp &amp;| apos &apos;| quot &quot;| lt &lt;| gt &gt; | &amp;',
+                    locale: 'de',
+                    totalJobsNeeded: 1,
+                    outputSPcount: 10,
+                },
+                {},
+            );
+            expect(query).toHaveBeenCalled();
+        });
+    });
+
+    describe('getDetailsQuery', () => {
+        test('should return data from DB', async () => {
+            // Arrange
+            const dataFromDB = 'dataFromDB';
+            const query = jest.fn().mockReturnValue(dataFromDB);
+            const queryStr = `
+            Select CJ.ClientJobID, CJP.ClientJobID ParentJobID, CJP.JobName ParentJobName, JDM.JobFamilyID, JDM.JobFamilyName, JDM.JobSubFamilyID, JDM.JobSubFamilyName,
+                KM.KFManagementCode LevelCode, KM.KFManagementName LevelName, KFL.KFLevelCode SubLevelCode, KFL.KFLevelName SubLevelName
+            from (Select *, substring(JRTDetailID, 1, LEN(JRTDetailID)-4) JobSubFamilyID
+                    from ClientJob Where ClientJobID in (1,2,3,4,5)
+                ) CJ
+            Left join ClientJob CJP on CJP.ClientJobID = CJ.ParentClientJobID
+            INNER JOIN (Select JobFamilyID, JobFamilyName, JobSubFamilyID, JobSubFamilyName 
+                                    from Fn_GetFamilySubFamilyForClient (1,'en')
+                                ) JDM ON cj.JobSubFamilyID = jdm.JobSubFamilyID
+            Inner join KFLevel KFL on KFL.KFLevelID = CJ.KFLevelID
+            Inner join KFManagement KM on KFL.KFManagementID = KM.KFManagementID
+        `;
+            (typeorm as any).getManager = () => ({
+                query,
+            });
+
+            // Act
+            const profilesAndSkills = await compareSkillsService.getDetailsQuery(1, [1, 2, 3, 4, 5]);
+
+            // Assert
+            expect(profilesAndSkills).toEqual(dataFromDB);
+            expect(query).toHaveBeenCalledWith(queryStr);
+        });
+    });
+
+    describe('mapSkillsAndProfilesV1', () => {
+        const details = [81342, 81343, 81345].map(id => {
+            const _id = id * 10;
+            return {
+                ClientJobID: id,
+                ParentJobID: _id,
+                ParentJobName: 'ParentJobName',
+                JobFamilyID: _id + 1,
+                JobFamilyName: 'JobFamilyName',
+                JobSubFamilyID: _id + 2,
+                JobSubFamilyName: 'JobSubFamilyName',
+                LevelCode: _id + 3,
+                LevelName: 'LevelName',
+                SubLevelCode: _id + 4,
+                SubLevelName: 'SubLevelName',
+            };
+        });
+        const query = {
+            loggedInUserClientId: 117269,
+            locale: 'en',
+        };
+        const body = {
+            jobTitle: 'Executive Secretaries and Executive Administrative Assistants IV',
+            skills: [
+                'Accounting',
+                'Customer relationship management (CRM) software',
+                'Project management software',
+                'Inventory management software',
+                'Enterprise resource planning (ERP)',
+                'Skill not from mock data',
+            ],
+        };
+
+        beforeEach(() => {});
+
+        test('should throw an error if there are no profiles and skills', async () => {
+            // Arrange
+            jest.spyOn(compareSkillsService, 'getProfilesAndSkillsV1').mockResolvedValue([]);
+            let err;
+
+            // Act
+            try {
+                await compareSkillsService.mapSkillsAndProfilesV1(
+                    { loggedInUserClientId: 1, locale: 'en' },
+                    { jobTitle: 'jobTitle', skills: [], outputSPcount: 3 },
+                );
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeDefined();
+            expect(err.getStatus()).toEqual(204);
+            expect(err.getExceptionCode()).toEqual('RES.20000');
+        });
+
+        test('should map profiles and skills', async () => {
+            // Arrange
+            const expected = {
+                successProfiles: [
+                    {
+                        familyId: 813421,
+                        familyName: 'JobFamilyName',
+                        id: 81342,
+                        kfLevelMappings: {
+                            level: {
+                                globalCode: 813424,
+                                label: 'SubLevelName',
+                            },
+                            management: {
+                                globalCode: 813423,
+                                label: 'LevelName',
+                            },
+                        },
+                        parentJobDetails: {
+                            id: 813420,
+                            title: 'ParentJobName',
+                        },
+                        profileType: 'O_NET',
+                        skills: [
+                            'Accounting',
+                            'Analytical or scientific software',
+                            'Customer relationship management (CRM) software',
+                            'Enterprise resource planning (ERP)',
+                            'Inventory management software',
+                        ],
+                        subFamilyId: 813422,
+                        subFamilyName: 'JobSubFamilyName',
+                        title: 'Executive Secretaries and Executive Administrative Assistants I',
+                    },
+                    {
+                        familyId: 813431,
+                        familyName: 'JobFamilyName',
+                        id: 81343,
+                        kfLevelMappings: {
+                            level: {
+                                globalCode: 813434,
+                                label: 'SubLevelName',
+                            },
+                            management: {
+                                globalCode: 813433,
+                                label: 'LevelName',
+                            },
+                        },
+                        parentJobDetails: {
+                            id: 813430,
+                            title: 'ParentJobName',
+                        },
+                        profileType: 'O_NET',
+                        skills: [
+                            'Accounting',
+                            'Analytical or scientific software',
+                            'Customer relationship management (CRM) software',
+                            'Enterprise resource planning (ERP)',
+                            'Inventory management software',
+                        ],
+                        subFamilyId: 813432,
+                        subFamilyName: 'JobSubFamilyName',
+                        title: 'Executive Secretaries and Executive Administrative Assistants II',
+                    },
+                    {
+                        familyId: 813451,
+                        familyName: 'JobFamilyName',
+                        id: 81345,
+                        kfLevelMappings: {
+                            level: {
+                                globalCode: 813454,
+                                label: 'SubLevelName',
+                            },
+                            management: {
+                                globalCode: 813453,
+                                label: 'LevelName',
+                            },
+                        },
+                        parentJobDetails: {
+                            id: 813450,
+                            title: 'ParentJobName',
+                        },
+                        profileType: 'O_NET',
+                        skills: [
+                            'Accounting',
+                            'Analytical or scientific software',
+                            'Customer relationship management (CRM) software',
+                            'Enterprise resource planning (ERP)',
+                            'Inventory management software',
+                        ],
+                        subFamilyId: 813452,
+                        subFamilyName: 'JobSubFamilyName',
+                        title: 'Executive Secretaries and Executive Administrative Assistants IV',
+                    },
+                ],
+            };
+            jest.spyOn(compareSkillsService, 'getProfilesAndSkillsV1').mockResolvedValue([
+                {
+                    ClientJobID: 81342,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants I',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Accounting',
+                },
+                {
+                    ClientJobID: 81342,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants I',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Analytical or scientific software',
+                },
+                {
+                    ClientJobID: 81342,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants I',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Customer relationship management (CRM) software',
+                },
+                {
+                    ClientJobID: 81342,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants I',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Enterprise resource planning (ERP)',
+                },
+                {
+                    ClientJobID: 81342,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants I',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Inventory management software',
+                },
+                {
+                    ClientJobID: 81343,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants II',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Accounting',
+                },
+                {
+                    ClientJobID: 81343,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants II',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Analytical or scientific software',
+                },
+                {
+                    ClientJobID: 81343,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants II',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Customer relationship management (CRM) software',
+                },
+                {
+                    ClientJobID: 81343,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants II',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Enterprise resource planning (ERP)',
+                },
+                {
+                    ClientJobID: 81343,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants II',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Inventory management software',
+                },
+                {
+                    ClientJobID: 81345,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants IV',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Accounting',
+                },
+                {
+                    ClientJobID: 81345,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants IV',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Analytical or scientific software',
+                },
+                {
+                    ClientJobID: 81345,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants IV',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Customer relationship management (CRM) software',
+                },
+                {
+                    ClientJobID: 81345,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants IV',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Enterprise resource planning (ERP)',
+                },
+                {
+                    ClientJobID: 81345,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants IV',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Inventory management software',
+                },
+            ]);
+            jest.spyOn(compareSkillsService, 'getDetailsQuery').mockResolvedValueOnce(details);
+
+            // Act
+            const result = await compareSkillsService.mapSkillsAndProfilesV1(query, { ...body, outputSPcount: 3 });
+
+            // Assert
+            expect(result).toEqual(expected);
+        });
+
+        test('should set null if there are no suitable details', async () => {
+            // Arrange
+            const expected = {
+                successProfiles: [
+                    {
+                        familyId: 813421,
+                        familyName: 'JobFamilyName',
+                        id: 81342,
+                        kfLevelMappings: {
+                            level: {
+                                globalCode: 813424,
+                                label: 'SubLevelName',
+                            },
+                            management: {
+                                globalCode: 813423,
+                                label: 'LevelName',
+                            },
+                        },
+                        parentJobDetails: {
+                            id: 813420,
+                            title: 'ParentJobName',
+                        },
+                        profileType: 'O_NET',
+                        skills: [
+                            'Accounting',
+                            'Analytical or scientific software',
+                            'Customer relationship management (CRM) software',
+                            'Enterprise resource planning (ERP)',
+                            'Inventory management software',
+                        ],
+                        subFamilyId: 813422,
+                        subFamilyName: 'JobSubFamilyName',
+                        title: 'Executive Secretaries and Executive Administrative Assistants I',
+                    },
+                    undefined,
+                    {
+                        familyId: 813451,
+                        familyName: 'JobFamilyName',
+                        id: 81345,
+                        kfLevelMappings: {
+                            level: {
+                                globalCode: 813454,
+                                label: 'SubLevelName',
+                            },
+                            management: {
+                                globalCode: 813453,
+                                label: 'LevelName',
+                            },
+                        },
+                        parentJobDetails: {
+                            id: 813450,
+                            title: 'ParentJobName',
+                        },
+                        profileType: 'O_NET',
+                        skills: [
+                            'Accounting',
+                            'Analytical or scientific software',
+                            'Customer relationship management (CRM) software',
+                            'Enterprise resource planning (ERP)',
+                            'Inventory management software',
+                        ],
+                        subFamilyId: 813452,
+                        subFamilyName: 'JobSubFamilyName',
+                        title: 'Executive Secretaries and Executive Administrative Assistants IV',
+                    },
+                ],
+            };
+            jest.spyOn(compareSkillsService, 'getProfilesAndSkillsV1').mockResolvedValue([
+                {
+                    ClientJobID: 81342,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants I',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Accounting',
+                },
+                {
+                    ClientJobID: 81342,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants I',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Analytical or scientific software',
+                },
+                {
+                    ClientJobID: 81342,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants I',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Customer relationship management (CRM) software',
+                },
+                {
+                    ClientJobID: 81342,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants I',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Enterprise resource planning (ERP)',
+                },
+                {
+                    ClientJobID: 81342,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants I',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Inventory management software',
+                },
+                {
+                    ClientJobID: 81343,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants II',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Accounting',
+                },
+                {
+                    ClientJobID: 81343,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants II',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Analytical or scientific software',
+                },
+                {
+                    ClientJobID: 81343,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants II',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Customer relationship management (CRM) software',
+                },
+                {
+                    ClientJobID: 81343,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants II',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Enterprise resource planning (ERP)',
+                },
+                {
+                    ClientJobID: 81343,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants II',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Inventory management software',
+                },
+                {
+                    ClientJobID: 81345,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants IV',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Accounting',
+                },
+                {
+                    ClientJobID: 81345,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants IV',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Analytical or scientific software',
+                },
+                {
+                    ClientJobID: 81345,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants IV',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Customer relationship management (CRM) software',
+                },
+                {
+                    ClientJobID: 81345,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants IV',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Enterprise resource planning (ERP)',
+                },
+                {
+                    ClientJobID: 81345,
+                    JobName: 'Executive Secretaries and Executive Administrative Assistants IV',
+                    ProfileType: 'O_NET',
+                    SourceTypeId: 3,
+                    SkillsName: 'Inventory management software',
+                },
+            ]);
+            jest.spyOn(compareSkillsService, 'getDetailsQuery').mockResolvedValueOnce([].concat(details.slice(0, 1), details.slice(2)));
+
+            // Act
+            const result = await compareSkillsService.mapSkillsAndProfilesV1(query, { ...body, outputSPcount: 3 });
+
+            // Assert
+            expect(result).toEqual(expected);
+        });
+    });
+});

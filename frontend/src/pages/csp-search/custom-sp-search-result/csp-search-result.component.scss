@@ -1,0 +1,107 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/mixins.scss';
+
+.noresults {
+    margin-top: -$size-16;
+}
+
+th {
+    padding: $size-16;
+}
+
+::ng-deep .context-menu-overlay-container {
+    .item:hover {
+        background-color: $dropdown-hover;
+    }
+}
+
+.context-menu-border {
+    border: 1px solid $silver-03;
+}
+
+.color-dark {
+    color: #212529;
+}
+
+.mb-450 {
+    @media (max-height: 1000px) { 
+        margin-bottom: 450px;
+    }
+}
+
+.disabled {
+    cursor: not-allowed!important;
+    color: $grey;
+}
+
+:host ::ng-deep table {
+    .cdk-column-name {
+        max-width: 45ch;
+        min-width: 30ch;
+    }
+    .cdk-column-grade {
+        max-width: 35ch;
+        .no-wrap {
+            white-space: nowrap;
+        }
+    }
+    .cdk-column-level {
+        min-width: 11ch;
+    }
+    .cdk-column-date {
+        max-width: 25ch;
+    }
+    .cdk-column-status .kf-sort-header-content:before {
+        display: none;
+    }
+}
+
+
+.check-container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    gap: 16px
+}
+
+
+.notification {
+    margin-top: 10px;
+    width: 32%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: white;
+    padding: 0px 16px;
+    font-family: "Proxima Nova", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+    position: relative;
+  }
+  
+  .icon {
+    color: #ffa000; /* Orange color for the icon */
+    font-weight: bold;
+    font-size: 18px;
+    margin-right: 10px;
+  }
+  
+  .message {
+    flex: 1;
+    font-size: 13px;
+    color: #333;
+  }
+  
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 40px;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .warning-icon{
+    margin-right: 10px;
+  }

@@ -1,0 +1,58 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { SchedulerService } from './scheduler.service';
+
+const queryMock = jest.fn();
+const ormStreamMock = jest.fn();
+jest.mock('typeorm', () => {
+    const actual = jest.requireActual('typeorm');
+    return {
+        ...actual,
+        __esModule: true,
+        getConnection: jest.fn(() => {
+            return { createQueryRunner: ()=>({ stream: () => ormStreamMock() }) };
+        }),
+        getManager: jest.fn(() => {
+            return { query: () => queryMock() };
+        }),
+    };
+});
+
+
+describe('SchedulerService', () => {
+    let module: TestingModule;
+    let schedulerService: SchedulerService;
+
+    beforeAll(async () => {
+        module = await Test.createTestingModule({
+            providers: [
+                SchedulerService
+            ],
+        }).compile();
+
+        schedulerService = module.get(SchedulerService);
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    describe('publishBulkBCsToClientCustomSPs', () => {
+        test('should execute publishBulkBCsToClientCustomSPs stored proc succesfully', async () => {
+            // Arrange
+            queryMock.mockResolvedValueOnce([]);
+            //Act
+            await schedulerService.publishBulkBCsToClientCustomSPs();
+            // Assert
+            expect(queryMock).toBeCalledTimes(1);
+        });
+
+        test('should catch ExceptionCode from stored proc response', async () => {
+            // Arrange
+            queryMock.mockImplementationOnce(()=> {throw new Error()});
+            //Act
+            const resultF = schedulerService.publishBulkBCsToClientCustomSPs();
+            // Assert
+            await expect(resultF).rejects.toThrowError(HttpException);
+        });
+    });
+});

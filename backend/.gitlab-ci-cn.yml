@@ -1,0 +1,56 @@
+variables:
+  NODE_VERSION: 22.11.0
+default:
+  tags:
+    - kfhub-nest-build
+  before_script:
+    - export TERM=xterm
+  retry:
+    max: 2
+    when:
+      - always
+      - data_integrity_failure
+      - scheduler_failure
+      - stale_schedule
+      - stuck_or_timeout_failure
+      - script_failure
+      - unknown_failure
+stages:
+  - prebuild
+  - deploy_CN
+prebuild:
+  stage: prebuild
+  rules:
+    - if: $CI_COMMIT_TAG =~ /-beijing--deployment--\d{14}$/
+      when: on_success
+  script:
+    - touch node_modules
+    - rm -rf node_modules
+    - cp -R prebuild/node_modules ./node_modules
+    - cd node_modules && for f in .*.tar.gz *.tar.gz; do tar xzf "$f"; rm "$f"; done
+  artifacts:
+    paths:
+      - ./node_modules
+      - ./prebuild
+    expire_in: 8 week
+deploy_CN:
+  stage: deploy_CN
+  rules:
+    - if: $CI_COMMIT_TAG =~ /-beijing--deployment--\d{14}$/
+      when: manual
+  script:
+    - |
+      npm run build
+      npm run configure prodBEIJING
+      cp -r node_modules release
+      tar -czf release.tar.gz release
+      echo $PROD_CN_IP01
+      echo $PROD_CN_IP02
+      for server in $PROD_CN_IP01 $PROD_CN_IP02; do
+        scp -r release.tar.gz ubuntu@$server:/home/ubuntu/build/kfhub_tarc_svc_nest/
+        ssh ubuntu@$server "cd /home/ubuntu/build/kfhub_tarc_svc_nest/; if [ -d release ]; then mv release "release-$(date -u +%y%m%d-%H%M%S)"; fi"
+        ssh ubuntu@$server "cd /home/ubuntu/build/kfhub_tarc_svc_nest/; find . -maxdepth 1 -name 'release-*' -mtime +7 | sort -r | tail -n +4 | xargs -n1 | xargs -I% rm -rf %"
+        ssh ubuntu@$server "cd /home/ubuntu/build/kfhub_tarc_svc_nest/; tar -xzf release.tar.gz"
+        ssh ubuntu@$server "cp -R /home/ubuntu/certs /home/ubuntu/build/kfhub_tarc_svc_nest/release"
+        ssh ubuntu@$server "sudo pm2 start /home/ubuntu/build/ecosystem.config.js --only kfhub_tarc_svc_nest"
+      done

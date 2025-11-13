@@ -1,0 +1,12 @@
+<div class="level-labels">
+    <div class="level-low body-text fw-semibold">{{ data.lowLevel | number: '.0' }}</div>
+    <div class="level-average body-text fw-semibold">{{ data.averageLevel | number: '.0' }}</div>
+    <div class="level-high body-text fw-semibold">{{ data.highLevel | number: '.0' }}</div>
+</div>
+<div class="graph-wrap">
+    <div class="graph">
+        <div class="level-average" [ngStyle]="{background: averageColor}"></div>
+    </div>
+    <div class="axis"></div>
+</div>
+<div class="axis-label body-text fw-semibold">{{ data.label | translate }}</div>

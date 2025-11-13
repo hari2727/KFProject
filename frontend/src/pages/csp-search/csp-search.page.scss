@@ -1,0 +1,317 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/mixins.scss';
+
+$footer-height: 46px;
+
+::ng-deep kf-page {
+	min-height: calc(100vh - #{$footer-height}) !important;
+}
+
+.header {
+	font-size: 34px;
+	line-height: normal;
+	letter-spacing: 0.51px;
+}
+
+.pp-modal {
+  .pp-modal-body {
+    .pp-checkbox {
+      display: inline-block;
+    }
+    a {
+      color: $blue !important;
+    }
+  }
+}
+
+.pp-link {
+  color: $blue;
+}
+
+.project-type {
+	::ng-deep .headers {
+		padding-bottom: $default-padding;
+
+		.header {
+			border-right: 1px solid rgba(0, 0, 0, 0.08);
+			padding-right: 30px;
+		}
+
+		.header:last-of-type {
+			border-right: 0;
+		}
+	}
+
+	::ng-deep .project-type-panel {
+
+		kf-radio-button {
+			label, span {
+				font-size: $body-size;
+			}
+
+			.radio-text {
+				margin-left: $default-margin;
+			}
+		}
+	}
+	.product {
+		margin-bottom: $small-margin;
+		&:last-of-type {
+		  margin-bottom: 0;
+		}
+	}
+
+
+}
+
+.text-primary {
+    font-size: 14px;
+    font-family: 'proxima nova';
+    text-underline-offset: 1px;
+    color:#007bc7;
+    font-weight: 600;
+ 
+}
+
+// .custom-dropDown{
+// 	display: flex;
+// 	justify-content: end;
+// }
+
+.custom-button{
+	border: solid 1px $silver;
+	outline: none;
+	span {
+		text-overflow: ellipsis;
+		&.text-placeholder {
+			height: 20px;
+		}
+	}
+	.filter-icon {
+		margin: 0 8px;
+	}
+}
+
+.custom-hover:hover {
+    background-color: #9fd1f0; /* Blue color */
+    color: white;
+}
+
+
+.custom-dropDown{
+	display: flex;
+	align-items: center; // Align buttons vertically
+	justify-content: space-between; // Evenly distribute space
+	gap: 16px; // Add space between buttons
+}
+
+.custom-button {
+	border: solid 1px $silver;
+	outline: none;
+	display: flex;
+	align-items: center; // Ensure text and icon are vertically aligned
+	padding: 4px 16px; // Adjust padding for consistent spacing
+	font-size: 14px;
+	font-family: 'proxima nova';
+	justify-content: space-around !important;
+    align-items: baseline !important;
+}
+
+.download-sign {
+	margin-right: 8px; // Adjust spacing between text and icon
+	color: #000;
+}
+
+.flex-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16px; // Add space below the buttons
+}
+
+.text-right {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 16px; // Adjust space between buttons
+}
+
+/* Flex container settings */
+.flex {
+    display: flex;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.flex-row {
+    flex-direction: row;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.items-start {
+    align-items: flex-start;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.items-end {
+    align-items: flex-end;
+}
+
+/* Margin and spacing utilities */
+.mt-0 {
+    margin-top: 0;
+}
+
+.mb-0 {
+    margin-bottom: 0;
+}
+
+.mb-4 {
+    margin-bottom: 16px;
+}
+
+.mb-12 {
+    margin-bottom: 48px;
+}
+
+.space-x-4 {
+    gap: 16px;
+}
+
+.space-y-2 {
+    gap: 8px;
+}
+
+/* Text and button styles */
+.header {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.sub-header {
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.text-primary {
+	font-size: 14px;
+	font-family: 'proxima nova';
+	text-underline-offset: 1px;
+	color: #000;
+	font-weight: 400;
+}
+
+.btn {
+    background-color: white;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.btn-outline {
+    background-color: white;
+}
+
+.pc-pointer {
+    cursor: pointer;
+}
+
+.kf-class {
+	justify-content: end;
+}
+
+.mouseaction{
+	cursor: pointer;
+}
+
+.bottom-padding {
+	padding-bottom: 20px;
+}
+
+.m-top{
+	margin-top: 20px;
+}
+
+.border-button {
+	border: 0.5px solid rgba(0,0,0,.08)
+}
+
+.input-container {
+	width: 374px;
+}
+
+  .btn-outline {
+	background-color: #fff;
+	border: 1px solid #007BC7;
+	color: #007BC7;
+  }
+  
+  .btn-outline:hover {
+	background-color: #e6f4ff;
+  }
+
+
+  /* Separator styling */
+  .separator {
+	width: 1px;
+	height: 24px;
+	background-color: #ccc;
+	margin-right: 11px;
+  }
+
+  .custom-export{
+	background: none; /* Prevent background change on hover */
+	color: inherit; /* Ensure text color does not change */
+	border-color: inherit; /* Prevent border color change */
+	box-shadow: none; /* Remove any shadow effect */
+	cursor: pointer; /* Keep the cursor unchanged */
+	border: none;
+  }
+
+  .text-disabled {
+	font-weight: 600;
+	color: #757575;
+	text-decoration: underline; /* Light gray for disabled state */
+	cursor: default;
+  }
+  
+  .text-normal {
+	font-weight: 600;
+	color: #007BC7;
+	text-decoration: underline /* Blue for enabled state */
+  }
+
+  button:disabled {
+	cursor: default; /* Ensures the cursor reflects a disabled state */
+  }
+  
+  .disabled, .pc-pointer[disabled] {
+	cursor: default !important; /* Ensures pointer behavior is overridden */
+  }
+  
+  .publish-center {
+	border: none;
+	font-family: "Proxima Nova";
+	font-size: 14px;
+	font-weight: 700;
+	line-height: 18px;
+	text-decoration-line: underline;
+	color:#757575;
+	}
+
+	.disabled-btn {
+		pointer-events: none;
+	}
+
+	.enabled-btn {
+		color: #007DA4;
+		cursor: pointer;
+	}

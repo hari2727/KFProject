@@ -1,0 +1,31 @@
+<div class="search d-flex flex-ai-center flex-jc-between p-12 w-100 bg-white">
+    <kf-input type="search" [(ngModel)]="search" (ngModelChange)="onChangeSearch($event)" class="search w-100"
+        [placeholder]="'lib.searchPlaceholder' | translate"></kf-input>
+</div>
+<thcl-accordion [multi]="true">
+    <ng-container *ngFor="let item of items; let i = index; let last = last" [class.border-bottom]="!last">
+        <thcl-expansion-panel #panel="thclExpansionPanel" [optionalData]="item" *ngIf="item.visible">
+            <thcl-expansion-panel-header class="item" [class.selected]="item.checked">
+                <div class="p-12 w-100 d-flex fs-body">
+                    <kf-checkbox thcl-expansion-panel-toggle-exclude class="checkbox pr-12" [(ngModel)]="item.checked"
+                        (ngModelChange)="onChangeItem(item, $event, panel)">
+                    </kf-checkbox>
+                    <span class="d-flex flex-jc-between w-100 text-break">
+                        {{item.label}}
+                    </span>
+                </div>
+            </thcl-expansion-panel-header>
+
+            <div class="items-container">
+                <ng-container *ngFor="let subItem of item.value; let i = index">
+                    <div *ngIf="subItem.visible || item.visible"
+                        (click)="subItem.checked = !subItem.checked; onChangeSubItem(item, i, subItem.checked)"
+                        class="item p-12 pl-24 d-flex flex-ai-center pc-pointer" [class.selected]="item.checked">
+                        <kf-checkbox [ngModel]="subItem.checked" class="mr-16"></kf-checkbox>
+                        <span class="wrapped body-text text-break w-100">{{ subItem.label }}</span>
+                    </div>
+                </ng-container>
+            </div>
+        </thcl-expansion-panel>
+    </ng-container>
+</thcl-accordion>

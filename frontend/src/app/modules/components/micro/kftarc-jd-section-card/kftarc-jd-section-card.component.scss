@@ -1,0 +1,36 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+
+.title {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    position: relative;
+
+    h4 {
+        margin: 0;
+    }
+
+    a {
+        margin: 0 16px;
+    }
+
+    .toggle {
+        align-items: center;
+        cursor: pointer;
+        display: flex;
+        flex-direction: row;
+        user-select: none;
+        flex: 0 0 auto;
+        position: absolute;
+        right: 0;
+    }
+
+    .icon {
+        margin: 8px;
+    }
+}
+
+.content {
+    padding-top: $card-padding;
+}

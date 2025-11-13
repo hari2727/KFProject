@@ -1,0 +1,56 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { FrameworkService } from './framework.service';
+import { FrameworkRepository } from './framework.repository';
+import { LanguageTranslationsMocK, ResponseWithClusterName, ResponseWithOutClusterName, TranslationsQuery } from './framework.service.fixtures';
+
+describe('FrameworkService', () => {
+    let service: FrameworkService;
+    let repo: FrameworkRepository;
+
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [FrameworkService, FrameworkRepository],
+        }).compile();
+
+        service = module.get<FrameworkService>(FrameworkService);
+        repo = module.get<FrameworkRepository>(FrameworkRepository);
+    });
+
+    it('should be defined', () => {
+        expect(service).toBeDefined();
+    });
+
+    describe('getLanguageCompetencies', () => {
+        test('should return expected response', async () => {
+            jest.spyOn(repo, 'getLanguageTranslations').mockResolvedValueOnce(LanguageTranslationsMocK);
+
+            const result = await service.getLanguageCompetencies(TranslationsQuery);
+            expect(result).toEqual(ResponseWithClusterName );
+        });
+
+        test('should return expected response without clusterName', async () => {
+            TranslationsQuery.clusterId = null;
+            jest.spyOn(repo, 'getLanguageTranslations').mockResolvedValueOnce(LanguageTranslationsMocK);
+            const result = await service.getLanguageCompetencies(TranslationsQuery);
+            expect(result).toEqual(ResponseWithOutClusterName );
+        });
+
+        test('should throw error', async () => {
+            jest.spyOn(repo, 'getLanguageTranslations').mockRejectedValueOnce(new Error('Error'));
+            try {
+                await service.getLanguageCompetencies(TranslationsQuery);
+            } catch (err) {
+                expect(err.message).toEqual('Error in getLanguageCompetencies');
+            }
+        });
+        test('should throw error for missing required parameters', async () => {
+            try {
+                TranslationsQuery.factorId = null;
+                jest.spyOn(repo, 'getLanguageTranslations').mockResolvedValue(LanguageTranslationsMocK);
+                await service.getLanguageCompetencies(TranslationsQuery);
+            } catch (err) {
+                expect(err.message).toEqual('Missing required parameters');
+            }
+        });
+    });
+});

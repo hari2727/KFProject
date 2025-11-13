@@ -1,0 +1,127 @@
+import { QueryValues, RequestType } from './kfhub-critical-experience.interface';
+import { Util } from './kfhub-critical-experience.util';
+
+describe('Util', () => {
+    describe('reqType', () => {
+        // Act
+        Util.reqType = RequestType.POST;
+
+        //Assert
+        expect(Util.reqType).toEqual(RequestType.POST);
+    });
+
+    describe('checkQueryParams', () => {
+        test(`should return mockData true if outputType ${QueryValues.OUTPUTTYPE} and type ${QueryValues.TYPE}`, () => {
+            // Act/Assert
+            expect(
+                Util.checkQueryParams({
+                    outputType: QueryValues.OUTPUTTYPE,
+                    type: QueryValues.TYPE,
+                }).mockData,
+            ).toEqual(true);
+        });
+
+        test(`should return mockData false if outputType not ${QueryValues.OUTPUTTYPE}`, () => {
+            // Act/Assert
+            expect(
+                Util.checkQueryParams({
+                    outputType: QueryValues.TYPE,
+                }).mockData,
+            ).toEqual(false);
+        });
+
+        test(`should return mockData false if type not ${QueryValues.TYPE}`, () => {
+            // Act/Assert
+            expect(
+                Util.checkQueryParams({
+                    outputType: QueryValues.OUTPUTTYPE,
+                    type: QueryValues.OUTPUTTYPE,
+                }).mockData,
+            ).toEqual(false);
+        });
+
+        test('should return experience true if successProfileId length does not 0', () => {
+            // Act/Assert
+            expect(
+                Util.checkQueryParams({
+                    outputType: QueryValues.OUTPUTTYPE,
+                    type: QueryValues.TYPE,
+                    successProfileId: [1, 2, 3],
+                }).experience,
+            ).toEqual(true);
+        });
+
+        test('should return experience false if successProfileId length is 0', () => {
+            // Act/Assert
+            expect(
+                Util.checkQueryParams({
+                    outputType: QueryValues.OUTPUTTYPE,
+                    type: QueryValues.TYPE,
+                    successProfileId: [],
+                }).experience,
+            ).toEqual(false);
+        });
+    });
+
+    describe('templateValidationMessages', () => {
+        test('should return undefined if there is no errors', () => {
+            // Act/Assert
+            expect(Util.templateValidationMessages([])).toBeUndefined();
+        });
+
+        test('should return parent messages', () => {
+            // Arrange
+            const errors = [
+                { constraints: { a: 'a1', b: 'b1' }, property: 'p1', value: 'v1' },
+                { constraints: { a: 'a2', b: 'b2' }, property: 'p2', value: 'v2' },
+            ];
+            const messages = [
+                { value: 'v1', property: 'p1', constraint: 'a', message: 'a1' },
+                { value: 'v2', property: 'p2', constraint: 'a', message: 'a2' },
+            ];
+
+            // Act/Assert
+            expect(Util.templateValidationMessages(errors)).toEqual(messages);
+        });
+
+        test("should return children's messages", () => {
+            const errors = [
+                {
+                    children: [
+                        { constraints: { a: 'ca1', b: 'cb1' }, property: 'cp1', value: 'cv1' },
+                        { constraints: { a: 'ca2', b: 'cb2' }, property: 'cp2', value: 'cv2' },
+                    ],
+                },
+            ];
+            const messages = [
+                { value: 'cv1', property: 'cp1', constraint: 'a', message: 'ca1' },
+                { value: 'cv2', property: 'cp2', constraint: 'a', message: 'ca2' },
+            ];
+
+            // Act/Assert
+            expect(Util.templateValidationMessages(errors)).toEqual(messages);
+        });
+
+        test("should return parent and children's messages", () => {
+            const errors = [
+                {
+                    constraints: { a: 'a1', b: 'b1' },
+                    property: 'p1',
+                    value: 'v1',
+                    children: [
+                        { constraints: { a: 'ca1', b: 'cb1' }, property: 'cp1', value: 'cv1' },
+                        { constraints: { a: 'ca2', b: 'cb2' }, property: 'cp2', value: 'cv2' },
+                    ],
+                },
+            ];
+            const messages = [
+                { value: 'v1', property: 'p1', constraint: 'a', message: 'a1' },
+                { value: 'cv1', property: 'cp1', constraint: 'a', message: 'ca1' },
+                { value: 'cv2', property: 'cp2', constraint: 'a', message: 'ca2' },
+            ];
+
+            // Act/Assert
+            expect(Util.templateValidationMessages(errors)).toEqual(messages);
+        });
+    });
+});

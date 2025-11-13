@@ -1,0 +1,370 @@
+{
+    "roles": [
+        {
+            "title": "02.25.2021 CL daily smoke edit",
+            "jobFamily": "EG",
+            "jobSubFamily": "EGA",
+            "jobRoleTypeId": "EGA01",
+            "familyName": "Engineering",
+            "subFamilyName": "General Engineers",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92624",
+            "grade": {
+                "standardHayGrade": "14"
+            },
+            "expandable": false
+        },
+        {
+            "title": "02.25.2021 CL daily smoke loc test job profiles",
+            "jobFamily": "HE",
+            "jobSubFamily": "HEA",
+            "jobRoleTypeId": "HEA01",
+            "familyName": "Health and Environment",
+            "subFamilyName": "Environmental Health",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92625",
+            "grade": {
+                "standardHayGrade": "14"
+            },
+            "expandable": false
+        },
+        {
+            "title": "02.25.2021 CL daily smoke no edit",
+            "jobFamily": "EG",
+            "jobSubFamily": "EGA",
+            "jobRoleTypeId": "EGA01",
+            "familyName": "Engineering",
+            "subFamilyName": "General Engineers",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92623",
+            "grade": {
+                "standardHayGrade": "14"
+            },
+            "expandable": false
+        },
+        {
+            "title": "03.05.2021 KFA added job from BIC",
+            "jobFamily": "HE",
+            "jobSubFamily": "HEA",
+            "jobRoleTypeId": "HEA01",
+            "familyName": "Health and Environment",
+            "subFamilyName": "Environmental Health",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92792",
+            "grade": {
+                "standardHayGrade": "13"
+            },
+            "expandable": false
+        },
+        {
+            "title": "03.22.2021 KFA smoke cxo job add",
+            "jobFamily": "FA",
+            "jobSubFamily": "FAA",
+            "jobRoleTypeId": "FAA05",
+            "familyName": "Finance and Accounting",
+            "subFamilyName": "Accounting and Controlling",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92664",
+            "grade": {
+                "standardHayGrade": "23"
+            },
+            "expandable": false
+        },
+        {
+            "title": "03.22.2021 KFA smoke job created and edited",
+            "jobFamily": "F0138128",
+            "jobSubFamily": "S0138128002",
+            "jobRoleTypeId": "S013812800200",
+            "familyName": "02.25.2021 CL daily smoke added func",
+            "subFamilyName": "02.25.2021 CL daily smoke subf 3",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92662",
+            "grade": {
+                "standardHayGrade": "8"
+            },
+            "expandable": false
+        },
+        {
+            "title": "03.22.2021 KFA smoke job created SAVE AS",
+            "jobFamily": "F0138128",
+            "jobSubFamily": "S0138128002",
+            "jobRoleTypeId": "S013812800200",
+            "familyName": "02.25.2021 CL daily smoke added func",
+            "subFamilyName": "02.25.2021 CL daily smoke subf 3",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92679",
+            "grade": {
+                "standardHayGrade": "14"
+            },
+            "expandable": false
+        },
+        {
+            "title": "04.16.2021 WU-TH edit",
+            "jobFamily": "EG",
+            "jobSubFamily": "EGA",
+            "jobRoleTypeId": "EGA01",
+            "familyName": "Engineering",
+            "subFamilyName": "General Engineers",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92727",
+            "grade": {
+                "standardHayGrade": "14"
+            },
+            "expandable": false
+        },
+        {
+            "title": "04.16.2021 WU-TH KA job edit",
+            "jobFamily": "AS",
+            "jobSubFamily": "ASB",
+            "jobRoleTypeId": "ASB00",
+            "familyName": "Administration / Support / Service",
+            "subFamilyName": "Secretarial",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92729",
+            "grade": {
+                "standardHayGrade": "14"
+            },
+            "expandable": false
+        },
+        {
+            "title": "04.16.2021 WU-TH no edit",
+            "jobFamily": "EG",
+            "jobSubFamily": "EGA",
+            "jobRoleTypeId": "EGA01",
+            "familyName": "Engineering",
+            "subFamilyName": "General Engineers",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92726",
+            "grade": {
+                "standardHayGrade": "14"
+            },
+            "expandable": false
+        },
+        {
+            "title": "09.04.2021 KA smoke",
+            "jobFamily": "HE",
+            "jobSubFamily": "HEA",
+            "jobRoleTypeId": "HEA01",
+            "familyName": "Health and Environment",
+            "subFamilyName": "Environmental Health",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92715",
+            "grade": {
+                "standardHayGrade": "14"
+            },
+            "expandable": false
+        },
+        {
+            "title": "09.04.2021 KA smoke COPY and edit",
+            "jobFamily": "F0138124",
+            "jobSubFamily": "S0138124002",
+            "jobRoleTypeId": "S013812400200",
+            "familyName": "VERY_LONG_TEXT_FUNCTION_TO_PROVE_WRAPPING_NOT_WORK",
+            "subFamilyName": "VERY_LONG_TEXT_FUNCTION_TO_PROVE_WRAPPING_NOT_WORK_2",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92716",
+            "grade": {
+                "standardHayGrade": "22"
+            },
+            "expandable": false
+        },
+        {
+            "title": "12345",
+            "jobFamily": "AS",
+            "jobSubFamily": "ASA",
+            "jobRoleTypeId": "ASA03",
+            "familyName": "Administration / Support / Service",
+            "subFamilyName": "Clerical Services",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92707",
+            "grade": {
+                "standardHayGrade": "14"
+            },
+            "expandable": false
+        },
+        {
+            "title": "24.02.2021 CL weekly smoke edited",
+            "jobFamily": "EG",
+            "jobSubFamily": "EGA",
+            "jobRoleTypeId": "EGA01",
+            "familyName": "Engineering",
+            "subFamilyName": "General Engineers",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92598",
+            "grade": {
+                "standardHayGrade": "14"
+            },
+            "expandable": false
+        },
+        {
+            "title": "24.02.2021 CL weekly smoke no edit",
+            "jobFamily": "EG",
+            "jobSubFamily": "EGA",
+            "jobRoleTypeId": "EGA01",
+            "familyName": "Engineering",
+            "subFamilyName": "General Engineers",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92597",
+            "grade": {
+                "standardHayGrade": "14"
+            },
+            "expandable": false
+        },
+        {
+            "title": "Academic Faculty Member/Physician",
+            "jobFamily": "HY",
+            "jobSubFamily": "HYB",
+            "jobRoleTypeId": "HYB01",
+            "familyName": "Physician Services",
+            "subFamilyName": "Physician Practice Group",
+            "profileType": "BEST_IN_CLASS",
+            "grade": {
+                "min": "18",
+                "max": "23"
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "title": "Academic Faculty Member/Physician I",
+                    "jobFamily": "HY",
+                    "jobSubFamily": "HYB",
+                    "jobRoleTypeId": "HYB01",
+                    "familyName": "Physician Services",
+                    "subFamilyName": "Physician Practice Group",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "90252",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "18"
+                },
+                {
+                    "title": "Academic Faculty Member/Physician II",
+                    "jobFamily": "HY",
+                    "jobSubFamily": "HYB",
+                    "jobRoleTypeId": "HYB01",
+                    "familyName": "Physician Services",
+                    "subFamilyName": "Physician Practice Group",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "90253",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "19"
+                },
+                {
+                    "title": "Academic Faculty Member/Physician III",
+                    "jobFamily": "HY",
+                    "jobSubFamily": "HYB",
+                    "jobRoleTypeId": "HYB01",
+                    "familyName": "Physician Services",
+                    "subFamilyName": "Physician Practice Group",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "90254",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "20"
+                },
+                {
+                    "title": "Academic Faculty Member/Physician IV",
+                    "jobFamily": "HY",
+                    "jobSubFamily": "HYB",
+                    "jobRoleTypeId": "HYB01",
+                    "familyName": "Physician Services",
+                    "subFamilyName": "Physician Practice Group",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "90255",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "21"
+                },
+                {
+                    "title": "Academic Faculty Member/Physician V",
+                    "jobFamily": "HY",
+                    "jobSubFamily": "HYB",
+                    "jobRoleTypeId": "HYB01",
+                    "familyName": "Physician Services",
+                    "subFamilyName": "Physician Practice Group",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "90256",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "22"
+                },
+                {
+                    "title": "Academic Faculty Member/Physician VI",
+                    "jobFamily": "HY",
+                    "jobSubFamily": "HYB",
+                    "jobRoleTypeId": "HYB01",
+                    "familyName": "Physician Services",
+                    "subFamilyName": "Physician Practice Group",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "90257",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "23"
+                }
+            ]
+        },
+        {
+            "title": "Academic Faculty Member/Physician I COPY",
+            "jobFamily": "HY",
+            "jobSubFamily": "HYB",
+            "jobRoleTypeId": "HYB01",
+            "familyName": "Physician Services",
+            "subFamilyName": "Physician Practice Group",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92758",
+            "grade": {
+                "standardHayGrade": "18"
+            },
+            "expandable": false
+        },
+        {
+            "title": "Academic Faculty Member/Physician I COPY 042821",
+            "jobFamily": "HY",
+            "jobSubFamily": "HYB",
+            "jobRoleTypeId": "HYB01",
+            "familyName": "Physician Services",
+            "subFamilyName": "Physician Practice Group",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92756",
+            "grade": {
+                "standardHayGrade": "20"
+            },
+            "expandable": false
+        },
+        {
+            "title": "Academic Faculty Member/Physician II  22-03",
+            "jobFamily": "HY",
+            "jobSubFamily": "HYB",
+            "jobRoleTypeId": "HYB01",
+            "familyName": "Physician Services",
+            "subFamilyName": "Physician Practice Group",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92684",
+            "grade": {
+                "standardHayGrade": "19"
+            },
+            "expandable": false
+        },
+        {
+            "title": "Academic Faculty Member/Physician II 15-01",
+            "jobFamily": "HY",
+            "jobSubFamily": "HYA",
+            "jobRoleTypeId": "HYA00",
+            "familyName": "Physician Services",
+            "subFamilyName": "Medical Affairs",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "90370",
+            "grade": {
+                "standardHayGrade": "20"
+            },
+            "expandable": false
+        }
+    ],
+    "paging": {
+        "pageIndex": 1,
+        "pageSize": 20,
+        "totalPages": 3,
+        "totalResultRecords": 96
+    }
+}

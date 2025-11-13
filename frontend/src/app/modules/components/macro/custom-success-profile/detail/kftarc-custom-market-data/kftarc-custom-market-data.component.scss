@@ -1,0 +1,295 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/mixins.scss';
+
+$match-skill-item: rgba(58, 205, 210, 0.15);
+
+.insights-section {
+    margin-bottom: 50px;
+    box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 4px 0 rgba(0, 2, 4, 0.1);
+    border: solid 1px $light-silver;
+    background-color: $white;
+}
+
+.skills-card {
+    width: 100%;
+    min-height: 350px;
+    display: flex;
+    flex-direction: column;
+    padding: $default-element-spacing;
+    .skills-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-bottom: $section-margin;
+        .skills-title {
+            display: block;
+            margin-bottom: $small-gutter;
+        }
+        .skills-subtitle {
+            color: #757575;
+        }
+    }
+    .skills-data {
+        flex: 1;
+        display: flex;
+        min-height: 220px;
+        flex-direction: row;
+        .skills-list-title {
+            display: block;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+        .skills-section {
+            flex: 1;
+            width: 100%;
+            &:not(:last-child) {
+                border-right: 1px solid $page-background;
+                padding-right: $section-margin;
+            }
+            &:last-child {
+                padding-left: $section-margin;
+            }
+            .skills-list-data {
+                display: flex;
+                flex-direction: row;
+                .skills-col {
+                    width: 100%;
+                    .skill-item {
+                        padding: 4px 10px;
+                        margin-bottom: 6px;
+                        display: inline-flex;
+                        align-items: center;
+                        flex-direction: row;
+                        &.matching-skill {
+                            background-color: rgba(58, 205, 210, 0.15);
+                        }
+                        .skill-item-number {
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            width: 19px;
+                            height: 19px;
+                            border-radius: 100%;
+                            border: solid 1px #b2b2b2;
+                            margin-right: $smaller-padding;
+                            position: relative;
+                            span {
+                                position: absolute;
+                                line-height: 12px;
+                                top: 50%;
+                                left: 50%;
+                                transform: translateX(-50%) translateY(-50%);
+                            }
+                        }
+                        .skill-item-text {
+                            letter-spacing: 0.23px;
+                        }
+                    }
+                    .matching-skill {
+                        background-color: $match-skill-item;
+                    }
+                }
+            }
+        }
+    }
+    .skills-footer {
+        margin-top: $large-padding;
+        .premium-skill {
+            display: flex;
+            align-items: center;
+            font-size: 9px;
+            letter-spacing: 0.7px;
+            &:before {
+                content: '';
+                width: 10px;
+                height: 10px;
+                display: inline-flex;
+                margin-right: 10px;
+                background-color: rgba(58, 205, 210, 0.15);
+            }
+        }
+    }
+}
+
+.insights-card {
+    min-height: 220px;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    border-top: 1px solid $page-background;
+    padding-bottom: 40px;
+
+    ::ng-deep kfthcl-section-card {
+        border-right: 1px solid $page-background;
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        margin-top: 24px;
+
+        &:last-of-type {
+            border-right: none;
+        }
+        &.insights-mix-of-rewards {
+            .section-card {
+                width: 400px;
+            }
+        }
+        &.insights-grade {
+            flex-basis: 276px;
+            padding:  0 32px;
+            .section-card {
+                width: 276px;
+            }
+        }
+        &.market-base-salary {
+            flex-basis: 450px;
+            .section-card {
+                width: 276px;
+            }
+        }
+        .section-card {
+            width: 276px;
+            box-shadow: none;
+            padding: 0;
+
+            .description {
+                overflow: visible;
+                white-space: pre-wrap;
+                text-overflow: inherit;
+            }
+        }
+    }
+
+    .insights-diff-dev {
+        .diff-dev-item {
+            display: flex;
+            margin-bottom: 16px;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+
+            .name {
+                flex: 1;
+                padding-right: 10px;
+                max-width: 160px;
+                flex-basis: 160px;
+                text-overflow: ellipsis;
+                display: block;
+                overflow: hidden;
+                span {
+                    white-space: nowrap;
+                    position: relative;
+                }
+            }
+
+            &:last-of-type {
+                margin-bottom: 0;
+            }
+
+            ::ng-deep kf-meter-bar {
+                margin: 0;
+                width: inherit;
+                .unit-container {
+                    width: inherit;
+                }
+            }
+        }
+    }
+
+    .market-base-salary {
+        ::ng-deep .description {
+            margin-bottom: 0;
+        }
+    }
+
+    &.pay-card, &.recruit-card {
+        .insights-mix-of-rewards {
+            flex-basis: 480px;
+        }
+
+        .insights-candidate-scarcity,
+        .insights-diff-dev {
+            flex-basis: 400px;
+        }
+    }
+}
+
+.insights-grade {
+    .grade-chart-container .grade-chart .value {
+        margin-top: 8px;
+        line-height: 16px;
+    }
+}
+
+.grade-chart-container {
+    display: flex;
+    justify-content: center;
+
+    .grade-chart {
+        padding-top: 17px;
+        position: relative;
+        flex-shrink: 0;
+        flex-grow: 0;
+
+        kf-chart {
+            position: relative;
+            width: 140px;
+            height: 70px;
+            margin: 0 20px;
+        }
+
+        .scale {
+            display: flex;
+            position: relative;
+            top: -14px;
+            width: 180px;
+            height: 16px;
+            justify-content: space-between;
+
+            > div {
+                width: 15px;
+                letter-spacing: 0.2px;
+
+                &:first-of-type {
+                    text-align: right;
+                }
+            }
+        }
+
+        .value {
+            position: relative;
+            top: -14px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+    }
+}
+
+.skills-empty-data {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    &::before {
+        content: "";
+        width: 96px;
+        height: 64px;
+        display: block;
+        margin: 20px 0;
+        background-image: url("#{$app-url-prefix}/assets/images/market-empty.svg");
+        background-size: contain;
+        background-repeat: no-repeat;
+    }
+    .nodata-title {
+        display: block;
+        font-size: 16px;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+    }
+}
+
+kftarc-skill-filter {
+    display: flex;
+}

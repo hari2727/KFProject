@@ -1,0 +1,36 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { SlidersController } from './sliders.controller';
+import { SlidersService } from './sliders.service';
+import { RequestCommon } from '../../common/common.utils';
+import { SlidersRepository } from './sliders.repository';
+import { RequestFactory } from '../../common/request-factory';
+
+describe('SlidersController', () => {
+    let controller: SlidersController;
+    let service: SlidersService;
+
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            controllers: [SlidersController],
+            providers: [SlidersService, RequestCommon, SlidersRepository, ConfigService, RequestFactory],
+        }).compile();
+
+        controller = module.get<SlidersController>(SlidersController);
+        service = module.get<SlidersService>(SlidersService);
+    });
+
+    it('should be defined', () => {
+        expect(controller).toBeDefined();
+    });
+
+    // test('should call service migrateCustomSPs on migrate Api call', () => {
+    //     jest.spyOn(service, 'migrateCustomSPs' as any);
+    //     const props: QueryProps.Default = {
+    //         loggedInUserClientId: 1,
+    //         locale: 'en-US',
+    //         userId: 12334,
+    //     };
+    //     controller.migrateCustomSP(props, {} as any);
+    //     expect(service.migrateCustomSPs).toHaveBeenCalled();
+    // });
+});

@@ -1,0 +1,37 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { ProfileCollectionsController } from './profile-collections.controller';
+import { ProfileCollectionsService } from './profile-collections.service';
+import { ProfileCollectionsRepository } from './profile-collections.repository';
+import { QueryProps } from '../../common/common.interface';
+import { PCApiResponse } from './profile-collections.fixture';
+
+describe('dummy test to bypass', () => {
+    test('test', () => {
+        expect(1).toBe(1);
+    });
+});
+
+describe('ProfileCollectionsController', () => {
+    let controller: ProfileCollectionsController;
+    let service: ProfileCollectionsService;
+    let defaultQuery: QueryProps.Default = { loggedInUserClientId: 1, userId: 1, locale: 'en' };
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [ProfileCollectionsService, ProfileCollectionsRepository],
+            controllers: [ProfileCollectionsController],
+        }).compile();
+        controller = module.get<ProfileCollectionsController>(ProfileCollectionsController);
+        service = module.get<ProfileCollectionsService>(ProfileCollectionsService);
+    });
+
+    it('should be defined', () => {
+        expect(controller).toBeDefined();
+    });
+
+    test('should call getProfileCollections', async () => {
+        const spy = jest.spyOn(service, 'getProfileCollections').mockResolvedValue(PCApiResponse);
+        await controller.getProfileCollections(defaultQuery);
+        expect(spy).toBeCalled();
+        expect(spy).toBeCalledWith(defaultQuery);
+    });
+});

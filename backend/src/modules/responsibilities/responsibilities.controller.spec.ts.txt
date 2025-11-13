@@ -1,0 +1,77 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { okResponse } from '../../common/common.utils';
+import { ResponsibilitiesController } from './responsibilities.controller';
+import { ResponsibilitiesRepository } from './responsibilities.repository';
+import { ResponsibilitiesService } from './responsibilities.service';
+import {
+    GetResponsibilityDetailIdResponse,
+    ModelDataResponse,
+    ModelQuery,
+    GetResponsibilityModelQuery,
+    NewModelAPIResponse,
+    OldModelAPIResponse,
+} from './responsibilities.service.fixture';
+import { SubcategoryType, UpdateResponsibilityBody, UpdateResponsibilityQuery } from './responsibilities.interface';
+
+describe('ResponsibilitiesController', () => {
+    let controller: ResponsibilitiesController;
+    let respService: ResponsibilitiesService;
+    const modelId = '1';
+
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            controllers: [ResponsibilitiesController],
+            providers: [ResponsibilitiesService, ResponsibilitiesRepository],
+        }).compile();
+
+        controller = module.get<ResponsibilitiesController>(ResponsibilitiesController);
+        respService = module.get<ResponsibilitiesService>(ResponsibilitiesService);
+    });
+
+    it('should be defined', () => {
+        expect(controller).toBeDefined();
+    });
+
+    test('should call required method for oldModelResponsibilities', async () => {
+        const oldModelSpy = jest.spyOn(respService, 'getOldModelResponsibilities').mockResolvedValueOnce(OldModelAPIResponse);
+        await controller.oldModelResponsibilities(ModelQuery, modelId);
+        expect(oldModelSpy).toBeCalledWith(ModelQuery, modelId);
+    });
+
+    test('should call required method for getModelResponsibilities', async () => {
+        const responsibilitySpy = jest.spyOn(respService, 'getModelResponsibilities').mockResolvedValueOnce(ModelDataResponse);
+        await controller.modelResponsibilities(ModelQuery);
+        expect(responsibilitySpy).toBeCalledWith(ModelQuery);
+    });
+
+    test('should call required method for getNewModelResponsibilities', async () => {
+        const newModelSpy = jest.spyOn(respService, 'getNewModelResponsibilities').mockResolvedValueOnce(NewModelAPIResponse);
+        await controller.newModelResponsibilities(ModelQuery, modelId);
+        expect(newModelSpy).toBeCalledWith(ModelQuery, modelId);
+    });
+
+    test('should call required method for publishResponsibilities', async () => {
+        const publishSpy = jest.spyOn(respService, 'responsibilitiesPublish').mockResolvedValueOnce(okResponse);
+        await controller.publishResponsibilities(ModelQuery);
+        expect(publishSpy).toBeCalledWith(ModelQuery);
+    });
+
+    test('should call required method for getResponsibilityDetailById', async () => {
+        const respDetailModelSpy = jest.spyOn(respService, 'getResponsibilityModelDetailId').mockResolvedValueOnce(GetResponsibilityDetailIdResponse);
+        await controller.getResponsibilityDetailById(1, GetResponsibilityModelQuery);
+        expect(respDetailModelSpy).toBeCalledWith(GetResponsibilityModelQuery, 1);
+    });
+    test('should call required method for getResponsibilityDetailById', async () => {
+        const respDetailModelSpy = jest.spyOn(respService, 'getResponsibilityModelDetailId').mockResolvedValueOnce(GetResponsibilityDetailIdResponse);
+        await controller.getResponsibilityDetailById(1, GetResponsibilityModelQuery);
+        expect(respDetailModelSpy).toBeCalledWith(GetResponsibilityModelQuery, 1);
+    });
+
+    test('should call required method for updateResponsibilities', async () => {
+        const query = {} as UpdateResponsibilityQuery;
+        const body = {} as  UpdateResponsibilityBody;
+        const respDetailModelSpy = jest.spyOn(respService, 'updateResponsibilities').mockResolvedValueOnce(okResponse);
+        await controller.updateResponsibilities(query, body);
+        expect(respDetailModelSpy).toBeCalledWith(query, body, SubcategoryType.RESPONSIBILITY);
+    });
+});

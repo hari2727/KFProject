@@ -1,0 +1,35 @@
+<div *ngIf="profile" class="wrapper" [ngClass]="{ 'height-auto': isIcClientUser }">
+    <div class="header">
+        <kf-icon [icon]="profile?.profileType | KfSpIconType"></kf-icon>
+        <a [routerLink]="'/tarc/sp/detail/' + profile.id"
+           class="title fw-bold ls-body d-block text-center line-clamp-2 mb-4"
+           [pTooltip]="profile.title"
+           [tooltipDisabled]="hideTooltip"
+           (mouseenter)="hover($event)">
+            {{ profile.title }} </a>
+    </div>
+    <div class="body">
+        <div class="body-text ls-label text-center">{{ profile.managementLabel }}</div>
+        <div class="body-text ls-label text-center line-clamp-2">{{ profile.familyName }}</div>
+        <div class="body-text ls-label text-center title-text line-clamp-2 pb-8" *ngIf="profile.profileType === spTypeEnum.Custom && profile.parentJobDetails"
+                [pTooltip]="profile.parentJobDetails.title"
+                [tooltipDisabled]="hideTooltip"
+                (mouseenter)="hover($event)">
+            {{ 'lib.basedOn' | translate }}
+            <a [routerLink]="'/tarc/sp/detail/' + profile.parentJobDetails.id" class="fw-regular ls-label">
+                {{ profile.parentJobDetails.title }}
+            </a>
+        </div>
+    </div>
+    <div class="stats" *ngIf="!isIcClientUser">
+        <div class="stats-item">
+            <p class="title fw-bold ls-body d-block text-center"> {{ profile.noOfDependantJobs }} </p>
+            <p class="description fw-semibold footnote text-uppercase"> {{ 'pm.relatedJobDesc' | translate }} </p>
+        </div>
+    </div>
+</div>
+<div *ngIf="!profile" class="wrapper empty">
+    <div>
+        <kf-icon color="primary" icon="search"></kf-icon> <a class="link fw-semibold" [routerLink]="'/tarc/sp/search'">  {{ 'pm.findSP' | translate }} </a>
+    </div>
+</div>

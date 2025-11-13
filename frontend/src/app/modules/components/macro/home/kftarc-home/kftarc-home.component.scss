@@ -1,0 +1,347 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/mixins.scss';
+
+$page-width: 1280px;
+$min-height: 525px;
+
+$icon-stroke-size: 2px;
+$icon-dashed-stroke: $icon-stroke-size dashed $grey-fade;
+$icon-width: 64px;
+$icon-height: 37px;
+$icon-square: 15px;
+$notification-banner-height: 60px;
+
+.content-wrapper {
+    width: 100%;
+    padding-bottom: $largest-padding;
+    background-attachment: fixed;
+    background-image: url('#{$app-url-prefix}/assets/images/tarc_bg.jpg'), $tarc-background;
+    background-repeat: no-repeat;
+    background-size: 100% 524px, 100% 100%;
+
+    /*Make sticky background compleatable with Ie 10/11*/
+    @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+        background-attachment: inherit;
+        background-image: $tarc-background;
+        background-size: 100%;
+
+        .sticky-background {
+            position: fixed;
+            display: block;
+            top: 0;
+            left: 0;
+            height: 524px;
+            width: 100%;
+            background-image: url('#{$app-url-prefix}/assets/images/tarc_bg.jpg');
+            background-repeat: no-repeat;
+            background-size: 100% 524px;
+
+            & + .content {
+                position: relative;
+                z-index: 1;
+            }
+        }
+    }
+}
+
+::ng-deep kf-card a {
+    line-height: 18px;
+}
+
+// fix long sp usage labels
+::ng-deep .content .profile-stats li {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 235px;
+    letter-spacing: 0.4px;
+}
+
+.kf-icon-download {
+    display: block;
+}
+
+.pp-link {
+    color:#0000EE;
+}
+
+.content {
+    width: $page-width;
+    margin: 0 auto;
+
+    .no-result {
+        height: 100%;
+        min-height: 250px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        .description {
+            color: $grey;
+            letter-spacing: 1.25px;
+        }
+        .icon-top {
+            position: relative;
+            width: $icon-width;
+            height: $icon-height - $icon-square;
+            border: $icon-dashed-stroke;
+            border-top: none;
+            border-bottom: none;
+
+            &:before, &:after {
+                content: "";
+                border: $icon-dashed-stroke;
+                border-right: none;
+                position: absolute;
+                top: -$icon-square;
+            }
+
+            &:before {
+                border-right: none;
+                border-bottom: none;
+                width: $icon-width - $icon-square;
+                height: $icon-square;
+                left: -$icon-stroke-size;
+            }
+
+            &:after {
+                border-top: none;
+                width: $icon-square;
+                height: $icon-square;
+                right: -$icon-stroke-size;
+            }
+        }
+
+        .icon-bottom {
+            position: relative;
+            width: $icon-width;
+            height: $icon-height;
+            border: $icon-dashed-stroke;
+            border-top: none;
+        }
+    }
+
+    .home-header {
+        padding-top: 1px;
+        .logo {
+            width: 115px;
+            height: 115px;
+            margin: $largest-margin auto $default-margin auto;
+            background-image: url('#{$app-url-prefix}/assets/images/lockup-hub-home-white.svg');
+            background-size: cover;
+        }
+        .title {
+            text-transform: uppercase;
+            font-size: $large-size;
+            font-weight: 300;
+            letter-spacing: 3.23x;
+            text-align: center;
+            color: $white;
+        }
+        .subtitle {
+            font-size: $h4-larger-size;
+            text-align: center;
+            color: $white;
+        }
+        .search-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 32px;
+            // height: 90px;
+            // margin: $breadcrumb-margin auto $default-margin auto;
+            .search {
+                width: 453px;
+
+                ::ng-deep input {
+                    padding: 9px 20px 9px 44px;
+                }
+            }
+        }
+    }
+
+    .profile-stats {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        .chart {
+            flex: 1 1 auto;
+
+            .functions-tick {
+                font-size: $baseFontSize + 1;
+                font-weight: 400;
+                text-transform: none;
+                ::ng-deep li {
+                    max-width: 180px !important;
+                }
+            }
+            functions-chart {
+                height: 150px;
+            }
+            .functions-chart, .donut-chart {
+                width: 450px;
+                margin: 0 auto;
+            }
+        }
+        .chart + .chart {
+            border-left: 1px solid $page-background;
+        }
+    }
+    .no-data-profile-stats {
+        height: 100%;
+        min-height: 250px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        .w-100 {
+            width: 100% !important;
+            &.icon-top {
+                &:before {
+                    width: calc(100% - #{$icon-square});
+                }
+            }
+        }
+        
+    }
+
+    [kf-card-header] {
+        margin: 0 (-$card-padding) $card-padding;
+        padding: 0 $card-padding $default-element-spacing;
+        border-bottom: $solid-stroke;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        span {
+            margin-right: 16px;
+        }
+    }
+
+    .recent-profiles {
+        .profiles {
+            display: flex;
+            flex-direction: row;
+            kftarc-sp-home-card {
+                margin-right: 15px;
+            }
+        }
+    }
+
+    .job-descriptions {
+        a {
+            line-height: 1.5;
+        }
+        kf-icon {
+            vertical-align: middle;
+        }
+        table {
+            width: 100%;
+            .col1 {
+                width: 50%;
+            }
+            .col2, col3 {
+                width: 20%;
+            }
+            .col4 {
+                width: 10%;
+            }
+        }
+        td {
+            vertical-align: middle;
+            height: 55px;
+            border-bottom: solid 2px $page-background;
+        }
+        th {
+            text-align: left;
+            vertical-align: bottom;
+            border-bottom: solid 2px $page-background;
+        }
+    }
+
+    .downloads-wrapper {
+        display: flex;
+        justify-content: space-between;
+        kf-icon:not([icon="download"]) {
+            vertical-align: middle;
+            margin-right: 16px;
+        }
+        .downloads {
+            width: 100%;
+            .download-item {
+                display: flex;
+                justify-content: space-between;
+                padding-bottom: $default-padding;
+
+                a {
+                    line-height: 1.5;
+                }
+            }
+            .downloads-main.no-clm {
+                display: flex;
+                flex-wrap: wrap;
+                word-break: break-word;
+                flex-direction: row;
+                .download-column {
+                    display: flex;
+                    flex-direction: column;
+                    width: 33%;
+                    padding-left: $default-padding;
+                    padding-right: $default-padding;
+                    border-right: 2px solid #ebeff2;
+                    &:last-child {
+                        border-right: none;
+                    }
+                }
+                .download-item {
+                    &:last-child {
+                        padding-bottom: 0;
+                    }
+                    kf-icon[icon='download'] {
+                        margin-left: $smaller-margin;
+                    }
+                }
+                .download-item:nth-child(5n),
+                .download-item:last-child {
+                    border-right: none;
+                }
+            }
+        }
+
+        .clm {
+            .clm-main {
+                display: flex;
+                justify-content: space-between;
+                .clm-links {
+                    width: 50%;
+
+                    a {
+                        line-height: 1.5;
+                    }
+                }
+                .sub-title {
+                    font-size: 11px;
+                    letter-spacing: 1.1px;
+                    margin-bottom: $default-padding;
+                }
+                a {
+                    display: block;
+                    margin-bottom: $default-padding;
+                }
+            }
+        }
+        .downloads.has-clm, .clm {
+            width: 629px;
+        }
+    }
+
+    .upsell-wrap {
+        display: flex;
+        justify-content: space-between;
+        margin-left: -11px;
+    }
+}
+
+.job-title {
+    word-wrap: break-word;
+    word-break: break-word;
+    padding-right: 8px;
+}

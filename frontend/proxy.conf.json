@@ -1,0 +1,23 @@
+{
+    "/app/tarc/**": {
+        "target": "http://localhost:4300/",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": "true",
+        "pathRewrite": {
+            "^/app/tarc": "/"
+        }
+    },
+    "/app/assets/**": {
+        "target": "http://localhost:4200/",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": "true"
+    },
+    "/app/lib/languages/**": {
+        "target": "http://localhost:4200/",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": "true"
+    }
+}

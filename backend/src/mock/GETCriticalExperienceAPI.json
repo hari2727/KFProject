@@ -1,0 +1,203 @@
+{
+  "sections": [
+    {
+      "id": 1,
+      "name": "Organization Experience",
+      "code": "ORGANIZATION EXPERIENCE",
+      "categories": [
+        {
+          "id": 2,
+          "name": "Function Experience",
+          "code": "FUNCTION EXPERIENCE",
+          "description": "Mock description",
+          "isCore": false,
+          "years": {
+            "id": 3,
+            "value": 5
+          },
+          "scope": {
+            "options": [
+              {
+                "id": "AS",
+                "value": "Admin Support services",
+                "subOptions": [
+                  {
+                    "id": "ASA",
+                    "value": "Clerical Services"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": 2,
+          "name": "Organization type",
+          "code": "ORGANIZATION TYPE",
+          "description": "Organization type description",
+          "isCore": true,
+          "years": {
+            "id": 3,
+            "value": 15
+          },
+          "scope": {
+            "options": [
+              {
+                "id": "12332",
+                "value": "Publically Traded"
+              }
+            ]
+          }
+        },
+        {
+          "id": 2,
+          "name": "Location",
+          "code": "LOCATION",
+          "description": "Location description",
+          "isCore": false,
+          "years": {
+            "id": 3,
+            "value": 5
+          },
+          "scope": {
+            "options": [
+              {
+                "id": "121",
+                "value": "North America"
+              }
+            ]
+          }
+        },
+        {
+          "id": 2,
+          "name": "Industry Experience",
+          "code": "INDUSTRY EXPERIENCE",
+          "description": "Industry description",
+          "isCore": false,
+          "years": {
+            "id": 3,
+            "value": 5
+          },
+          "scope": {
+            "options": [
+              {
+                "id": "232",
+                "value": "Technology",
+                "subOptions": [
+                  {
+                    "id": "1212",
+                    "value": "Contribution "
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": 23,
+          "name": "Organization Size",
+          "code": "ORGANIZATION SIZE",
+          "description": "Mock description",
+          "years": {
+            "id": 6,
+            "value": 10
+          },
+          "isCore": true,
+          "scope": {
+            "options": [
+              {
+                "id": "23",
+                "value": "Small - <1,000"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "name": "Custom Experience",
+      "code": "CUSTOM EXPERIENCE",
+      "categories": [
+        {
+          "id": 2,
+          "name": "Cross selling",
+          "description": "Custom experience description added by user",
+          "isCore": false,
+          "years": {
+            "id": 3,
+            "value": 5
+          },
+          "scope": {
+            "options": [
+              {
+                "id": "121",
+                "value": "Led"
+              }
+            ]
+          }
+        },
+        {
+          "id": 23,
+          "name": "Cross selling 2",
+          "years": {
+            "id": 6,
+            "value": 10
+          },
+          "isCore": true,
+          "scope": {
+            "options": [
+              {
+                "id": "23",
+                "value": "Played a significant role in"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 345,
+      "name": "Role Experiences",
+      "code": "ROLE EXPERIENCES",
+      "categories": [
+        {
+          "id": 67,
+          "name": "Experience in Role",
+          "code": "EXPERIENCE IN ROLE",
+          "years": {
+            "id": 6,
+            "value": 10
+          },
+          "isCore": true,
+          "scope": {
+            "options": [
+              {
+                "id": "23",
+                "value": "Chief financial officer"
+              }
+            ]
+          }
+        },
+        {
+          "id": 565,
+          "name": "Management Experience",
+          "code": "MANAGEMENT EXPERIENCE",
+          "years": {
+            "id": 6,
+            "value": 10
+          },
+          "isCore": true,
+          "scope": {
+            "options": [
+              {
+                "id": "23",
+                "value": "5-100 small size"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

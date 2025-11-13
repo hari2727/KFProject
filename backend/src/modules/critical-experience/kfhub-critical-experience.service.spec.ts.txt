@@ -1,0 +1,134 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import * as mockPost from '../../mock/postCriticalExperiences.json';
+import * as mockGetMetaData from '../../mock/getmetadata.json';
+import * as mockGet from '../../mock/GETCriticalExperienceAPI.json';
+import { KfhubCriticalExperienceService } from './kfhub-critical-experience.service';
+import { QueryValues } from './kfhub-critical-experience.interface';
+import { Utils } from '../../common/common.utils';
+
+describe('KfhubCriticalExperienceService', () => {
+    let module: TestingModule;
+    let criticalExperienceService: KfhubCriticalExperienceService;
+
+    beforeAll(async () => {
+        module = await Test.createTestingModule({
+            providers: [KfhubCriticalExperienceService],
+        }).compile();
+    });
+
+    beforeEach(() => {
+        criticalExperienceService = module.get(KfhubCriticalExperienceService);
+    });
+
+    afterAll(() => {
+        jest.clearAllMocks();
+    });
+
+    ['postExperienceData', 'putExperienceData'].forEach(method => {
+        describe(method, () => {
+            test('should throw an error if sections are not valid', async () => {
+                // Arrange
+                let err;
+
+                // Act
+                try {
+                    await criticalExperienceService[method]({ sections: [{}] });
+                } catch (e) {
+                    err = e;
+                }
+
+                // Assert
+                expect(err).toBeDefined();
+            });
+
+            test('should return mockPost json if post valid', async () => {
+                // Act/Assert
+                expect(
+                    await criticalExperienceService[method]({
+                        sections: [
+                            {
+                                id: 123,
+                                categories: [
+                                    {
+                                        value: '',
+                                        years: {
+                                            id: 1,
+                                        },
+                                        isCore: true,
+                                        userEdited: true,
+                                        id: 1,
+                                        name: '',
+                                        description: '',
+                                        scope: {
+                                            options: [{ id: 1 }],
+                                        },
+                                    },
+                                ],
+                            },
+                        ],
+                    }),
+                ).toEqual(mockPost);
+            });
+        });
+    });
+
+    describe('handleGetRoute', () => {
+        test('should throw an error if mockData and experience are not defined', async () => {
+            // Arrange
+            let err;
+
+            // Act
+            try {
+                await criticalExperienceService.handleGetRoute({});
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeDefined();
+            expect(err.message).toEqual('please provide successProfileId for experience or (outputType=METADATA&type=CRITICAL_EXPERIENCE) for metaData');
+        });
+
+        test(`should return mockGetMetaData if mockData is defined`, async () => {
+            // Act/Assert
+            expect(await criticalExperienceService.handleGetRoute({ outputType: QueryValues.OUTPUTTYPE, type: QueryValues.TYPE })).toEqual(mockGetMetaData);
+        });
+
+        test('should return error on getExperienceData if Utils.simulateJson failed', async () => {
+            // Arrange
+            let err;
+            jest.spyOn(Utils, 'simulateJson').mockRejectedValueOnce('failed');
+
+            // Act
+            try {
+                await criticalExperienceService.handleGetRoute({ outputType: QueryValues.OUTPUTTYPE, type: QueryValues.TYPE });
+            } catch (e) {
+                err = e;
+            }
+
+            //Assert
+            expect(err).toBeDefined();
+        });
+
+        test(`should return mockGet if experience is defined`, async () => {
+            // Act/Assert
+            expect(await criticalExperienceService.handleGetRoute({ successProfileId: [1] })).toEqual(mockGet);
+        });
+
+        test('should return an error on getMetaDataForExperiences if Utils.simulateJson failed', async () => {
+            // Arrange
+            let err;
+            jest.spyOn(Utils, 'simulateJson').mockRejectedValueOnce('failed');
+
+            // Act
+            try {
+                await criticalExperienceService.handleGetRoute({ successProfileId: [1] });
+            } catch (e) {
+                err = e;
+            }
+
+            //Assert
+            expect(err).toBeDefined();
+        });
+    });
+});

@@ -1,0 +1,99 @@
+<div class="d-flex flex-column search-filter-section">
+    <div class="d-flex w-100">
+        <ng-content></ng-content>
+
+        <kfthcl-dropdown #dropdown [insideClick]="true" [overlayMinWidth]="430" [overlayMaxWidth]="430"
+            [overlayMaxHeight]="315"
+            (click)="emitOnClickFilter()"
+            class="o-auto bg-white ml-8"
+            style="width: 180px;"
+            [originY]="'bottom'"
+            [originX]="'start'"
+            [originXFallback]="false"
+            [originYFallback]="false">
+            <kfthcl-dropdown-toggle class="pc-pointer">
+                <button class="color-primary bg-white p-12 pl-8 pr-16 d-flex flex-ai-center flex-row w-100 o-hidden">
+                    <kf-icon class="left-icon" color="primary" icon="filter"></kf-icon>
+                    <span class="display-text flex-grow-1 text-left ml-8 body-text color-dark o-hidden text-nowrap">{{
+                        'lib.filters' | translate }}</span>
+                    <kf-icon [@indicatorRotate]="getPanelState(!dropdown.isOpen)" icon="arrow-up" color="primary"
+                        size="sm">
+                    </kf-icon>
+                </button>
+            </kfthcl-dropdown-toggle>
+            <kfthcl-dropdown-overlay>
+                <thcl-accordion>
+                    <thcl-expansion-panel class="sp-search-filter-expansion-panel"
+                        *ngFor="let filter of filters; let i = index; let last = last" [class.border-bottom]="!last">
+                        <thcl-expansion-panel-header>
+                            <div class="color-dark body-text bg-white ml-8 mr-8 p-12 pl-8 pr-16 pc-pointer">
+                                {{ filter.term | translate }}
+                            </div>
+                        </thcl-expansion-panel-header>
+
+                        <ng-container [ngSwitch]="filter.type[0]">
+                            <ng-container *ngSwitchCase="searchFilterEnum.Functions">
+                                <csp-kfthcl-nested-filter
+                                    [placeholderTerm]="filter.term"
+                                    [(ngModel)]="filter.items"
+                                    (ngModelChange)="onChangeFunction($event)" style="flex-basis: 0;">
+                                </csp-kfthcl-nested-filter>
+                            </ng-container>
+                            <ng-container *ngSwitchCase="searchFilterEnum.Language">
+                                <div *ngFor="let item of filter.items"
+                                    class="item p-12 fs-body pc-pointer d-flex flex-ai-start"
+                                    [class.selected]="item.checked">
+                                    <kfthcl-radio-button
+                                        [value]="item"
+                                        [disabled]="item.disabled"
+                                        [checked]="item.checked"
+                                        [class.selected]="item.checked"
+                                        (change)="onChangeRadio(item, filter.items, $event)">
+                                        <div class="body-text pl-12">{{ item.label }}</div>
+                                    </kfthcl-radio-button>
+                                </div>
+                            </ng-container>
+                            <ng-container *ngSwitchDefault>
+                                <div *ngFor="let item of filter.items" (click)="onChangeFilter(item)"
+                                    class="item p-12 fs-body pc-pointer d-flex flex-ai-start"
+                                    [class.selected]="item.checked">
+                                    <kf-checkbox class="checkbox pr-12" [ngModel]="item.checked"></kf-checkbox>
+                                    <div *ngIf="filter.type[0] === searchFilterEnum.ProfileType">
+                                        <kf-icon class="icon" [icon]="item.icon" color="dark" class="mr-12">
+                                        </kf-icon>
+                                        <span class="body-text">{{item.label}}</span>
+                                        <span class="d-block subtext-sm color-medium ls-label-sm">{{
+                                            item.data?.description }}</span>
+                                    </div>
+                                    <div class="body-text" *ngIf="filter.type[0] !== searchFilterEnum.ProfileType">
+                                        {{item.label}}</div>
+                                </div>
+                            </ng-container>
+                        </ng-container>
+                    </thcl-expansion-panel>
+                </thcl-accordion>
+            </kfthcl-dropdown-overlay>
+        </kfthcl-dropdown>
+
+    </div>
+    <div class="d-flex flex-row flex-ai-center w-100 mt-16 p-12 pr-16 applied-filters-well"
+        *ngIf="selectedFilters.length > 0">
+        <div class="applied-filters flex-grow-1">
+            <ng-container *ngFor="let filter of selectedFilters">
+                <div class="d-inline-block flex-ai-baseline m-4 bg-white px-12 applied-filter"
+                    *ngIf="filter.label !== 'Custom Profiles'">
+                    <span class="flex-grow-1 flex-shrink-0 mr-8 filter-content subtext-sm fw-semibold">
+                        {{ filter.term | translate }}: {{ filter.label }}
+                    </span>
+                    <span (click)="removeFilter(filter.type, filter.value, filter.parentId)">
+                        <kf-icon icon="close" color="primary" size="xs" class="pc-pointer"></kf-icon>
+                    </span>
+                </div>
+            </ng-container>
+        </div>
+        <a *ngIf="selectedFilters.length > 0" class="fs-body-xs lh-16 link-sm ls-utility text-uppercase"
+            (click)="removeAllFilters()">
+            {{ 'lib.ClearAllFilters' | translate }}
+        </a>
+    </div>
+</div>

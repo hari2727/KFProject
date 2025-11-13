@@ -1,0 +1,920 @@
+<kf-page app="pm" class="detail-content banner-wide banners-background-{{totalBanners}}" [class.shadow-mode]="isShadowMode">
+    <kf-page-masthead *ngIf="!isSliderOpen" class="xl-page-masthead">
+        <div class="dropdowns">
+            <span class="subtext-sm fw-semibold color-white">{{ 'pm.selectViewTitle' | translate }}</span>
+            <div class="select-dropdown">
+                <button class="btn menu-select-btn" (click)="toggleSelectMenu()">
+                    <span class="body-text menu-select-text">{{ getSelectMenuText() }}</span>
+                    <kf-icon class="arrow-down-select" color="primary" icon="arrow-down" size="sm"></kf-icon>
+                </button>
+                <div class="dropdown-items" *ngIf="showSelectMenu" kfOutside [outsideEnabled]="showSelectMenu"
+                    (onClickOutside)="onClickOutsideSelectMenu($event)">
+                    <div class="dropdown-description body-text fs-body-sm">{{ 'pm.viewDescription' | translate }}</div>
+                    <div (click)="clearSelection()"
+                        [ngClass]="{'selected': viewType === ''}" class="view-option">
+                        <p class="view body-text">{{ 'pm.general' | translate }}</p>
+                        <p class="view-desc body-text fs-body-sm">{{ 'pm.generalDescription' | translate }}</p>
+                    </div>
+                    <div (click)="switchToView(selectViewOptions.recruit)"
+                        [ngClass]="{'selected': viewType === selectViewOptions.recruit}"
+                        class="view-option">
+                        <p class="view body-text">{{ 'pm.recruitView' | translate }}</p>
+                        <p class="view-desc body-text fs-body-sm">{{ 'pm.recruitDescription' | translate }}</p>
+                    </div>
+                    <div (click)="switchToView(selectViewOptions.select)"
+                        [ngClass]="{'selected': viewType === selectViewOptions.select}"
+                        class="view-option">
+                        <p class="view body-text">{{ 'pm.selectView' | translate }}</p>
+                        <p class="view-desc fs-body-sm body-sm">{{ 'pm.selectDescription' | translate }}</p>
+                    </div>
+                    <div (click)="switchToView(selectViewOptions.pay)"
+                        [ngClass]="{'selected': viewType === selectViewOptions.pay}"
+                        class="view-option">
+                        <p class="view body-text">{{ 'pm.payView' | translate }}</p>
+                        <p class="view-desc fs-body-sm body-sm">{{ 'pm.payDescription' | translate }}</p>
+                    </div>
+                    <!--gCheck: Remove if requiremnts are not changed by Jan21 release
+                    <div (click)="clearSelection()" class="clear-option">
+                        <p kf-text color="primary" size="sm" weight="strong">{{ 'pm.clearSelection' | translate | uppercase }}</p>
+                    </div> -->
+                </div>
+            </div>
+
+            <div *ngIf="arch !== 'select'">
+                <div class="action-dropdown">
+                    <button class="menu-action-btn" (click)="toggleActionMenu()">
+                        <kf-icon class="arrow-down-actions" icon="dots-three-horizontal" color="light" size="sm"></kf-icon>
+                    </button>
+                    <div class="dropdown-items action-items" *ngIf="showActionMenu" kfOutside [outsideEnabled]="showActionMenu" (onClickOutside)="onClickOutsideActionMenu($event)">
+                        <div (click)="viewAllDetails()" class="body-text">{{ 'pm.successProfileViewAllDetails' | translate }}</div>
+                        <div *ngIf="showEditMenuItem"
+                            (click)="showPopUp()"
+                            class="body-text"
+                            [ngClass]="{'disabled': successProfile.shortProfile === 'Err'}"
+                            pTooltip="{{'lib.errShortProfileEditPM' | translate }}"
+                            [tooltipDisabled]="successProfile.shortProfile !== 'Err'"
+                            tooltipPosition="top"
+                        >{{ 'lib.editSuccessProfile' | translate }}</div>
+                        <div *ngIf="showEditManageStakeholders"
+                            (click)="noAccessModal()"
+                            class="body-text"
+                            [ngClass]="{'disabled': successProfile.shortProfile === 'Err'}"
+                            pTooltip="{{'lib.errShortProfileEditPM' | translate }}"
+                            [tooltipDisabled]="successProfile.shortProfile !== 'Err'"
+                            tooltipPosition="top"
+                        >{{ 'lib.editManageStakeHolders' | translate }}</div>
+                        <div *ngIf="showRemoveMenuItem" (click)="removeSuccessProfile()" class="body-text">{{ 'pm.successProfileRemoveSuccessProfile' | translate }}</div>
+                        <div *ngIf="showCopyMenuItem"
+                            (click)="openCopyModal()"
+                            class="body-text"
+                            [ngClass]="{'disabled': successProfile.shortProfile === 'Err'}"
+                            pTooltip="{{'lib.errShortProfileCopyPM' | translate }}"
+                            [tooltipDisabled]="successProfile.shortProfile !== 'Err'"
+                            tooltipPosition="top"
+                        >{{ 'pm.successProfileCopySuccessProfile' | translate }}</div>
+                        <div *ngIf="showJobDescription"
+                            (click)="createJobDescription()"
+                            class="body-text"
+                            [ngClass]="{'disabled': hasLanguageAccess && !languagesAreMatching}"
+                            pTooltip="{{'pm.selectedLanguageDifferent' | translate }}"
+                            [tooltipDisabled]="!hasLanguageAccess || hasLanguageAccess && languagesAreMatching"
+                            tooltipPosition="top">{{ 'pm.successProfileCreateJobDescription' | translate }}</div>
+                        <div *ngIf="isShowMatchTool()" (click)="openMatchTool()" class="body-text">{{ 'pm.useProfileMatchTool' | translate }}</div>
+                        <div (click)="downloadSuccessProfileReport()" class="body-text">{{ 'pm.successProfileDownload' | translate }}</div>
+                        <div *ngIf="canCreateAssessmentProject && productTypes"
+                            (click)="createAssessmentProject()"
+                            class="body-text"
+                            [ngClass]="{'disabled': hasLanguageAccess && !languagesAreMatching}"
+                            pTooltip="{{'pm.selectedLanguageDifferent' | translate }}"
+                            [tooltipDisabled]="!hasLanguageAccess ||hasLanguageAccess && languagesAreMatching"
+                            tooltipPosition="top">{{ 'pm.successProfileCreateAssessmentProject' | translate }}</div>
+                        <div *ngIf="showJobPricing"
+                            (click)="navigateToJobPricing()"
+                            class="body-text"
+                            [ngClass]="{'disabled': hasLanguageAccess && !languagesAreMatching}"
+                            pTooltip="{{'pm.selectedLanguageDifferent' | translate }}"
+                            [tooltipDisabled]="!hasLanguageAccess ||hasLanguageAccess && languagesAreMatching"
+                            tooltipPosition="top">{{ 'pm.priceJob' | translate }}</div>
+                        <div *ngIf="isExecutiveUngradedProfile && permissions?.hasExecutiveGradingAccess"
+                            (click)="openExecGrading()" class="body-text"
+                            [ngClass]="{'disabled': hasLanguageAccess && !languagesAreMatching}"
+                            pTooltip="{{'pm.selectedLanguageDifferent' | translate }}"
+                            [tooltipDisabled]="!hasLanguageAccess ||hasLanguageAccess && languagesAreMatching"
+                            tooltipPosition="top">{{ 'pm.gradeProfile' | translate }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-summary" [class.alt-title-string]="altTitlesString">
+            <div class="profile-header" *ngIf="successProfile">
+                <p *ngIf="orgName" class="label-text-sm color-white fw-semibold">{{ orgName }}</p>
+                <h1 class="title color-white line-clamp-2"
+                    [pTooltip]="successProfile.title"
+                    [tooltipDisabled]="hideTooltip"
+                    (mouseenter)="hover($event)"
+                >{{ successProfile.title }}</h1>
+                <div class="short-line"></div>
+                <h4 *ngIf="altTitlesString" class="profile-desc alt-desc color-white fw-semibold position-relative text-break o-hidden pr-16 m-0 line-clamp-1">
+                    {{ altTitlesString }}
+                </h4>
+                <h4 *ngIf="successProfile.description" class="profile-desc color-white fw-semibold position-relative text-break o-hidden pr-16 m-0 line-clamp-2" >
+                    {{ successProfile.description }}
+                </h4>
+            </div>
+            <div class="profile-info pl-48 pr-8 mr-32" [class.removeMinHeight]="isShadowMode">
+                <div class="info-row d-flex flex-ai-center" *ngIf="successProfile?.profileCollections?.length">
+                    <span class="info-title subtext-sm color-white fw-bold ls-utility">{{ 'lib.PROFILE_COLLECTIONS' | translate }}:</span>
+                    <span class="info-value fs-body-sm fw-bold color-white line-clamp-2"
+                        [pTooltip]="displayProfileCollections(successProfile.profileCollections)"
+                        [tooltipDisabled]="hideTooltip"
+                        (mouseenter)="hover($event)"
+                        tooltipPosition="bottom">{{ displayProfileCollections(successProfile.profileCollections) }}</span>
+                </div>
+                <div class="info-row d-flex flex-ai-baseline profile-type">
+                    <span kf-text color="light" size="sm" weight="strong" utility="true" class="info-title">{{ 'lib.jobCode' | translate | KfTitlecase }}:</span>
+                    <span class="info-value">
+                        <span class="word-break" kf-text color="light" size="sm" weight="heavy">{{ successProfile?.jobCode || '-' }}</span>
+                    </span>
+                </div>
+                <div class="info-row d-flex flex-ai-baseline profile-type">
+                    <span class="info-title label-text-sm color-white fw-semibold">{{ 'lib.profileType' | translate | KfTitlecase }}:</span>
+                    <span class="info-value">
+                        <span class="label-text-sm color-white fw-semibold" *ngIf="successProfile.profileType === spTypeEnum.ONet">{{ 'pm.successProfileJobProfile' | translate }}</span>
+                        <span class="label-text-sm color-white fw-semibold" *ngIf="successProfile.profileType === spTypeEnum.Levels">{{ 'pm.successProfileLevelProfiles' | translate }}</span>
+                        <span class="label-text-sm color-white fw-semibold" *ngIf="successProfile.profileType === spTypeEnum.BestInClass">{{ 'pm.successProfileFunctionProfiles' | translate }}</span>
+                        <span class="label-text-sm color-white fw-semibold" *ngIf="successProfile.profileType === spTypeEnum.Custom">{{ 'pm.successProfileCustomProfiles' | translate }}</span>
+                        <span class="label-text-sm color-white fw-semibold" *ngIf="successProfile.profileType === spTypeEnum.Ai">{{ 'lib.aiProfile' | translate }}</span>
+                        <span class="label-text-sm color-white fw-semibold" *ngIf="successProfile.isTemplateJob"> | {{ 'pm.successProfileBestInClass' | translate }}</span>
+                    </span>
+                </div>
+                <div class="info-row d-flex flex-ai-baseline level">
+                    <span class="info-title label-text-sm color-white fw-semibold">{{ 'lib.level' | translate | KfTitlecase }}:</span>
+                    <span class="info-value">
+                        <span class="label-text-sm color-white fw-semibold" *ngIf="levelMappings?.management">{{ levelMappings.management.label }}</span>
+                        <span class="label-text-sm color-white fw-semibold" *ngIf="levelMappings?.level"> | {{ levelMappings.level.label }}</span>
+                    </span>
+                </div>
+                <div class="info-row d-flex flex-ai-baseline function">
+                    <span class="info-title label-text-sm color-white fw-semibold">{{ 'lib.function' | translate | KfTitlecase }}:</span>
+                    <span class="info-value">
+                        <span class="label-text-sm color-white fw-semibold" *ngIf="successProfile.familyName">{{ successProfile.familyName }}</span>
+                        <span class="label-text-sm color-white fw-semibold" *ngIf="successProfile.subFamilyName"> | {{ successProfile.subFamilyName }}</span>
+                    </span>
+                </div>
+                <div class="info-row d-flex flex-ai-baseline grade" *ngIf="viewType !== selectViewOptions.select && viewType !== selectViewOptions.pay && viewType !== selectViewOptions.recruit && hasGradeAccess">
+                    <div class="d-flex flex-ai-end info-title">
+                        <span class="label-text-sm color-white fw-semibold">{{ 'pm.GradeLCase' | translate | KfTitlecase }}</span>
+                        <kf-icon *ngIf="successProfile.isGradeOverriddenByJE"
+                                 icon="inquiry"
+                                 class="ml-8 grade-override-icon"
+                                 color="light"
+                                 size="sm"
+                                 tooltipPosition="top"
+                                 pTooltip="{{ 'lib.gradeOverrideProfileSummaryPageTooltip' | translate }}"></kf-icon>
+                    </div>
+                    <div class="info-value label-text-sm color-white fw-semibold">
+                        <span class="label-text-sm color-white fw-semibold pr-12">{{ renderGrade(successProfile.grade, hasCustomGradesAccess, kfLabel) }}</span>
+                        <span *ngIf="isExecutiveUngradedProfile && permissions?.hasExecutiveGradingAccess && arch !== 'select'"
+                            class="link-white-sm grade-profile"
+                            [ngClass]="{'disabled': hasLanguageAccess && !languagesAreMatching}"
+                            pTooltip="{{'pm.selectedLanguageDifferent' | translate }}"
+                            [tooltipDisabled]="!hasLanguageAccess ||hasLanguageAccess && languagesAreMatching"
+                            (click)="openExecGrading()">
+                            {{ 'pm.gradeProfile2' | translate }}
+                        </span>
+                    </div>
+                </div>
+                <div class="info-row d-flex flex-ai-baseline role-location">
+                    <span class="info-title label-text-sm color-white fw-semibold">
+                        {{ 'lib.normLocation' | translate | KfTitlecase }}*:
+                    </span>
+                    <span class="info-value label-text-sm color-white fw-semibold"> {{ normLabel }}</span>
+                </div>
+                <div *ngIf="!isExecutiveUngradedProfile && bannerFactName && viewType !== selectViewOptions.select && viewType !== selectViewOptions.pay && viewType !== selectViewOptions.recruit"
+                    class="info-row d-flex flex-ai-baseline base-salary">
+                    <span class="info-title label-text-sm color-white fw-semibold">{{ bannerFactName | KfTitlecase }}:</span>
+                    <span class="info-value label-text-sm color-white fw-semibold">{{ bannerFactDetail ? bannerFactDetail : '-' }}</span>
+                </div>
+                <div class="info-row d-flex flex-ai-baseline salary-market">
+                    <span class="info-title label-text-sm color-white fw-semibold">
+                        {{ 'pm.successProfileLocation' | translate | KfTitlecase }}:
+                    </span>
+                    <kf-country-select
+                        color="light"
+                        class="info-value"
+                        [textColor]="'light'"
+                        [countryArray]="countryArray"
+                        [defaultCountry]="selectedCountry"
+                        [relation]="true"
+                        (selectedCountryChange)="onCountrySelectionChange($event)"
+                    ></kf-country-select>
+                </div>
+            </div>
+            <div class="subheader-navigation-link" [ngClass]="{'notification-banner': showBanner}">
+                <a (click)="viewAllDetails()" class="ls-label">{{ 'lib.viewMoreDetails' | translate }}</a>
+            </div>
+        </div>
+    </kf-page-masthead>
+
+    <kf-page-content>
+        <kftarc-market-data
+            [successProfile]="successProfile"
+            [viewType]="viewType"
+            [selectedCountry]="selectedCountry"
+            (bannerDataChange)="updateBannerFacts($event)">
+        </kftarc-market-data>
+
+        <div class="summary-card" [class.extra-botttom-margin]="arch==='select'">
+            <div class="aci-column accountability-column"
+                [class.two-column]="viewType === selectViewOptions.pay || viewType === selectViewOptions.recruit">
+                <kftarc-sp-tagline-card
+                    [title]="'pm.accountabilityTitle'"
+                    [description]="'pm.accountabilityTagline'"
+                    [icon]="'lightbulb'"
+                    [width]="(viewType === selectViewOptions.pay || viewType === selectViewOptions.recruit) ? 'lg' : 'md'"
+                    (openSlider)="openSlider('responsibilityCompetencies')"
+                ></kftarc-sp-tagline-card>
+
+                <kfthcl-section-card *ngIf="responsibilities && topResponsibilityCategories && topResponsibilityCategories.length"
+                    [titleKey]="'pm.responsibilityCompetencies'"
+                    [descriptionKey]="'pm.cardResponsibilitiesIntro'"
+                    [width]="(viewType === selectViewOptions.pay || viewType === selectViewOptions.recruit) ? 'lg' : 'md'"
+                    class="responsibility-card">
+                    <div class="resp-chart" [class.two-column]="viewType === selectViewOptions.pay || viewType === selectViewOptions.recruit">
+                        <div #responsibilityChart class="resp-graph"></div>
+                        <div class="treemap-captions">
+                            <div class="caption" *ngFor="let categoryData of topResponsibilityCategories">
+                                <span class="square" [ngStyle]="{'background-color':categoryData.color}"></span>
+                                <span class="label-text-sm fw-semibold">
+                                    {{ categoryData.name }} ({{ categoryData.subCategoryCount }})
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sub-categories">
+                        <div *ngFor="let responsibility of topResponsibilitySubCategories" class="sub-category word-break-class">
+                            <kf-icon icon="check-solid" [style.color]="responsibility.parentNode.color"></kf-icon>
+                            <div class="item">
+                                <h5  class="label-text-sm fw-semibold">{{ responsibility.name }}</h5>
+                                <p class="body-text fs-body-sm fs-body-sm lh-18 ls-label-sm">{{ responsibility.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </kfthcl-section-card>
+
+                <kfthcl-section-card *ngIf="topTasks?.length && viewType !== selectViewOptions.select && viewType !== selectViewOptions.pay"
+                    [titleKey]="'pm.tasks'"
+                    [count]="tasks.length"
+                    [descriptionKey]="'pm.tasksIntro'"
+                    [width]="viewType === selectViewOptions.recruit ? 'lg' : 'md'"
+                    class="section-card task-card">
+                    <div class="tasks word-break-class">
+                        <div *ngFor="let task of topTasks" class="task">
+                            <kf-icon icon="check-solid" color="dark"></kf-icon>
+                            <span class="body-text fs-body-sm">{{ task.name }}</span>
+                        </div>
+                    </div>
+                </kfthcl-section-card>
+            </div>
+
+            <div class="aci-column capability-column" [class.two-column]="viewType === selectViewOptions.pay || viewType === selectViewOptions.recruit">
+                <kftarc-sp-tagline-card
+                    [title]="'pm.capabilityTitle'"
+                    [description]="'pm.capabilityTagline'"
+                    [icon]="'atom'"
+                    [width]="(viewType === selectViewOptions.pay || viewType === selectViewOptions.recruit) ? 'lg' : 'md'"
+                    (openSlider)="openSlider('behavioralCompetencies')"
+                ></kftarc-sp-tagline-card>
+
+                <div class="skills-techs-wrapper vertical" #skillsTechsWrapper>
+                    <div class="skills-techs" [class.two-column]="viewType === selectViewOptions.pay || viewType === selectViewOptions.recruit">
+                        <kfthcl-section-card *ngIf="(behavioralCompetencies && behavioralCompetencies.length && viewType !== selectViewOptions.pay && viewType !== selectViewOptions.recruit) || (technicalCompetencies && technicalCompetencies.length && (viewType !== selectViewOptions.select || (viewType === selectViewOptions.select && !isExecutiveLevel())))"
+                            [titleKey]="skillCardTitle"
+                            [descriptionKey]="'pm.skillsIntro'"
+                            [width]="(viewType === selectViewOptions.pay || viewType === selectViewOptions.recruit) ? 'sm' : 'md'"
+                            class="section-card skills-card"
+                            [class.two-column]="viewType === selectViewOptions.pay || viewType === selectViewOptions.recruit">
+                            <div class="behavioral-comps"
+                                *ngIf="viewType !== selectViewOptions.pay && viewType !== selectViewOptions.recruit">
+                                <span *ngIf="behavioralCompetencies?.length" class="title label-text-sm fw-semibold">
+                                    {{ 'lib.subCardTitleBehavioralCompetencies' | translate }}
+                                    ({{ behavioralCompetencies.length }})
+                                </span>
+                                <kf-chart *ngIf="topBehavioralSkillsCount" [width]="topSkillsWidth" [height]="topBehavioralSkillsHeight">
+                                    <kf-chart-series type="bar" [data]="topBehavioralSkills.values" [total]="8" [style]="barStyleSoft"></kf-chart-series>
+                                    <kf-chart-series type="benchmark" for="bar" [data]="topBehavioralSkills.benchmarks" [style]="benchmarkStyle"></kf-chart-series>
+                                    <kf-chart-ticks [data]="topBehavioralSkills.categories" [tooltipPosition]="'top'" [truncateFrom]="viewType === selectViewOptions.pay || viewType === selectViewOptions.recruit ? 28 : 38"></kf-chart-ticks>
+                                    <kf-chart-plot [margin]="{top:8}"></kf-chart-plot>
+                                </kf-chart>
+                            </div>
+                            <div class="technical-comps" *ngIf="!isIcClientUser && (viewType !== selectViewOptions.select || (viewType === selectViewOptions.select && !isExecutiveLevel()))">
+                                <span *ngIf="technicalCompetencies?.length" class="title label-text-sm fw-semibold">
+                                    {{ 'lib.subCardTitleTechnicalCompetencies' | translate }}
+                                    ({{ technicalCompetencies.length }})
+                                </span>
+                                <kf-chart *ngIf="topTechnicalSkillsCount" [width]="topSkillsWidth" [height]="topTechnicalSkillsHeight">
+                                    <kf-chart-series type="bar" [data]="topTechnicalSkills.values" [total]="5" [style]="barStyleSoft"></kf-chart-series>
+                                    <kf-chart-series type="benchmark" for="bar" [data]="topTechnicalSkills.benchmarks" [style]="benchmarkStyle"></kf-chart-series>
+                                    <kf-chart-ticks [data]="topTechnicalSkills.categories" [tooltipPosition]="'top'" [truncateFrom]="viewType === selectViewOptions.pay || viewType === selectViewOptions.recruit ? 28 : 38"></kf-chart-ticks>
+                                    <kf-chart-plot [margin]="{top:8}"></kf-chart-plot>
+                                </kf-chart>
+                            </div>
+                            <div class="technical-comps" *ngIf="isIcClientUser && (viewType !== selectViewOptions.select || (viewType === selectViewOptions.select && !isExecutiveLevel()))">
+                                <span *ngIf="technicalCompetencies?.length" class="title label-text-sm fw-semibold">
+                                    {{ 'lib.subCardTitleTechnicalCompetencies' | translate }}
+                                    ({{ technicalCompetencies.length }})
+                                </span>
+                                <div *ngFor="let skill of topTechnicalSkills.categories | slice:0:3" class="mt-16 skill-wrapper">
+                                    <span class="fs-body-sm skill-wrapper">{{ skill }}</span>
+                                </div>
+                            </div>
+                        </kfthcl-section-card>
+
+                        <kfthcl-section-card *ngIf="hasToolsTechCard"
+                            [titleKey]="toolsAndTechnoCardTitle"
+                            [descriptionKey]="'pm.skillsIntro'"
+                            [width]="(viewType === selectViewOptions.pay || viewType === selectViewOptions.recruit) ? 'sm' : 'md'"
+                            class="section-card tech-tool-card">
+                            <div class="tech-tool"
+                                [class.techs-tools-only]="viewType === selectViewOptions.pay
+                                      || viewType === selectViewOptions.recruit
+                                      || !(topToolTilesData.topElements.length && topTechSkillsData?.topElements.length)"
+                            >
+                            <div class="tools" *ngIf="(viewType !== selectViewOptions.pay && viewType !== selectViewOptions.recruit) && topToolTilesData.topElements.length">
+                                    <span *ngIf="topToolTilesData.topElements.length"
+                                        [ngClass]="{'tools-only': !topTechSkillsData?.topElements?.length}"
+                                        class="tiles-name label-text-sm fw-semibold">
+                                        {{ 'lib.subCardTitleTools' | translate }} ({{ tools.length }})
+                                    </span>
+                                    <kftarc-sp-tiles [tiles]="topToolTilesData"></kftarc-sp-tiles>
+                                </div>
+                                <div class="techs" *ngIf="!isIcClientUser">
+                                    <span *ngIf="topTechSkillsData?.topElements.length"
+                                        [ngClass]="{'tech-skills-only': !topToolTilesData.topElements.length}"
+                                        class="tiles-name label-text-sm fw-semibold"
+                                        [class.hide]="viewType === selectViewOptions.pay || viewType === selectViewOptions.recruit">
+                                        {{ 'pm.techSkillcard' | translate }} ({{ techSkillsTotal }})
+                                    </span>
+                                    <kftarc-sp-tiles [tiles]="topTechSkillsData"></kftarc-sp-tiles>
+                                </div>
+                            </div>
+                        </kfthcl-section-card>
+                    </div>
+
+                    <!-- THREE COLUMN DISPLAY for EXPERIENCE & EDUCATION -->
+                    <kfthcl-section-card
+                        [class.hide]="viewType === selectViewOptions.recruit || viewType === selectViewOptions.pay"
+                        [titleKey]="'pm.background'"
+                        [descriptionKey]="'pm.backgroundIntro'"
+                        class="section-card background-card word-break-class">
+                        <div class="education">
+                            <kf-icon icon="education" size="lg" [class.disable]="!education"></kf-icon>
+                            <span class="label-text-sm fw-semibold lh-18 ls-label-sm" *ngIf="education">{{ education.name }}</span>
+                            <span class="label-text-sm fw-semibold color-medium" *ngIf="!education">{{ 'pm.generalEducation' | translate }}</span>
+                            <span class="body-text fs-body-sm lh-18 ls-label-sm" *ngIf="education">{{ education.description }}</span>
+                            <span class="body-text fs-body-sm color-medium" *ngIf="!education">{{ 'pm.notRequired' | translate }}</span>
+                        </div>
+                        <div class="experience">
+                            <div class="professional-experience">
+                                <kf-icon icon="leaf" size="lg" [class.disable]="!generalExperience"></kf-icon>
+                                <span class="label-text-sm fw-semibold lh-18 ls-label-sm" *ngIf="generalExperience">{{ generalExperience.name }}</span>
+                                <span class="label-text-sm fw-semibold color-medium" *ngIf="!generalExperience">{{ 'pm.generalExperience' | translate }}</span>
+                                <span *ngIf="generalExperience" class="description body-text fs-body-sm lh-18 ls-label-sm">{{ generalExperience.description }}</span>
+                                <span class="body-text fs-body-sm color-medium" *ngIf="!generalExperience">{{ 'pm.notRequired' | translate }}</span>
+                            </div>
+                            <div class="managerial-experience">
+                                <kf-icon icon="briefcase" size="lg" [class.disable]="!managerialExperience"></kf-icon>
+                                <span class="label-text-sm fw-semibold lh-18 ls-label-sm" *ngIf="managerialExperience">{{ managerialExperience.name }}</span>
+                                <span class="body-text fs-body-sm fw-semibold color-medium" *ngIf="!managerialExperience">{{ 'pm.managerialExperience' | translate }}</span>
+                                <span *ngIf="managerialExperience" class="description body-text fs-body-sm lh-18 ls-label-sm">{{ managerialExperience.description }}</span>
+                                <span class="body-text fs-body-sm color-medium lh-18 ls-label-sm" *ngIf="!managerialExperience">{{ 'pm.notRequired' | translate }}</span>
+                            </div>
+                        </div>
+                        <div></div>
+                    </kfthcl-section-card>
+
+                    <!-- TWO COLUMN DISPLAY for EXPERIENCE & EDUCATION -->
+                    <kfthcl-section-card
+                        [class.hide]="viewType !== selectViewOptions.recruit && viewType !== selectViewOptions.pay"
+                        [titleKey]="'pm.background'"
+                        [descriptionKey]="'pm.backgroundIntro'"
+                        [width]="topTechTilesData?.topElements?.length && viewType !== selectViewOptions.pay && viewType !== selectViewOptions.recruit ||
+                           topTechSkillsData?.topElements?.length && (viewType === selectViewOptions.pay || viewType === selectViewOptions.recruit) ? 'lg' : 'sm'"
+                        class="section-card exp-edu-card" [class.vertical]="isTwoColumnsAlignment()">
+                        <div class="blocks-container" [class.two-column]="isTwoColumnsAlignment()">
+                            <div class="education">
+                                <kf-icon icon="education" size="lg" [class.disable]="!education"></kf-icon>
+                                <span class="body-text fs-body-sm fw-semibold lh-18 ls-label-sm" *ngIf="education">{{ education.name }}</span>
+                                <span class="body-text fs-body-sm fw-semibold color-medium" *ngIf="!education">{{ 'pm.generalEducation' | translate }}</span>
+                                <span class="body-text fs-body-sm lh-18 ls-label-sm" *ngIf="education">{{ education.description }}</span>
+                                <span class="body-text fs-body-sm color-medium" *ngIf="!education">{{ 'pm.notRequired' | translate }}</span>
+                            </div>
+                            <div class="professional-experience">
+                                <kf-icon icon="leaf" size="lg" [class.disable]="!generalExperience"></kf-icon>
+                                <span class="body-text fs-body-sm fw-semibold lh-18 ls-label-sm" *ngIf="generalExperience">{{ generalExperience.name }}</span>
+                                <span class="body-text fs-body-sm fw-semibold color-medium" *ngIf="!generalExperience">{{ 'pm.generalExperience' | translate }}</span>
+                                <span *ngIf="generalExperience" class="description body-text fs-body-sm lh-18 ls-label-sm">{{ generalExperience.description }}</span>
+                                <span class="body-text fs-body-sm color-medium" *ngIf="!generalExperience">{{ 'pm.notRequired' | translate }}</span>
+                            </div>
+                            <div class="managerial-experience">
+                                <kf-icon icon="briefcase" size="lg" [class.disable]="!managerialExperience"></kf-icon>
+                                <span class="body-text fs-body-sm fw-semibold lh-18 ls-label-sm" *ngIf="managerialExperience">{{ managerialExperience.name }}</span>
+                                <span class="body-text fs-body-sm fw-semibold color-medium" *ngIf="!managerialExperience">{{ 'pm.managerialExperience' | translate }}</span>
+                                <span *ngIf="managerialExperience" class="description body-text fs-body-sm lh-18 ls-label-sm">{{ managerialExperience.description }}</span>
+                                <span class="body-text fs-body-sm color-medium" *ngIf="!managerialExperience">{{ 'pm.notRequired' | translate }}</span>
+                            </div>
+                        </div>
+                    </kfthcl-section-card>
+
+                    <kfthcl-section-card *ngIf="viewType === selectViewOptions.select && isExecutiveLevel()"
+                        [explanation]="'pm.softSkillsHighlight'"
+                    ></kfthcl-section-card>
+                </div>
+            </div>
+
+            <div class="aci-column identity-column" *ngIf="viewType !== selectViewOptions.pay && viewType !== selectViewOptions.recruit">
+                <kftarc-sp-tagline-card
+                    [title]="'pm.identityTitle'"
+                    [description]="'pm.identityTagline'"
+                    [icon]="'fingerprint'"
+                    (openSlider)="openSlider('traitsCompetencies')"
+                ></kftarc-sp-tagline-card>
+                <kfthcl-section-card *ngIf="topTraits?.length && (viewType !== selectViewOptions.select || (viewType === selectViewOptions.select && !isEntryLevel()))"
+                    [titleKey]="'pm.traits'"
+                    [count]="traits.length"
+                    [descriptionKey]="'pm.traitsIntro'"
+                    class="section-card traits-card" >
+                    <div class="traits">
+                        <span *ngFor="let trait of topTraits" class="trait body-text fs-body-sm lh-18 ls-label-sm">{{ trait.descriptions[0].name }}</span>
+                    </div>
+                </kfthcl-section-card>
+
+                <kfthcl-section-card *ngIf="driversHexData?.data?.length && (viewType !== selectViewOptions.select || (viewType === selectViewOptions.select && !isEntryLevel()))"
+                    [titleKey]="'pm.drivers'"
+                    [descriptionKey]="'pm.driversIntro'"
+                    class="section-card drivers-card hex-chart-card">
+                    <kf-chart class="hex-chart">
+                        <kf-chart-series type="hex" [data]="driversHexData.data" [style]="hexStyle" [maxScore]="maxScore"></kf-chart-series>
+                    </kf-chart>
+                </kfthcl-section-card>
+
+                <kfthcl-section-card *ngIf="cognitiveAbilitiesData?.length && (viewType !== selectViewOptions.select || (viewType === selectViewOptions.select && !isExecutiveLevel()))"
+                    [titleKey]="'pm.cognitiveAbilities'"
+                    [descriptionKey]="'pm.cognitiveAbilitiesIntro'"
+                    class="section-card cognitive-card">
+                    <div class="abilities">
+                    <ng-container *ngIf="!customAssessmentsEnabled || !displayCustomCogAbilities">
+                        <div *ngFor="let abilities of cognitiveAbilitiesData" class="ability">
+                            <kf-icon [icon]="abilities.isMandatory ? 'check-solid' : 'check-line'" color="success"></kf-icon>
+                            <span class="body-text fs-body-sm lh-18 ls-label-sm">{{ getCogAbilitiesName(abilities.name) }}</span>
+                        </div>
+                    </ng-container>
+                    <ng-container *ngIf="customAssessmentsEnabled && displayCustomCogAbilities">
+                        <div *ngFor="let ability of cognitiveAbilitiesData" class="ability">
+                            <kf-icon icon="check-solid" color="success"></kf-icon>
+                            <span class="body-text fs-body-sm lh-18 ls-label-sm">{{ getCogAbilitiesNameByType(ability.type) | translate }}</span>
+                        </div>
+                    </ng-container>
+                    </div>
+                </kfthcl-section-card>
+
+                <kfthcl-section-card *ngIf="viewType === selectViewOptions.select && isEntryLevel()"
+                    [explanation]="'pm.personalityDriversHighlight'"
+                ></kfthcl-section-card>
+                <kfthcl-section-card *ngIf="viewType === selectViewOptions.select && isExecutiveLevel()"
+                    [explanation]="'pm.cognitiveAbilitiesHighlight'"
+                ></kfthcl-section-card>
+            </div>
+        </div>
+
+        <div class="sp-ld-container" *ngIf="arch !== 'select' && learningContent.length">
+            <div class="sp-ld-col1">
+                <div class="sp-ld-title">
+                    <kf-icon class="book-icon" size="xl" color="light" icon="book"></kf-icon>
+                    <h4 class="body-text fw-bold color-white"> {{ 'pm.learningDevelopment' | translate }} </h4>
+                </div>
+                <span class="body-text color-white">{{ 'pm.learningDevelopmentDesc' | translate }}</span>
+            </div>
+            <div class="sp-ld-col2">
+                <div class="sp-ld-courses-count label-text-sm color-white lh-18 text-uppercase">{{ learningContent.length }} <span *ngIf="learningContent.length === 1">{{ 'pm.courseAvaliable' | translate }}</span><span *ngIf="learningContent.length > 1">{{ 'pm.coursesAvaliable' | translate }}</span></div>
+                <div>
+                    <a (click)="openLearningDevelopment()" class="link-white">{{ 'pm.learnMore' | translate }}</a>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="arch !== 'select'"
+            class="spdetail-properties-container"
+            [ngClass]="isOnet ? 'four-items' : 'three-items'">
+            <div class="profile-property"
+            [ngClass]="{'four-items': isOnet, 'three-items' : !isOnet, 'two-items': isIcClientUser && !isOnet }">
+                <!-- RELATED PROFILES -->
+                <div *ngIf="isOnet" class="spdetail-properties">
+                    <div class="spdetail-properties-content">
+                        <div class="properties-header">
+                            <kf-icon icon="best-in-class" size="lg"></kf-icon>
+                            <h4 class="properties-title label-text-sm ls-utility">
+                                {{ 'pm.relatedSuccessProfiles' | translate | uppercase }}
+                            </h4>
+                        </div>
+                        <div class="properties-container">
+                            <div class="properties-row related-profiles-row body-text" *ngIf="successProfile.parentJobDetails">
+                                <kf-icon icon="profile-function" color="primary"></kf-icon>
+                                <a (click)="navigateToSuccessProfile(successProfile.parentJobDetails.id)">
+                                    {{ successProfile.parentJobDetails.title }}
+                                </a>
+                            </div>
+                            <div class="properties-row related-profiles-row body-text"
+                                *ngFor="let relatedSuccessProfile of relatedSuccessProfiles">
+                                <kf-icon icon="{{ relatedSuccessProfile.profileType | kftarcRelatedSpIcon }}" color="primary"></kf-icon>
+                                <a (click)="navigateToSuccessProfile(relatedSuccessProfile.id)">
+                                    {{ relatedSuccessProfile.title }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DETAILS -->
+                <div class="spdetail-properties">
+                    <div class="spdetail-properties-content">
+                        <div class="properties-header">
+                            <kf-icon icon="details" size="lg"></kf-icon>
+                            <h4 class="properties-title label-text-sm ls-utility">
+                                {{ 'pm.successProfileDetails' | translate | uppercase }}
+                            </h4>
+                        </div>
+                        <div class="properties-container">
+                            <div *ngIf="!successProfile.isTemplateJob && successProfile.parentJobDetails"
+                                class="detail-row properties-row details line-clamp-2"
+                                [pTooltip]="successProfile.parentJobDetails.title"
+                                [tooltipDisabled]="hideTooltip"
+                                (mouseenter)="hover($event)">
+                                <span class="body-text based-on">
+                                    {{ 'lib.basedOn' | translate }}
+                                    <a (click)="navigateToParentProfile(successProfile.parentJobDetails.id)" class="fw-regular" *ngIf="hasLanguageAccess || !hasLanguageAccess && successProfile.parentJobDetails.preferredLocale === userLocale">
+                                        {{ successProfile.parentJobDetails.title }}
+                                        <span *ngIf="successProfile.parentJobDetails.version && successProfile.parentJobDetails.profileType !== spTypeEnum.Custom">
+                                            {{ 'pm.version' | translate }} {{ successProfile.parentJobDetails.version }}
+                                        </span>
+                                    </a>
+                                    <span class="fw-regular" *ngIf="!hasLanguageAccess && successProfile.parentJobDetails?.preferredLocale !== userLocale">
+                                        {{ successProfile.parentJobDetails.title }}
+                                        <span *ngIf="successProfile.parentJobDetails.version && successProfile.parentJobDetails.profileType !== spTypeEnum.Custom">
+                                            {{ 'pm.version' | translate }} {{ successProfile.parentJobDetails.version }}
+                                        </span>
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="detail-row properties-row details">
+                                <span class="details body-text">
+                                    {{ 'pm.successProfileCreated' | translate }}
+                                    {{ getSource('CREATED_BY', 'effectiveDateTime', convertMillisToDate) | date:'M-dd-yy' }}
+                                    {{ 'by' | translate }} {{ getSource('CREATED_BY', 'name') }}
+                                </span>
+                            </div>
+                            <div class="detail-row properties-row details" *ngIf="!successProfile.isTemplateJob">
+                                <span class="details body-text">
+                                    {{ 'pm.successProfileLastModified' | translate }}
+                                    {{ getSource('LAST_MODIFIED_BY', 'effectiveDateTime', convertMillisToDate) | date:'M-dd-yy' }}
+                                    {{ 'by' | translate }} {{ getSource('LAST_MODIFIED_BY', 'name') }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="detail-row properties-row details" *ngIf="isLevel || isFunction">
+                            <span class="details body-text">
+                                {{ successProfile.title }}
+                                {{ 'pm.shortVersion' | translate }}
+                                <span *ngIf="successProfile.parentJobDetails">{{ successProfile.parentJobDetails.version }}</span>
+                            </span>
+                        </div>
+                        <div class="detail-row properties-row details" *ngIf="isOnet">
+                            <span class="detail body-text">
+                                {{ successProfile.title }}
+                                {{ 'pm.shortVersion' | translate }}
+                                <span *ngIf="successProfile.parentJobDetails">{{ successProfile.parentJobDetails.version }}</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- USAGE STATS -->
+                <div class="spdetail-properties" *ngIf="!isIcClientUser">
+                    <div class="spdetail-properties-content">
+                        <div class="properties-header">
+                            <kf-icon icon="usage-stats" size="lg"></kf-icon>
+                            <h4 class="properties-title label-text-sm ls-utility">
+                                {{ 'pm.successProfileUsageStats' | translate | uppercase }}
+                            </h4>
+                        </div>
+                        <div class="properties-container">
+                            <div class="usage-row properties-row body-text"
+                                pTooltip="{{'pm.selectedLanguageDifferent' | translate }}"
+                                [tooltipDisabled]="!hasLanguageAccess || hasLanguageAccess && languagesAreMatching"
+                                tooltipPosition="top">
+                                <a [ngClass]="{'disabled': hasLanguageAccess && !languagesAreMatching}"
+                                class="job-description-title" (click)="relatedJDSearch()">
+                                    {{ 'pm.successProfileAddnlLinkRelatedJobDes' | translate }}
+                                </a>
+                                <a [ngClass]="{'disabled': hasLanguageAccess && !languagesAreMatching}" (click)="relatedJDSearch()">
+                                    {{ successProfile.noOfDependantJobs || 0 }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REPORTS -->
+                <div class="spdetail-properties">
+                    <div class="spdetail-properties-content">
+                        <div class="properties-header">
+                            <kf-icon icon="reports" size="lg"></kf-icon>
+                            <h4 class="properties-title label-text-sm ls-utility">{{ 'pm.reports' | translate | uppercase }}</h4>
+                        </div>
+                        <div class="properties-container">
+                            <div class="reports-row properties-row body-text">
+                                <a (click)="downloadSuccessProfileReport()">{{ 'pm.successProfileLabel' | translate }}</a>
+                            </div>
+                            <div class="reports-row properties-row body-text">
+                                <a (click)="downloadInterviewGuide()">{{ 'pm.successProfileInterviewGuide' | translate }}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="addition-info">
+            <p *ngIf="arch !== 'select'" class="info">* {{ 'pm.roleLocationHelp' | translate }}</p>
+            <p *ngIf="technicalCompetencies?.length && arch !== 'select'" class="info body-text fs-body-xs lh-16">
+                {{ 'lib.oNetCitation1' | translate }}
+                <a href="https://www.onetcenter.org/" class="fw-regular" target="_blank">{{ 'lib.oNetDatabase' | translate }}</a>
+                {{ 'lib.oNetCitation2' | translate }}
+                <a href="https://creativecommons.org/licenses/by/4.0/" class="fw-regular"  target="_blank">{{ 'lib.oNetCitationLicenses' | translate }}</a>
+                {{ 'lib.oNetCitation3' | translate }} <i>{{ 'lib.kornFerry' | translate }}</i>
+                {{ 'lib.oNetCitationEdited' | translate }}
+            </p>
+            <div *ngIf="successProfile.isAIProfile && successProfile.profileType !== 'CUSTOM'" class="info body-text d-flex">*
+                <kf-icon class="ml-8 mt-4" icon="ai-powered" color="dark" size="lg"></kf-icon>
+                <div class="ml-8">{{ 'lib.aiPoweredDisclaimer' | translate }}</div>
+            </div>
+        </div>
+
+        <kfthcl-sp-competency-detail *ngIf="copySP && selectedCountry && isSliderOpen"
+            [(visible)]="isSliderOpen"
+            [isEditable]="isEditable"
+            [(isEditMode)]="isEditMode"
+            [defaultTab]="defaultTab"
+            [successProfile]="copySP"
+            [assessmentRequirements]="assessmentRequirements"
+            [selectedCountry]="selectedCountry"
+            [marketInsightConfig]="marketInsightConfig"
+            [altTitles]="altTitles"
+            [permissions]="permissions"
+            [showKfGradeIcon]="showKfGradeIcon"
+            (successProfileSave)="onSuccessProfileSave($event)"
+            (editModeChange)="toggleEditSuccessProfile($event)"
+            (successProfileSave)="onSavedSP()"
+            (successProfileChange)="onSuccessProfileChange($event)"
+            (reloadPriceResult)="onReloadPriceResult($event)"
+            (countrySelectionChange)="onCountrySelectionChange($event)"
+        ></kfthcl-sp-competency-detail>
+    </kf-page-content>
+</kf-page>
+
+<kfthcl-kf-edit-success-profile *ngIf="showEditPopUp"
+    [showEditPopUp]="showEditPopUp"
+    [editAccess]="editCollaborativeAccess"
+    [ownerObject]="ownerObject"
+    (form)="toggleEditSuccessProfile({ event: true, editSuccessProfileFormValue: $event })"
+    (sendPopup)="closePopUp()">
+</kfthcl-kf-edit-success-profile>
+
+<kf-modal *ngIf="isIGEmptyModalOpen"
+    title="{{ 'pm.notice' | translate }}"
+    size="sm" [(visible)]="isIGEmptyModalOpen">
+    <div class="body-content">{{ 'pm.interviewGuideBEHNotFound' | translate }}</div>
+    <footer><button class="btn" (click)="closeIGEmptyModal()">{{ 'pm.ok' | translate }}</button></footer>
+</kf-modal>
+
+<kf-modal *ngIf="showRemoveModal"
+    class="pp-modal"
+    size="sm"
+    [modal]="true"
+    title="{{ 'lib.removalConfirmationQuestion' | translate }} '{{ successProfile.title }}'?"
+    [closeOnEscape]="false"
+    [dismissableMask]="false"
+    [scrollable]="true"
+    [(visible)]="showRemoveModal">
+    <div class="pp-modal-body">
+        <span class="body-text" *ngIf="!successProfile.isArchitectJob">
+            {{ 'pm.successProfileRemoveModalContent' | translate }}
+        </span>
+        <span class="body-text" *ngIf="successProfile.isArchitectJob">
+            {{ 'pm.successProfileRemoveArchitectModalContent' | translate }}
+        </span>
+    </div>
+    <footer>
+        <button (click)="removeSuccessProfileChoice(false)" class=" btn btn-outline">{{ 'pm.successProfileRemoveModalButtonCancel' | translate }}</button>
+        <button (click)="removeSuccessProfileChoice(true)" class="btn">{{ 'pm.successProfileRemoveModalButtonYes' | translate }}</button>
+    </footer>
+</kf-modal>
+
+<kf-slide-up *ngIf="isLearningDevelopOpen"
+    [(visible)]="isLearningDevelopOpen"
+    [correctSize]="true"
+    [overrideWithCustomFooter]="true">
+    <div kf-slider-header-content>
+        <h1>{{ 'pm.learningDevelopment' | translate }}</h1>
+    </div>
+    <div class="learning-content-slider">
+        <div class="body-text learning-content-title">{{ 'pm.coursesTitle' | translate }}</div>
+        <div class="course-wrapper" *ngFor="let course of learningContent">
+            <h4 class="course-name fw-bold">{{ course.name }}</h4>
+            <div class="course-descr body-text">{{ course.description }}</div>
+            <div *ngIf="course.behComps.length">
+                <div class="competencies-title body-text fw-bold">{{ 'pm.behavioralCompetencies' | translate }}</div>
+                <div class="competencies-list body-text">{{ course.behComps.join(', ') }}</div>
+            </div>
+            <div *ngIf="course.techComps.length">
+                <div class="competencies-title body-text fw-bold">{{ 'pm.technicalCompetencies' | translate }}</div>
+                <div class="competencies-list body-text">{{ course.techComps.join(', ') }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="custom-footer-content slider-content learning-content-footer">
+        <div class="footer-left">
+            <button class="btn btn-outline" (click)="closeLearningDevelopment()">{{ 'lib.close' | translate }}</button>
+        </div>
+        <div class="footer-right">
+            <kf-icon class="phone-icon" icon="phone" size="lg"></kf-icon> <span class="body-text fw-bold">{{ 'pm.contactConsultant' | translate }}</span>
+        </div>
+    </div>
+</kf-slide-up>
+
+<kfthcl-copy-modal
+    *ngIf="isCopyModalOpen && hasLanguageAccess"
+    [id]="successProfile.id"
+    [languages]="languages"
+    [title]="successProfile.title"
+    [selectedLanguage]="selectedLanguage"
+    [profileCollections]="clientProfileCollections"
+    [(visible)]="isCopyModalOpen"
+    modalTitle="pm.successProfileCopySuccessProfile"
+    [appendCopyToTitle]="true"
+    (copySP)="onCopySP($event)"
+    (closeModal)="closeCopyModal()"
+    [deselectAllOptionAvailable]="deselectAllOptionAvailable">
+</kfthcl-copy-modal>
+
+<kf-modal
+    *ngIf="!hasLanguageAccess"
+    [width]="482"
+    height="auto"
+    [(visible)]="isCopyModalOpen"
+    title="{{ 'pm.successProfileCopySuccessProfile' | translate }}"
+    [closeOnEscape]="false">
+    <div>
+        {{ 'pm.renameSP' | translate }}.
+        <div class="copy-title">
+            <kf-input [(ngModel)]="copySPTitle" [maxlength]="jobTitleMaxLength" label="{{ 'lib.profileTitle' | translate }}"></kf-input>
+            <p *ngIf="!copySPTitle?.length" class="subtext-sm fw-bold pt-12">
+                <kf-icon icon="warning-info" color="danger" size="sm"></kf-icon>
+                {{ 'lib.required' | translate }}
+            </p>
+            <p *ngIf="copySPTitle?.length > jobTitleMaxLength" class="subtext-sm fw-bold pt-12">
+                <kf-icon icon="warning-info" color="danger" size="sm"></kf-icon>
+                {{ jobTitleMaxLengthWarningText }}
+            </p>
+        </div>
+        <p class="mt-12 fs-body-sm fw-bold color-dark ls-02"> {{ 'lib.jobCode' | translate }}</p>
+        <kf-input
+            [(ngModel)]="jobCode"
+            class="cj-input"
+            maxlength="50"
+            (ngModelChange)="jobCodeChange$.next($event)"
+        ></kf-input>
+            <div class="mt-12 property-dropdown">
+                <kfthcl-multi-selection-dropdown
+                    *ngIf="clientProfileCollections?.length > 0"
+                    [subProperties]="clientProfileCollections"
+                    [placeHolder]="'lib.selectProfileCollection' | translate"
+                    (multiSubPropsUpdated)="onProfileCollectionsUpdated($event)"
+                    [jobPropertyName]="'lib.PROFILE_COLLECTIONS' | translate"
+                    class="property-dropdown"
+                    [deselectAllOptionAvailable]="deselectAllOptionAvailable"
+                    (deselectAllOptionSelected)="deselectAllOptionSelected($event)"
+                    [isJobPropertyRequired]="true">
+            </kfthcl-multi-selection-dropdown>
+            </div>
+        <p *ngIf="invalidJobCode" kf-text size="sm" weight="strong">
+            <kf-icon icon="warning-info" color="danger" size="sm"></kf-icon>
+            {{ 'lib.invalidJobCode' | translate }}
+        </p>
+    </div>
+
+    <footer>
+        <button class="btn btn-outline" (click)="cancelCopy()">{{ 'pm.cancel' | translate }}</button>
+        <button class="btn"
+            [disabled]="!copySPTitle ||
+                        invalidJobCode ||
+                        copySPTitle.length > jobTitleMaxLength ||
+                        clientProfileCollections?.length > 0 &&
+                        isDeselectAllOptionSelected === false &&
+                        selectedProfileCollections?.length === 0" (click)="copySuccessProfile()">{{ 'pm.save' | translate }}</button>
+    </footer>
+</kf-modal>
+
+<kf-modal *ngIf="isAssessmentModal" class="assessment-ModalHeading" title="Create Project" size="md" [scrollable]="true" [(visible)]="isAssessmentModal">
+    <h4 class="assessment-modal-subHeading fs-body fw-bold">
+        {{ 'pm.assessmentModalProjectCreate' | translate }}
+    </h4>
+    <div class="project-type">
+        <kf-tab-view [(selectedIndex)]="assessmentSelectedIndex" (selectedIndexChange)="onAssessmentModalTabSelected($event)">
+            <kf-tab-panel *ngFor='let productType of productTypes' header="{{productType?.name}}" class="project-type-panel" uKey="{{productType?.name}}">
+                <form [formGroup]="productInputsForm">
+                    <div *ngFor='let product of productType?.products' class="mb-32">
+                        <kf-radio-button [disabled]="product?.type==='POTENTIAL'" *ngIf="product"
+                            label="{{product.name === 'Leadership Selection' ? 'Leadership' : product?.name}}"
+                            description="{{product?.description}}" value="{{product?.type}}"
+                            formControlName="product"
+                        ></kf-radio-button>
+                    </div>
+                </form>
+            </kf-tab-panel>
+        </kf-tab-view>
+    </div>
+    <footer class="project-type-footer">
+        <button class="btn btn-outline" (click)="leaveAssessPageChoice(true)">{{ 'pm.cancel' | translate }}</button>
+        <button class="btn" [disabled]="isAssessNextBtnDisabled" (click)="continueAssessPageChoice()">{{ 'pm.continue' | translate }}</button>
+    </footer>
+</kf-modal>
+
+<kfthcl-arch-add-job-modal
+    [isCreateJobModal]="isCreateJobModal"
+    [jobTitle]="jobTitle"
+    [jobCode]="jobCode"
+    [selectedProfile]="successProfile"
+    (changedCreateJobModal)="shutoffCreateJob($event)"
+></kfthcl-arch-add-job-modal>
+
+<kfthcl-profile-match-tool-modal *ngIf="showMatchTool"
+    #profileMatchTool
+    [(visible)]="showMatchTool"
+    [jobFactors]="jobFactors"
+    [spTitle]="successProfile.title"
+    (btnClickCallback)="onMatchToolChange($event)"
+></kfthcl-profile-match-tool-modal>
+
+<kfthcl-download-pdf *ngIf="permissions"
+    [visible]="isSpPdfDownloadOpened"
+    [successProfile]="successProfile"
+    [marketInsights]="marketInsights"
+    [exportType]="'success_profile_single_pdf_export'"
+    (visibleChange)="toggleSpPdfDownload($event)"
+    (downloadClick)="downloadReport($event)"
+></kfthcl-download-pdf>
+
+<div *ngIf="arch === 'select'" class="arch-footer-wrap" kfFixedFooterPosition>
+    <div class="archNavigatedFooter">
+        <button class="btn btn-outline" (click)="back()">{{ 'lib.close' | translate }}</button>
+        <span *ngIf="this.showMaxJobsTooltip" class="pt-8 position-relative">
+            <kf-icon icon="warning-info" color="danger" size="sm"></kf-icon>
+            {{ 'pm.maxJobSelectedMessage' | translate }}
+        </span>
+        <div pTooltip="{{'lib.errShortProfileEditPM' | translate }}"
+            [tooltipDisabled]="successProfile.shortProfile !== 'Err'"
+            [tooltipZIndex]="100000"
+            tooltipPosition="top">
+            <button
+                [disabled]="successProfile.shortProfile === 'Err' || this.showMaxJobsTooltip"
+                class="btn"
+                (click)="showCreateJobModel()"
+                >{{ 'lib.useThisProfile' | translate }}</button>
+        </div>
+    </div>
+</div>
+
+<kfthcl-exec-grading
+    *ngIf="successProfile?.id"
+    [(visible)]="showExecGrading"
+    [title]="jobTitle"
+    [roleId]="successProfile.jobRoleTypeId"
+    [standardHayGrade]="successProfile?.grade?.standardHayGrade"
+    [jobId]="successProfile?.id"
+    (gradedProfile)="onSavedSP($event)"
+></kfthcl-exec-grading>
+
+<ng-container [kfSMCXSurvey]="surveyScope"></ng-container>
+
+<kftarc-sp-interview-guide
+    *ngIf="successProfile?.id"
+    [id]="successProfile.id"
+    [url]="successProfile.interviewGuideUrl"
+    [compIds]="behavioralCompetenciesCodes"
+    [bcRecords]="behavioralCompsRecords"
+    [skillsRecords]="skillsRecords"
+    [spName]="successProfile.title"
+    [(visible)]="isIGConfigModalOpen"
+></kftarc-sp-interview-guide>

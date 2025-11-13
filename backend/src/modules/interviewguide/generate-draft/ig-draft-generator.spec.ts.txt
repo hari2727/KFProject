@@ -1,0 +1,100 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { IgDraftTransformer } from './ig-draft-generator';
+import { IgModelComparator } from './ig-model-comparator';
+import { IgMock } from '../mock/ig-mocks';
+
+describe('IgDraftTransformer', () => {
+    let module: TestingModule;
+    let igDraftTransformer: IgDraftTransformer;
+
+    const areCompetenciesEqualMock = jest.fn();
+
+    beforeAll(async () => {
+        module = await Test.createTestingModule({
+            providers: [
+                IgDraftTransformer,
+                { provide: IgModelComparator, useValue: {areCompetenciesEqual: areCompetenciesEqualMock}},
+            ],
+        }).compile();
+
+        igDraftTransformer = module.get(IgDraftTransformer);
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+        jest.clearAllTimers();
+    });
+
+    describe('generateNewDraft', () => {
+        test('should generate New Draft properly', async () => {
+            // Arrange
+            jest.spyOn(igDraftTransformer as any, 'getTimeString').mockReturnValue(IgMock.generatedDraft.competencies[0].competency.dateModified);
+
+            // Act
+            const result = igDraftTransformer.generateNewDraft(
+                IgMock.igCmsIdBin, //competencyId: string
+                IgMock.draft.clientId,  //clientId: number
+                IgMock.draft.locale,  //locale: string
+                String(IgMock.draft.createdBy),  //userId: string
+                IgMock.igCmsMappedCompBin,  //origCompPayload: S.Competency
+                IgMock.draft, //igDraftOrig: S.Draft
+                IgMock.igCmsMappedStandart, //igCmsOrig: S.CompetencyRoot[]
+                IgMock.igCmsMappedBase, //igBaseOrig: S.CompetencyRoot[]
+            );
+
+            // Assert
+            expect(result).toEqual(IgMock.generatedDraft);
+        });
+        test('should throw HttpException on error', async () => {
+            // Arrange
+            jest.spyOn(igDraftTransformer as any, 'generateDraftTemplate').mockImplementationOnce(()=> {throw new Error()});
+
+            // Act
+            const resultF = async () => igDraftTransformer.generateNewDraft(
+                IgMock.igCmsIdBin, //competencyId: string
+                IgMock.draft.clientId,  //clientId: number
+                IgMock.draft.locale,  //locale: string
+                String(IgMock.draft.createdBy),  //userId: string
+                IgMock.igCmsMappedCompBin,  //origCompPayload: S.Competency
+                IgMock.draft, //igDraftOrig: S.Draft
+                IgMock.igCmsMappedStandart, //igCmsOrig: S.CompetencyRoot[]
+                IgMock.igCmsMappedBase, //igBaseOrig: S.CompetencyRoot[]
+            );
+
+            // Assert
+            await expect(resultF).rejects.toThrowError(HttpException);
+        });
+    });
+
+    describe('draftToCmsStructure', () => {
+        test('should convert draftToCmsStructure properly', async () => {
+            // Arrange
+            jest.spyOn(igDraftTransformer as any, 'getTimeString').mockReturnValue(IgMock.generatedDraft.competencies[0].competency.dateModified);
+
+            // Act
+            const result = igDraftTransformer.draftToCmsStructure(IgMock.draft);
+
+            // Assert
+            expect(result).toEqual(IgMock.draftToCmsStructure);
+        });
+    });
+
+    describe('generateDraftTemplate', () => {
+        test('should generate New Draft properly', async () => {
+            // Arrange
+            jest.spyOn(igDraftTransformer as any, 'getTimeString').mockReturnValue(IgMock.generatedDraft.competencies[0].competency.dateModified);
+            //clientId: number, locale: string, userId: string, igDraft: S.Draft, igCms: S.CompetencyRoot[]
+            // Act
+            const result = igDraftTransformer.generateDraftTemplate(
+                IgMock.draft.clientId,  //clientId: number
+                IgMock.draft.locale,  //locale: string
+                String(IgMock.draft.createdBy),  //userId: string
+                null,  //igDraft: S.Draft
+                IgMock.draft.competencies, //igCmsOrig: S.CompetencyRoot[]
+            );
+
+            // Assert
+            expect(result).toEqual(IgMock.draft);
+        });
+    });
+});

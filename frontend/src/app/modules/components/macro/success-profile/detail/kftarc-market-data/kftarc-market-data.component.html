@@ -1,0 +1,133 @@
+<div class="insights-section" *ngIf="checkMarketInsights()">
+    <kftarc-summary-insights-card [title]="'pm.insightsTitle'" [icon]="'diamond'">
+        <!-- SELECT INSIGHTS -->
+        <div *ngIf="viewType === selectViewOptions.select && checkMarketInsights()" class="insights-card">
+            <kfthcl-section-card *ngIf="salaryRangeData" [titleKey]="'pm.salaryRangeTitle'"
+                             [titleParam]="salaryRangeFactName"
+                             [extraDesc]="salaryRangeCurrencyCode ? 'In ' + salaryRangeCurrencyCode : ''">
+                <kftarc-sp-salary-range [data]="salaryRangeData"></kftarc-sp-salary-range>
+            </kfthcl-section-card>
+
+            <kfthcl-section-card *ngIf="scarcityDonutConfig"
+                             [titleKey]="'lib.candidateScarcity'"
+                             [descriptionKey]="'pm.candidateScarcityIntro'">
+                <kf-double-donut [donutConfig]="scarcityDonutConfig"></kf-double-donut>
+            </kfthcl-section-card>
+
+            <kfthcl-section-card *ngIf="developmentDifficulty?.length"
+                             [titleKey]="'lib.headingDifficultyLevel'"
+                             [descriptionKey]="'pm.developmentDifficultyIntro'"
+                             class="insights-diff-dev">
+                <div *ngFor="let difficulty of developmentDifficulty" class="diff-dev-item">
+                    <span #competencyName class="name"
+                    [pTooltip]="difficulty.competencyName"
+                    [tooltipDisabled]="competencyName.offsetWidth === competencyName.scrollWidth"
+                    tooltipPosition="top"
+                   ><span class="subtext-sm">{{ difficulty.competencyName }}</span></span>
+                    <kf-meter-bar [value]="difficulty.difficultyLevel" max="5" color="lemonGreen"
+                                  circleShape="true"></kf-meter-bar>
+                </div>
+            </kfthcl-section-card>
+        </div>
+
+        <!-- PAY INSIGHTS -->
+        <div *ngIf="viewType === selectViewOptions.pay && checkMarketInsights()" class="insights-card pay-card">
+            <kfthcl-section-card *ngIf="mixOfRewards" class="insights-mix-of-rewards"
+                             [titleKey]="'pm.mixOfPayTitle'" [descriptionKey]="'pm.mixOfPayIntro'"
+                             [descriptionParam]="mixOfPayFactName"
+                             [extraDesc]="mixOfPayCurrencyCode ? '(In ' + mixOfPayCurrencyCode + ')': ''">
+                <kf-donut-detailed [donutData]="donutData" legendSize="sm" showPercentage="true"
+                                   [showTotal]="false" [label]=""></kf-donut-detailed>
+            </kfthcl-section-card>
+            <kfthcl-section-card *ngIf="gradeData && successProfile.hasGradeAccess" class="insights-grade"
+                             [titleKey]="'pm.GradeLCase'" [descriptionKey]="'pm.gradeIntro'">
+                <div class="grade-chart-container">
+                    <div class="grade-chart">
+                        <kf-chart *ngIf="gradeData" width="140" height="70">
+                            <kf-chart-series type="half-donut" [data]="gradeData" [style]="gradeStyle">
+                            </kf-chart-series>
+                        </kf-chart>
+                        <div class="scale">
+                            <div *ngIf="!hasCustomGradesAccess" class="footnote">1</div>
+                            <div *ngIf="!hasCustomGradesAccess" class="footnote">38</div>
+                        </div>
+                        <div class="value body-text fw-semibold">
+                            {{ renderGrade(successProfile.grade, hasCustomGradesAccess, kfLabel) }}
+                        </div>
+                    </div>
+                </div>
+            </kfthcl-section-card>
+            <kfthcl-section-card *ngIf="baseSalaryDataHasValues" [titleKey]="'pm.marketBaseSalaryTitle'"
+                             [titleParam]="marketSalaryFactName" [descriptionKey]="'pm.marketBaseSalaryIntro'"
+                             [extraDesc]="marketSalaryCurrencyCode ? '(In ' + marketSalaryCurrencyCode + ')': ''"
+                             class="market-base-salary">
+                <kf-chart-bar-vertical-series-container [barData]="baseSalaryData"
+                                                        [colorScheme]="'MARKET_BASE_SALARY'" [maxHeight]="baseSalaryMax" [showLegend]="false">
+                </kf-chart-bar-vertical-series-container>
+            </kfthcl-section-card>
+        </div>
+
+        <!--RECRUIT INSIGHTS-->
+        <div *ngIf="viewType === selectViewOptions.recruit && checkMarketInsights()" class="insights-card recruit-card">
+            <kfthcl-section-card *ngIf="mixOfRewards" class="insights-mix-of-rewards"
+                             [titleKey]="'pm.mixOfPayTitle'" [descriptionKey]="'pm.mixOfPayIntro'"
+                             [descriptionParam]="mixOfPayFactName"
+                             [extraDesc]="mixOfPayCurrencyCode ? '(In ' + mixOfPayCurrencyCode + ')': ''"
+            >
+                <kf-donut-detailed
+                    [donutData]="donutData" legendSize="sm" showPercentage="true"
+                    [showTotal]="false" [label]=""
+                ></kf-donut-detailed>
+            </kfthcl-section-card>
+
+            <kfthcl-section-card *ngIf="scarcityDonutConfig" class="insights-candidate-scarcity"
+                             [titleKey]="'lib.candidateScarcity'" [descriptionKey]="'pm.candidateScarcityIntro'"
+            >
+                <kf-double-donut [donutConfig]="scarcityDonutConfig"></kf-double-donut>
+            </kfthcl-section-card>
+
+            <kfthcl-section-card *ngIf="developmentDifficulty?.length"
+                             [titleKey]="'lib.headingDifficultyLevel'"
+                             [descriptionKey]="'pm.developmentDifficultyIntro'"
+                             class="insights-diff-dev"
+            >
+                <div *ngFor="let difficulty of developmentDifficulty" class="diff-dev-item">
+                    <span #competencyName class="name"
+                    [pTooltip]="difficulty.competencyName"
+                    [tooltipDisabled]="competencyName.offsetWidth === competencyName.scrollWidth"
+                    tooltipPosition="top"><span class="subtext-sm">{{ difficulty.competencyName }}</span></span>
+                    <kf-meter-bar [value]="difficulty.difficultyLevel" max="5" color="lemonGreen" circleShape="true"></kf-meter-bar>
+                </div>
+            </kfthcl-section-card>
+        </div>
+    </kftarc-summary-insights-card>
+</div>
+
+<ng-template #skills let-skills='skills' let-market='market'>
+    <div class="skills-list-data" *ngIf="skills">
+        <ng-container [ngTemplateOutlet]="skillscol" [ngTemplateOutletContext]="{skills: skills, start: 0, end: 5}"></ng-container>
+        <ng-container [ngTemplateOutlet]="skillscol" [ngTemplateOutletContext]="{skills: skills, start: 5, end: 10}"></ng-container>
+    </div>
+    <div class="skills-empty-data" *ngIf="!skills || skills.length === 0">
+        <span class="body-text fw-bold nodata-title">{{ 'pm.noDataDisplay' | translate }}</span>
+        <span *ngIf="market" class="body-text color-medium nodata-description">{{ 'pm.noMarketSkills' | translate }}</span>
+        <span *ngIf="!market" class="body-text color-medium nodata-description">{{ 'pm.noOrgSkills' | translate }}</span>
+    </div>
+</ng-template>
+
+<ng-template #skillscol let-skills='skills' let-start='start' let-end='end'>
+    <div class="skills-col">
+        <ng-container *ngFor="let skill of skills.slice(start, end); let idx=index;">
+            <div class="body-text skill-item-container">
+                <span class="skill-item" [ngClass]="{'matching-skill': skill.isMatching}">
+                    <div class="skill-item-number">
+                        <span class="subtext-sm">{{ idx + start + 1 }}</span>
+                    </div>
+                    <div class="skill-item-text">
+                        <span>{{ skill.name | KfTitlecase }}</span>
+                    </div>
+                </span>
+            </div>
+        </ng-container>
+    </div>
+</ng-template>

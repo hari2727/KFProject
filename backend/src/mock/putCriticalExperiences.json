@@ -1,0 +1,112 @@
+{
+  "sections": [
+    {
+      "id": 1,
+      "categories": [
+        {
+          "id": 2,
+          "years": {
+            "id": 3
+          },
+          "isCore": true,
+          "scope": {
+            "options": [
+              {
+                "id": "AS",
+                "subOptions": [
+                  {
+                    "id": "ASA"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": 23,
+          "years": {
+            "id": 3
+          },
+          "isCore": true,
+          "scope": {
+            "options": [
+              {
+                "id": "23"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "code": "CUSTOM_EXPERIENCE",
+      "categories": [
+        {
+          "name": " Custom experience added by user",
+          "description": "add description here",
+          "years": {
+            "id": 6
+          },
+          "isCore": true,
+          "scope": {
+            "options": [
+              {
+                "id": 234,
+                "value": "Led"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Experience 2",
+          "description": "description here",
+          "years": {
+            "id": 76
+          },
+          "isCore": true,
+          "scope": {
+            "options": [
+              {
+                "id": 234,
+                "value": "Played a significant role in"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 345,
+      "categories": [
+        {
+          "id": 67,
+          "years": {
+            "id": 6
+          },
+          "isCore": true,
+          "scope": {
+            "options": [
+              {
+                "value": "Chief financial officer"
+              }
+            ]
+          }
+        },
+        {
+          "id": 565,
+          "years": {
+            "id": 10
+          },
+          "isCore": true,
+          "scope": {
+            "options": [
+              {
+                "id": 23
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

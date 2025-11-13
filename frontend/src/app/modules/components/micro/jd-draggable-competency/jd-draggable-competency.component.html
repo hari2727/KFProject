@@ -1,0 +1,12 @@
+<div class="container">
+    <div class="handle" *ngIf="isDragEnabled"></div>
+    <div class="titles input" *ngIf="editable" [formGroup]="form">
+        <kf-input formControlName="name" maxlength="250"></kf-input>
+        <span class="counter">{{ 700 - form.value.description.length }} {{ 'pm.left' | translate }}</span>
+        <kf-input type="textarea" formControlName="description" maxlength="700"></kf-input>
+    </div>
+    <div class="titles" *ngIf="!editable">
+        <span class="body-text fw-semibold" *ngIf="showHeader">{{ form.value.name }}</span>
+        <span class="body-text">{{ form.value.description }}</span>
+    </div>
+</div>

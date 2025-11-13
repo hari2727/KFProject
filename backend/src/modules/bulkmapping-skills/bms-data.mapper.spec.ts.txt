@@ -1,0 +1,122 @@
+import {
+    BulkMappingSkillsStagingPayload,
+    BulkMappingSkillsStagingSkill,
+} from './bms.interfaces';
+import {
+    generateRandomAmount,
+    getBoolean,
+    getNumber,
+    getString,
+} from '../../_shared/test/test';
+import { BulkMappingSkillsDataMapper } from './bms-data.mapper';
+
+const getSuccessProfileId = (): string =>
+    String(getNumber());
+
+const getSkill = (addDependents = true): BulkMappingSkillsStagingSkill => ({
+    skillId: getNumber(),
+    levelId: getNumber(),
+    order: getNumber(),
+    dependents: addDependents ? generateRandomAmount(getString, { min: 1 }) : undefined,
+});
+
+
+describe('BulkMappingSkillsDataMapper', () => {
+
+    let body: BulkMappingSkillsStagingPayload;
+    let itemModificationId: number;
+    let dataMapper: BulkMappingSkillsDataMapper;
+
+    beforeEach(() => {
+
+        body = {
+            skills: [
+                ...generateRandomAmount(() => getSkill(getBoolean()), { min: 1 }),
+                ...generateRandomAmount(() => getSkill(true), { min: 1 }),
+                ...generateRandomAmount(() => getSkill(false), { min: 1 }),
+            ],
+            successProfileIds: generateRandomAmount(getSuccessProfileId, { min: 1 }),
+        };
+
+        itemModificationId = getNumber();
+
+        dataMapper = new BulkMappingSkillsDataMapper();
+    });
+
+    it('should generate DTO.profiles based on params provided', async () => {
+        const DTOs = await dataMapper.createStagingDTOs(itemModificationId, body);
+
+        expect(DTOs.profiles).toBeInstanceOf(Array);
+
+        const keys = DTOs.profiles.map(dto => dto.ClientJobID);
+        expect(new Set(keys).size).toEqual(body.successProfileIds.length);
+
+        for (const dto of DTOs.profiles) {
+            expect(dto.ItemModificationID).toEqual(itemModificationId);
+            expect(dto.ClientJobID).toEqual(Number(body.successProfileIds.shift()));
+        }
+    });
+
+    it('should generate DTO.skillLevels based on params provided', async () => {
+        const DTOs = await dataMapper.createStagingDTOs(itemModificationId, body);
+
+        expect(DTOs.skillLevels).toBeInstanceOf(Array);
+
+        const keys = DTOs.skillLevels.map(dto => dto.JobSubCategoryId);
+        expect(new Set(keys).size).toEqual(body.skills.length);
+
+        for (const dto of DTOs.skillLevels) {
+            expect(dto.ItemModificationID).toEqual(itemModificationId);
+
+            const skill = body.skills.shift();
+            expect(dto.JobSubCategoryId).toEqual(skill.skillId);
+            expect(dto.JobLevelDetailOrder).toEqual(skill.levelId);
+            expect(dto.SectionDetailOrder).toEqual(skill.order);
+        }
+    });
+
+    it('should generate DTO.skillComponents based on params provided', async () => {
+        const DTOs = await dataMapper.createStagingDTOs(itemModificationId, body);
+
+        expect(DTOs.skillComponents).toBeInstanceOf(Array);
+
+        const allSkillComponents = body.skills.flatMap(i => i.dependents || []);
+        const keys = DTOs.skillComponents.map(dto => String([dto.JobSubCategoryId, dto.JobSubCategoryDependantName]));
+        expect(new Set(keys).size).toEqual(allSkillComponents.length);
+
+        const allSkillComponentsWithOrders: { skillId: number; componentName: string; componentOrder: number; }[] =
+            body.skills.filter(i => i.dependents?.length).flatMap(skill =>
+                skill.dependents.map((componentName, index) => ({
+                    skillId: skill.skillId,
+                    componentName: componentName,
+                    componentOrder: index + 1
+                }))
+            );
+        for (const dto of DTOs.skillComponents) {
+            expect(dto.ItemModificationID).toEqual(itemModificationId);
+
+            let base = allSkillComponentsWithOrders.shift();
+            expect(dto.JobSubCategoryId).toEqual(base.skillId);
+            expect(dto.JobSubCategoryDependantName).toEqual(base.componentName);
+            expect(dto.JobSubCategoryDependantOrder).toEqual(base.componentOrder);
+        }
+    });
+
+    it('should keep DTO.skillComponents empty, if none provided', async () => {
+        body.skills.forEach(skill => skill.dependents = undefined);
+
+        const DTOs = await dataMapper.createStagingDTOs(itemModificationId, body);
+
+        expect(DTOs.skillComponents).toBeInstanceOf(Array);
+        expect(DTOs.skillComponents.length).toBe(0);
+
+        expect(DTOs.skillLevels).toBeInstanceOf(Array);
+        const skillLevelKeys = DTOs.skillLevels.map(dto => dto.JobSubCategoryId);
+        expect(new Set(skillLevelKeys).size).toEqual(body.skills.length);
+
+        expect(DTOs.profiles).toBeInstanceOf(Array);
+        const profileKeys = DTOs.profiles.map(dto => dto.ClientJobID);
+        expect(new Set(profileKeys).size).toEqual(body.successProfileIds.length);
+    });
+
+});

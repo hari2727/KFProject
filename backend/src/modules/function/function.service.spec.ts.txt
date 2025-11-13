@@ -1,0 +1,163 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { FamilyStatus, FamilyStatusBody } from './function.interface';
+import { FunctionRepository } from './function.repository';
+import { FunctionService } from './function.service';
+import {
+    FamiliesOnTypeRespData,
+    FamilyStatusQuery,
+    GetJobFamiliesResponse,
+    GetJobFamilyRequest,
+    IndustryResponse,
+    JobClientIndustryDbMock,
+    JobFamilyDBResponse,
+    JobFamilyRequest,
+    JobFamilyResp,
+    JobModelResponseMock,
+    MappedApiResponseMock,
+    ProfileStatMockRespose,
+    StatsDbResponseMock,
+    StatsQuey,
+    UpdateFamilyBody,
+    FamilesValidation,
+    SubFamilesValidation,
+} from './function.service.fixture';
+import { okResponse } from '../../common/common.utils';
+
+describe('Function Service', () => {
+    let module: TestingModule;
+    let functionService: FunctionService;
+    let functionRepository: FunctionRepository;
+
+    beforeAll(async () => {
+        module = await Test.createTestingModule({
+            providers: [FunctionService, FunctionRepository],
+        }).compile();
+        functionService = module.get(FunctionService);
+        functionRepository = module.get(FunctionRepository);
+    });
+
+    afterAll(() => {
+        jest.clearAllMocks();
+    });
+
+    describe('publishFunction', () => {
+        test('publishFunction api response', async () => {
+            const clientId = 1234;
+            const transferJobSpy = jest.spyOn(functionRepository, 'transferJobFamilyAndSubFamily').mockResolvedValueOnce();
+            const resp = await functionService.publishFunction(clientId);
+            expect(transferJobSpy).toHaveBeenCalled();
+            expect(resp).toBe(okResponse);
+        });
+    });
+
+    describe('updateFamilyStatus', () => {
+        const body: FamilyStatusBody = {
+            families: [
+                {
+                    id: '',
+                    isActive: false,
+                    name: '',
+                },
+            ],
+        };
+
+        test('updateFamilyStatus api response', async () => {
+            const updateFamilyStatusSpy = jest.spyOn(functionRepository, 'updateFamilyStatus').mockResolvedValueOnce({ status: FamilyStatus.MODIFIED });
+            await functionService.updateFamilyStatus(FamilyStatusQuery, body);
+            expect(updateFamilyStatusSpy).toHaveBeenCalled();
+        });
+
+        test('updateFamilyStatus throw an error', async () => {
+            jest.spyOn(functionRepository, 'updateFamilyStatus').mockResolvedValueOnce({ status: FamilyStatus.MODIFIED });
+            try {
+                await functionService.updateFamilyStatus(FamilyStatusQuery, {});
+            } catch (e) {
+                expect(e.message).toBe('Invalid body payload provided.');
+            }
+        });
+    });
+
+    describe('getProfileStats', () => {
+        test('getProfileStats api response', async () => {
+            const getProfileStatsSpy = jest.spyOn(functionRepository, 'getProfileStats').mockResolvedValueOnce(ProfileStatMockRespose);
+            await functionService.getProfileStats(StatsQuey);
+            expect(getProfileStatsSpy).toHaveBeenCalled();
+        });
+        test('Should return mapped json response from with DB response', async () => {
+            const response = functionService.mapProfileStatusResponse(StatsDbResponseMock);
+            expect(MappedApiResponseMock).toEqual(response);
+        });
+    });
+
+    describe('addJobFamily', () => {
+        test('Should been called addJobFamily', async () => {
+            const addJobFamilySpy = jest.spyOn(functionRepository, 'addJobFamily').mockResolvedValueOnce(JobFamilyDBResponse);
+            await functionService.addJobFamily(FamilyStatusQuery, JobFamilyRequest);
+            expect(addJobFamilySpy).toHaveBeenCalled();
+        });
+        test('Should return addJobFamily Response', async () => {
+            const response = await functionService.mapAddJobResponseData(JobFamilyDBResponse);
+            expect(JobFamilyResp).toEqual(response);
+        });
+    });
+    describe('getJobFamilies', () => {
+        test('Should been called getJobFamilies', async () => {
+            const getJobFamiliesSpy = jest.spyOn(functionRepository, 'getJobFamilies').mockResolvedValueOnce(GetJobFamiliesResponse);
+            functionService.getJobFamilies(GetJobFamilyRequest);
+            expect(getJobFamiliesSpy).toHaveBeenCalled();
+        });
+        test('Should return getJobFamilies Response', async () => {
+            const response = functionService.mapGetDbResponseData(GetJobFamiliesResponse);
+            expect(FamiliesOnTypeRespData).toEqual(response);
+        });
+    });
+
+    describe('getJobModels', () => {
+        test('getJobModels should call repository getJobModels', async () => {
+            const getJobModelsSpy = jest.spyOn(functionRepository, 'getJobModels').mockResolvedValueOnce(JobModelResponseMock);
+            await functionService.getJobModels(FamilyStatusQuery);
+            expect(getJobModelsSpy).toHaveBeenCalled();
+        });
+    });
+
+    describe('getIndustryJobModels', () => {
+        test('getIndustryJobModels should call repository getIndustryJobModels', async () => {
+            const getIndustryJobModelsSpy = jest.spyOn(functionRepository, 'getIndustryJobModels').mockResolvedValueOnce(JobClientIndustryDbMock);
+            jest.spyOn(functionRepository, 'getJobModelIndustryDetailsStatus').mockResolvedValue({ status: '' });
+            await functionService.getIndustryJobModels(FamilyStatusQuery, '');
+            expect(getIndustryJobModelsSpy).toHaveBeenCalled();
+        });
+
+        test('getIndustryJobModels should return [] on industryId null', async () => {
+            jest.spyOn(functionRepository, 'getIndustryJobModels').mockResolvedValueOnce(JobClientIndustryDbMock);
+            jest.spyOn(functionRepository, 'getJobModelIndustryDetailsStatus').mockResolvedValue({ status: 'MODIFIED' });
+            const resp = await functionService.getIndustryJobModels(FamilyStatusQuery, '');
+            expect({ status: 'MODIFIED', industry: expect({ status: 'MODIFIED', industry: [] }).toEqual(resp) });
+        });
+    });
+
+    describe('updatefamilysubfamily', () => {
+        test('updatefamilysubfamily should call repository updatefamilysubfamily', async () => {
+            const updatefamilysubfamilySpy = jest.spyOn(functionRepository, 'updatefamilysubfamily').mockResolvedValueOnce(JobClientIndustryDbMock);
+            const familyValidationSpy = jest.spyOn(functionRepository, 'getJobFamilyNameValidation').mockResolvedValueOnce([]);
+            const subfamilyValidationSpy = jest.spyOn(functionRepository, 'getJobSubFamilyValidation').mockResolvedValueOnce([]);
+            const modificationJobFamilySubFamilySpy = jest
+                .spyOn(functionRepository, 'modificationJobFamilySubFamily')
+                .mockResolvedValueOnce({ status: 'MODIFIED' });
+            await functionService.updatefamilysubfamily(FamilyStatusQuery, UpdateFamilyBody);
+            expect(familyValidationSpy).toHaveBeenCalled();
+            expect(subfamilyValidationSpy).toHaveBeenCalled();
+            expect(modificationJobFamilySubFamilySpy).toHaveBeenCalled();
+            expect(updatefamilysubfamilySpy).toHaveBeenCalled();
+        });
+    });
+
+    describe('getJobModelDetails', () => {
+        test('getJobModelDetails should call repository getJobModelDetails', async () => {
+            const getJobModelDetailsSpy = jest.spyOn(functionRepository, 'getJobModelDetails').mockResolvedValueOnce(JobClientIndustryDbMock);
+            jest.spyOn(functionRepository, 'getJobModelDetailsStatus').mockResolvedValueOnce({ status: 'MODIFIED' });
+            await functionService.getJobModelDetails(FamilyStatusQuery, '');
+            expect(getJobModelDetailsSpy).toHaveBeenCalled();
+        });
+    });
+});

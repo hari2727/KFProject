@@ -1,0 +1,14 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/mixins.scss';
+
+$footer-height: 46px;
+
+::ng-deep kf-page {
+	min-height: calc(100vh - #{$footer-height}) !important;
+}
+
+.header {
+	font-size: 34px;
+	line-height: normal;
+	letter-spacing: 0.51px;
+}

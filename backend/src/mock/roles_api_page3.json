@@ -1,0 +1,409 @@
+{
+    "roles": [
+        {
+            "title": "Added job 22-03",
+            "jobFamily": "HE",
+            "jobSubFamily": "HEA",
+            "jobRoleTypeId": "HEA01",
+            "familyName": "Health and Environment",
+            "subFamilyName": "Environmental Health",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92686",
+            "grade": {
+                "standardHayGrade": "14"
+            },
+            "expandable": false
+        },
+        {
+            "title": "Added Job Sab 24-03",
+            "jobFamily": "AE",
+            "jobSubFamily": "AEA",
+            "jobRoleTypeId": "AEA01",
+            "familyName": "Asset Management ",
+            "subFamilyName": "Portfolio Management",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92689",
+            "grade": {
+                "standardHayGrade": "18"
+            },
+            "expandable": false
+        },
+        {
+            "title": "Administrative Assistant",
+            "jobFamily": "AS",
+            "jobSubFamily": "ASA",
+            "jobRoleTypeId": "ASA01",
+            "familyName": "Administration / Support / Service",
+            "subFamilyName": "Clerical Services",
+            "profileType": "BEST_IN_CLASS",
+            "grade": {
+                "min": "8",
+                "max": "12"
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "title": "Administrative Assistant I",
+                    "jobFamily": "AS",
+                    "jobSubFamily": "ASA",
+                    "jobRoleTypeId": "ASA01",
+                    "familyName": "Administration / Support / Service",
+                    "subFamilyName": "Clerical Services",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75399",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "8"
+                },
+                {
+                    "title": "Administrative Assistant II",
+                    "jobFamily": "AS",
+                    "jobSubFamily": "ASA",
+                    "jobRoleTypeId": "ASA01",
+                    "familyName": "Administration / Support / Service",
+                    "subFamilyName": "Clerical Services",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75400",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "9"
+                },
+                {
+                    "title": "Administrative Assistant III",
+                    "jobFamily": "AS",
+                    "jobSubFamily": "ASA",
+                    "jobRoleTypeId": "ASA01",
+                    "familyName": "Administration / Support / Service",
+                    "subFamilyName": "Clerical Services",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75401",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "10"
+                },
+                {
+                    "title": "Administrative Assistant IV",
+                    "jobFamily": "AS",
+                    "jobSubFamily": "ASA",
+                    "jobRoleTypeId": "ASA01",
+                    "familyName": "Administration / Support / Service",
+                    "subFamilyName": "Clerical Services",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75402",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "11"
+                },
+                {
+                    "title": "Administrative Assistant V",
+                    "jobFamily": "AS",
+                    "jobSubFamily": "ASA",
+                    "jobRoleTypeId": "ASA01",
+                    "familyName": "Administration / Support / Service",
+                    "subFamilyName": "Clerical Services",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75403",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "12"
+                }
+            ]
+        },
+        {
+            "title": "Administrative Assistant I COPY",
+            "jobFamily": "F0138127",
+            "jobSubFamily": "S0138127001",
+            "jobRoleTypeId": "S013812700100",
+            "familyName": "Added Function 24-02",
+            "subFamilyName": "Added Subfunction 24-02",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "90465",
+            "grade": {
+                "standardHayGrade": "13"
+            },
+            "expandable": false
+        },
+        {
+            "title": "Administrative Assistant I COPY 012221",
+            "jobFamily": "AS",
+            "jobSubFamily": "ASB",
+            "jobRoleTypeId": "ASB00",
+            "familyName": "Administration / Support / Service",
+            "subFamilyName": "Secretarial",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "90379",
+            "grade": {
+                "standardHayGrade": "10"
+            },
+            "expandable": false
+        },
+        {
+            "title": "Administrative Supervisor",
+            "jobFamily": "AS",
+            "jobSubFamily": "ASC",
+            "jobRoleTypeId": "ASC05",
+            "familyName": "Administration / Support / Service",
+            "subFamilyName": "Support Services",
+            "profileType": "BEST_IN_CLASS",
+            "grade": {
+                "min": "12",
+                "max": "14"
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "title": "Administrative Supervisor I",
+                    "jobFamily": "AS",
+                    "jobSubFamily": "ASC",
+                    "jobRoleTypeId": "ASC05",
+                    "familyName": "Administration / Support / Service",
+                    "subFamilyName": "Support Services",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75439",
+                    "shortProfile": "A3",
+                    "haypoints": {},
+                    "standardHayGrade": "12"
+                },
+                {
+                    "title": "Administrative Supervisor II",
+                    "jobFamily": "AS",
+                    "jobSubFamily": "ASC",
+                    "jobRoleTypeId": "ASC05",
+                    "familyName": "Administration / Support / Service",
+                    "subFamilyName": "Support Services",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75440",
+                    "shortProfile": "A3",
+                    "haypoints": {},
+                    "standardHayGrade": "13"
+                },
+                {
+                    "title": "Administrative Supervisor III",
+                    "jobFamily": "AS",
+                    "jobSubFamily": "ASC",
+                    "jobRoleTypeId": "ASC05",
+                    "familyName": "Administration / Support / Service",
+                    "subFamilyName": "Support Services",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75441",
+                    "shortProfile": "A3",
+                    "haypoints": {},
+                    "standardHayGrade": "14"
+                }
+            ]
+        },
+        {
+            "title": "Admitting Clerk",
+            "jobFamily": "RY",
+            "jobSubFamily": "RYA",
+            "jobRoleTypeId": "RYA01",
+            "familyName": "Healthcare Revenue Cycle",
+            "subFamilyName": "Front End/Admitting",
+            "profileType": "BEST_IN_CLASS",
+            "grade": {
+                "min": "11",
+                "max": "13"
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "title": "Admitting Clerk I ",
+                    "jobFamily": "RY",
+                    "jobSubFamily": "RYA",
+                    "jobRoleTypeId": "RYA01",
+                    "familyName": "Healthcare Revenue Cycle",
+                    "subFamilyName": "Front End/Admitting",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "76090",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "11"
+                },
+                {
+                    "title": "Admitting Clerk II",
+                    "jobFamily": "RY",
+                    "jobSubFamily": "RYA",
+                    "jobRoleTypeId": "RYA01",
+                    "familyName": "Healthcare Revenue Cycle",
+                    "subFamilyName": "Front End/Admitting",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "76091",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "12"
+                },
+                {
+                    "title": "Admitting Clerk III",
+                    "jobFamily": "RY",
+                    "jobSubFamily": "RYA",
+                    "jobRoleTypeId": "RYA01",
+                    "familyName": "Healthcare Revenue Cycle",
+                    "subFamilyName": "Front End/Admitting",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "76095",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "13"
+                }
+            ]
+        },
+        {
+            "title": "Admitting Director",
+            "jobFamily": "RY",
+            "jobSubFamily": "RYA",
+            "jobRoleTypeId": "RYA02",
+            "familyName": "Healthcare Revenue Cycle",
+            "subFamilyName": "Front End/Admitting",
+            "profileType": "BEST_IN_CLASS",
+            "grade": {
+                "min": "18",
+                "max": "20"
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "title": "Admitting Director I ",
+                    "jobFamily": "RY",
+                    "jobSubFamily": "RYA",
+                    "jobRoleTypeId": "RYA02",
+                    "familyName": "Healthcare Revenue Cycle",
+                    "subFamilyName": "Front End/Admitting",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "76096",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "18"
+                },
+                {
+                    "title": "Admitting Director II",
+                    "jobFamily": "RY",
+                    "jobSubFamily": "RYA",
+                    "jobRoleTypeId": "RYA02",
+                    "familyName": "Healthcare Revenue Cycle",
+                    "subFamilyName": "Front End/Admitting",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "76098",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "19"
+                },
+                {
+                    "title": "Admitting Director III",
+                    "jobFamily": "RY",
+                    "jobSubFamily": "RYA",
+                    "jobRoleTypeId": "RYA02",
+                    "familyName": "Healthcare Revenue Cycle",
+                    "subFamilyName": "Front End/Admitting",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75997",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "20"
+                }
+            ]
+        },
+        {
+            "title": "Agile Coach",
+            "jobFamily": "PM",
+            "jobSubFamily": "PMA",
+            "jobRoleTypeId": "PMA10",
+            "familyName": "Project Management",
+            "subFamilyName": "Project Management",
+            "profileType": "BEST_IN_CLASS",
+            "grade": {
+                "min": "16",
+                "max": "18"
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "title": "Agile Coach I",
+                    "jobFamily": "PM",
+                    "jobSubFamily": "PMA",
+                    "jobRoleTypeId": "PMA10",
+                    "familyName": "Project Management",
+                    "subFamilyName": "Project Management",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "89277",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "16"
+                },
+                {
+                    "title": "Agile Coach II",
+                    "jobFamily": "PM",
+                    "jobSubFamily": "PMA",
+                    "jobRoleTypeId": "PMA10",
+                    "familyName": "Project Management",
+                    "subFamilyName": "Project Management",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "89278",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "17"
+                },
+                {
+                    "title": "Agile Coach III",
+                    "jobFamily": "PM",
+                    "jobSubFamily": "PMA",
+                    "jobRoleTypeId": "PMA10",
+                    "familyName": "Project Management",
+                    "subFamilyName": "Project Management",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "89279",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "18"
+                }
+            ]
+        },
+        {
+            "title": "Agile Portfolio Manager",
+            "jobFamily": "PM",
+            "jobSubFamily": "PMA",
+            "jobRoleTypeId": "PMA31",
+            "familyName": "Project Management",
+            "subFamilyName": "Project Management",
+            "profileType": "BEST_IN_CLASS",
+            "grade": {
+                "min": "19",
+                "max": "20"
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "title": "Agile Portfolio Manager I",
+                    "jobFamily": "PM",
+                    "jobSubFamily": "PMA",
+                    "jobRoleTypeId": "PMA31",
+                    "familyName": "Project Management",
+                    "subFamilyName": "Project Management",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "89323",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "19"
+                },
+                {
+                    "title": "Agile Portfolio Manager II",
+                    "jobFamily": "PM",
+                    "jobSubFamily": "PMA",
+                    "jobRoleTypeId": "PMA31",
+                    "familyName": "Project Management",
+                    "subFamilyName": "Project Management",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "89324",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "20"
+                }
+            ]
+        }
+    ],
+    "paging": {
+        "pageIndex": 3,
+        "pageSize": 20,
+        "totalPages": 3,
+        "totalResultRecords": 96
+    }
+}

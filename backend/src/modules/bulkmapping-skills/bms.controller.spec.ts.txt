@@ -1,0 +1,72 @@
+import { BulkMappingSkillsService } from './bms.service';
+import { BulkMappingSkillsController } from './bms.controller';
+import {
+    BulkMappingSkillsQuery,
+    BulkMappingSkillsStagingPayload,
+    BulkMappingSkillsStagingResponse,
+} from './bms.interfaces';
+import { createMockInstance, getNumber, getString, snapshotInstance } from '../../_shared/test/test';
+
+
+describe('BulkMappingSkillsController', () => {
+
+    let query: BulkMappingSkillsQuery;
+    let body: BulkMappingSkillsStagingPayload;
+    let serviceResponse: BulkMappingSkillsStagingResponse;
+    let service: BulkMappingSkillsService;
+    let controller: BulkMappingSkillsController;
+
+    beforeEach(() => {
+        query = {
+            loggedInUserClientId: getNumber(),
+            userId: getNumber(),
+            locale: getString(),
+        };
+
+        body = {
+            skills: [],
+            successProfileIds: [],
+        };
+
+        serviceResponse = {
+            itemModificationId: getNumber(),
+        };
+
+        service = createMockInstance<BulkMappingSkillsService>({
+            stageSkillComponents: jest.fn().mockReturnValue(serviceResponse)
+        });
+
+        controller = new BulkMappingSkillsController(service);
+    });
+
+    test('should pass query and body to the service', async () => {
+        await controller.stageSkillComponents(query, body);
+        expect(service.stageSkillComponents).toHaveBeenCalledWith(query, body);
+        expect(service.stageSkillComponents).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not modify query and body before passing them into the service', async () => {
+        const beforeQuerySnapshot = snapshotInstance(query);
+        const beforeBodySnapshot = snapshotInstance(body);
+
+        let afterQuerySnapshot: string;
+        let afterBodySnapshot: string;
+
+        service.stageSkillComponents = jest.fn().mockImplementation((query, body) => {
+            afterQuerySnapshot = snapshotInstance(query);
+            afterBodySnapshot = snapshotInstance(body);
+            return serviceResponse;
+        });
+
+        await controller.stageSkillComponents(query, body);
+
+        expect(beforeQuerySnapshot).toBe(afterQuerySnapshot);
+        expect(beforeBodySnapshot).toBe(afterBodySnapshot);
+    });
+
+    it('should return response from the service', async () => {
+        const result = await controller.stageSkillComponents(query, body);
+        expect(result).toEqual(serviceResponse);
+    });
+
+});

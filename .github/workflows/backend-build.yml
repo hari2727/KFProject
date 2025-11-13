@@ -1,0 +1,46 @@
+name: kfone-profile-manager-api-build
+run-name: kfone-profile-manager-api-build-${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'dev' }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: "Environment"
+        required: true
+        default: dev
+        options:
+          - sbx
+          - dev
+          - qa1
+          - stg
+          - prd
+      dockerImagePush:
+        type: boolean
+        description: "Do you want to build docker image for kfone-profile-manager?"
+        required: true
+        default: false
+  pull_request:
+    branches:
+      - "develop"
+      - "rc/*"
+      - "patch/*"
+      - "feature/*"
+    types:
+      - opened
+      - ready_for_review
+      - synchronize
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-build.yml"
+jobs:
+  Build:
+    name: "kfone-profile-manager-api-build"
+    if: ${{ !github.event.pull_request.draft }}
+    uses: HayGroup/kfone-common/.github/workflows/docker-build-push-0.0.1.yml@main
+    secrets: inherit
+    with:
+      dockerRepository: "kfone-profile-manager/api"
+      isDockerImagePush: "${{ github.event_name == 'workflow_dispatch' && inputs.dockerImagePush || false }}"
+      environment: "${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'dev' }}"
+      workspace: "backend"

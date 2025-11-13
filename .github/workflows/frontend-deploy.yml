@@ -1,0 +1,61 @@
+name: kfone-profile-manager-ui-deploy
+run-name: kfone-profile-manager-ui-build_${{ inputs.environment }}_${{ inputs.region }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: 'Environment'
+        required: true
+        default: dev
+        options:
+          - dev
+          - sbx
+          - qa1
+      region:
+        type: choice
+        description: 'AWS Region'
+        required: true
+        default: us-east-1
+        options:
+          - us-east-1
+          - eu-central-1
+          - eu-west-1
+          - us-west-2
+      DeployToDev:
+        type: boolean
+        description: 'Do you want to Deploy the built docker image for profile-manager-ui?'
+        required: true
+        default: false
+
+jobs:
+  Build:
+    if: ${{ inputs.environment == 'dev' || inputs.environment == 'sbx' || (inputs.environment == 'qa1' && startsWith(github.ref, 'refs/heads/rc/v')) }}
+    uses: HayGroup/kfone-common/.github/workflows/docker-build-n-deploy-0.0.1.yml@main
+    secrets: inherit
+    with:
+      dockerBaseImage: 'kf-one/hardened-nginx:1.0.2'
+      dockerRepository: 'kfone-profile-manager/ui'
+      environment: '${{inputs.environment}}'
+      workspace: 'frontend'
+
+  Call-Deploy-Workflow:
+    needs: [Build] # Ensure the build job is completed before deployment
+    if: ${{ inputs.DeployToDev == true && (inputs.environment == 'dev' || inputs.environment == 'sbx') }}
+    uses: HayGroup/kfone-ocp-github-workflows/.github/workflows/deploy-openshift-app-ui-gitops.yaml@main ##need to change back to main once all repos are migrated.
+    secrets: inherit
+    with:
+      environment: ${{ inputs.environment }}
+      region: ${{ inputs.region }}
+      imageTag: ${{ needs.Build.outputs.Image_Tag }} ## Replace <output_name> with the actual output name from the Build job
+      applicationsetpath: 'frontend/applicationset'
+
+  cdn-cache-invalidation:
+    needs: [Call-Deploy-Workflow] # Ensure the deployment job is completed before cache invalidation
+    uses: HayGroup/kfone-common/.github/workflows/cdn-cache-invalidation-0.0.1.yml@main
+    secrets: inherit
+    with:
+      environment: ${{ inputs.environment }}
+      region: ${{ inputs.region }}
+      modulename: 'profile-manager'

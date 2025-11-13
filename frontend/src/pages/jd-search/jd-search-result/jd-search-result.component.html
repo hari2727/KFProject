@@ -1,0 +1,72 @@
+<div>
+    <div class="w-100 mt-24 h-auto">
+        <div class="d-inline-block">
+            <span class="body-text" *ngIf="dataSource.length === 0"> {{ 'lib.NoResultsFound' | translate }}
+            </span>
+            <div class="body-text" *ngIf="dataSource.length !== 0">
+                {{ 'lib.LabelShowing' | translate }} {{ dataSource.length }} of {{ totalRows }} {{
+                'pm.BCJobDescriptions' | translate }}
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-24 w-100">
+        <kf-table-ui [dataSource]="dataSource" [infiniteScrollDisabled]="infiniteScrollDisabled"
+            (onScrollDown)="scrollDown($event)" kf-sort [kfSorting]="_sorting" (kfSortChange)="sortByColumn($event)">
+            <ng-container cdkColumnDef="name">
+                <th cdk-header-cell *cdkHeaderCellDef class="color-primary">
+                    <div kf-sort-header="name">
+                        {{ 'lib.name' | translate }}
+                    </div>
+                </th>
+                <td cdk-cell *cdkCellDef="let row">
+                    <div class="text-left name-column d-flex flex-ai-center o-hidden text-break">
+                        <span>
+                            <a class="fw-semibold ls-label line-clamp-2"
+                               [routerLink]="row.name.href"
+                               [pTooltip]="row.name.text"
+                               [tooltipDisabled]="hideTooltip"
+                               (mouseenter)="hover($event)">{{ row.name.text }}</a>
+                        </span>
+                    </div>
+                </td>
+            </ng-container>
+            <ng-container *ngFor="let column of textColumns;" cdkColumnDef="{{column}}">
+                <th cdk-header-cell *cdkHeaderCellDef class="color-primary"
+                    [class.profile-type-column]="column === 'type'">
+                    <div kf-sort-header="{{column}}">
+                        {{ columnSource[column]?.title | translate }}
+                    </div>
+                </th>
+                <td cdk-cell *cdkCellDef="let row">
+                    <div class="text-left py-0 pl-8 align-left">
+                        <span class="body-text text-break">{{ row[column] || '&#8210;' }}</span>
+                    </div>
+                </td>
+            </ng-container>
+            <ng-container cdkColumnDef="menu">
+                <th cdk-header-cell *cdkHeaderCellDef></th>
+                <td cdk-cell *cdkCellDef="let row">
+                    <kfthcl-dropdown #dropdown [originX]="'end'" [overlayMinWidth]="250" [overlayMaxWidth]="400" [overlayMaxHeight]="230"
+                        overlayCustomClass="context-menu-overlay-container" class="o-auto bg-white"
+                        (click)="onContextMenuClick.emit([row.menu, dropdown])">
+                        <kfthcl-dropdown-toggle class="pc-pointer">
+                            <kf-icon icon="dots-three-horizontal" class="pr-4" color="primary"></kf-icon>
+                        </kfthcl-dropdown-toggle>
+                        <kfthcl-dropdown-overlay>
+                            <div *ngIf="menuItems.length" class="context-menu-border">
+                                <div *ngFor="let item of menuItems" (click)="item.action($event, row.menu.id, row.menu.title)"
+                                    class="item p-12 fs-body pc-pointer">
+                                    {{item.label}}</div>
+                            </div>
+                        </kfthcl-dropdown-overlay>
+                    </kfthcl-dropdown>
+                </td>
+            </ng-container>
+        </kf-table-ui>
+
+        <div *ngIf="dataSource.length === 0" class="noresults body-text fw-semibold py-16 px-16 mb-20 bg-white">
+            {{ 'pm.JDSearch_NoResults' | translate }}
+        </div>
+    </div>
+</div>

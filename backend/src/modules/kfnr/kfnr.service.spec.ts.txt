@@ -1,0 +1,64 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { KfTarcSuccessProfilesDetailsService } from '../successprofiles-details/kftarc-success-profiles-details.service';
+import { SuccessProfileDetailRequest } from './kfnr.interface';
+import { KfnrRepository } from './kfnr.repository';
+import { KfnrService } from './kfnr.service';
+
+describe('KfnrService', () => {
+    let service: KfnrService;
+    let repository: KfnrRepository;
+    let kfSuccessProfileDetailService: KfTarcSuccessProfilesDetailsService;
+    let mockRequest: SuccessProfileDetailRequest;
+    beforeEach(async () => {
+        mockRequest = {
+            body: {},         // Mock body if necessary
+            params: {},       // Mock URL params
+            query: {},        // Mock query parameters
+            headers: {},      // Mock headers
+            method: '',       // Mock HTTP method
+            url: '',          // Mock request URL
+            // Add other properties as needed, like `cookies`, `originalUrl`, `path`, etc.
+        } as SuccessProfileDetailRequest;
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [KfnrService, KfnrRepository, KfTarcSuccessProfilesDetailsService],
+        }).compile();
+
+        service = module.get<KfnrService>(KfnrService);
+        repository = module.get<KfnrRepository>(KfnrRepository);
+        kfSuccessProfileDetailService = module.get<KfTarcSuccessProfilesDetailsService>(KfTarcSuccessProfilesDetailsService);
+    });
+
+    it('should be defined', () => {
+        expect(service).toBeDefined();
+    });
+
+    it('should return clientJobDetail when kfnrRepository returns data', async () => {
+        // Arrange
+        const jobCode = '10001';
+        const grade = '27';
+        const dbResponse: { ClientJobID: number; }[] = [{ ClientJobID: 12345 }];
+        const successProfileDetails = { clientJobId: 1028809 };
+        jest.spyOn(repository,'getClientJobIdByJobCodeAndGrade').mockResolvedValueOnce(dbResponse);
+        jest.spyOn(kfSuccessProfileDetailService,'getSuccessProfileDetails').mockResolvedValueOnce(successProfileDetails);
+        // Act
+        const result = await service.getClientJobDetail(jobCode, grade, mockRequest);
+
+        // Assert
+        expect(result).toEqual({ clientJobId: 1028809 });
+        expect(repository.getClientJobIdByJobCodeAndGrade).toHaveBeenCalledWith(jobCode, grade);
+    });
+
+    it('should return null when no clientJobDetail is found', async () => {
+        // Arrange
+        const jobCode = '10001';
+        const grade = '27';
+        const successProfileDetails = { id: 1028809 };
+        jest.spyOn(repository,'getClientJobIdByJobCodeAndGrade').mockResolvedValueOnce([{ClientJobID: null}]);
+        jest.spyOn(kfSuccessProfileDetailService,'getSuccessProfileDetails').mockResolvedValueOnce(successProfileDetails);
+        // Act
+        const result = await service.getClientJobDetail(jobCode, grade, mockRequest);
+
+        // Assert
+        expect(result).toEqual(null);
+    });
+});

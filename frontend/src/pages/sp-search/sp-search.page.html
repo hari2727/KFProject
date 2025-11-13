@@ -1,0 +1,131 @@
+<kf-page app="pm">
+    <kf-page-masthead class="flex-row flex-wrap">
+        <h1 class="header mt-0 mb-12 w-100">{{ 'pm.SuccessProfilesPageTitle' | translate | KfTitlecase }}</h1>
+        <p class="sub-header body-text w-50 mb-0">{{ 'pm.SuccessProfilesPageDescription' | translate }}</p>
+    </kf-page-masthead>
+
+    <kf-page-content>
+        <div class="position-relative">
+            <div class="bg-white position-absolute right-0">
+                <kf-buttons-switch
+                    [iconNames]="views"
+                    [selectedIcon]="selectedView"
+                    (selectionChange)="viewChange($event)"
+                ></kf-buttons-switch>
+            </div>
+
+            <kftarc-sp-search-filter [filters]="filters" (onFilterChange)="onFilterChange($event)" (onClickFilter)="callLoaderifNeeded()">
+                <thcl-search-input [search]="search" placeholder="{{ 'pm.SearchSuccessProfiles' | translate }}"
+                    (onInputChange)="onInputChange($event)"></thcl-search-input>
+            </kftarc-sp-search-filter>
+            <kf-svg-spinner *ngIf="showTheSpinnerLoader" class="spinner"></kf-svg-spinner>
+            <div *ngIf="showTheSpinnerLoader" class="blocker"></div>
+        </div>
+
+        <kftarc-sp-search-result
+            [infiniteScrollDisabled]="infiniteScrollDisabled"
+            [dataSource]="dataSource"
+            [columns]="columns"
+            [columnSource]="columnSource"
+            [menuItems]="menuItems"
+            [totalRows]="totalRows"
+            [totalPages]="totalPages"
+            [pageIndex]="pageIndex"
+            [sorting]="sorting"
+            (onScrollDown)="scrollDown($event)"
+            (onSortByColumn)="sortByColumn($event)"
+            (onContextMenuClick)="onContextMenuClick($event)"
+        ></kftarc-sp-search-result>
+    </kf-page-content>
+</kf-page>
+
+<kf-modal
+    class="pp-modal"
+    title="{{ 'lib.removalConfirmationQuestion' | translate }} '{{ spPropsForModals?.title }}'?"
+    size="sm"
+    [closeOnEscape]="false"
+    [modal]="true"
+    [dismissableMask]="false"
+    [scrollable]="true"
+    [(visible)]="showRemoveModal">
+    <div class="pp-modal-body">
+        <span class="body-text" *ngIf="!spPropsForModals?.isArchitectJob">{{ 'pm.successProfileRemoveModalContent' | translate }}</span>
+        <span class="body-text" *ngIf="spPropsForModals?.isArchitectJob">{{ 'pm.successProfileRemoveArchitectModalContent' | translate }}</span>
+    </div>
+    <footer>
+        <button (click)="removeSpChoice(false)" class="btn btn-outline">
+            {{ 'pm.successProfileRemoveModalButtonCancel' | translate }}
+        </button>
+        <button (click)="removeSpChoice(true)" class="btn">
+            {{ 'pm.successProfileRemoveModalButtonYes' | translate }}
+        </button>
+    </footer>
+</kf-modal>
+
+<kf-modal class="assessment-ModalHeading" title="Create Project" size="md" [scrollable]="true" [(visible)]="shownAssessmentModal">
+    <h4 class="assessment-modal-subheading mt-0 mb-16 body-text fw-semibold">{{ 'pm.assessmentModalProjectCreate' | translate }}</h4>
+    <div class="project-type">
+        <kf-tab-view [selectedIndex]="0" (selectedIndexChange)="onAssessmentModalTabSelected($event)">
+            <kf-tab-panel *ngFor='let productType of spPropsForModals?.productTypes' header="{{productType.name}}" uKey="{{productType.name}}">
+                <form [formGroup]="productInputsForm">
+                    <div *ngFor='let product of productType.products' class="product">
+                        <kf-radio-button *ngIf="product"
+                            [disabled]="product.type === 'POTENTIAL'"
+                            class="marginbottom"
+                            label="{{product?.name === 'Leadership Selection' ? 'Leadership' : product?.name}}"
+                            description="{{product?.description}}"
+                            value="{{product?.type}}"
+                            formControlName="product"
+                        ></kf-radio-button>
+                    </div>
+                </form>
+              </kf-tab-panel>
+            </kf-tab-view>
+          </div>
+    <footer class="project-type-footer">
+        <button class="btn btn-outline" (click)="leavePageChoice(true)">{{ 'pm.cancel' | translate }}</button>
+        <button class="btn" [disabled]="isBtnDisabled" (click)="continuePageChoice()">{{ 'pm.continue' | translate }}</button>
+    </footer>
+</kf-modal>
+
+<kfthcl-profile-match-tool-modal #profileMatchTool
+    [(visible)]="showMatchTool"
+    [jobFactors]="spPropsForModals?.jobFactors"
+    [spTitle]="spPropsForModals?.title"
+    (btnClickCallback)="onMatchToolBtnChange($event)"
+></kfthcl-profile-match-tool-modal>
+
+<kfthcl-download-pdf *ngIf="permissions"
+    [visible]="isSpPdfDownloadOpened"
+    [successProfile]="successProfile"
+    [marketInsights]="marketInsights"
+    [exportType]="'success_profile_single_pdf_export'"
+    (visibleChange)="toggleSpPdfDownload($event)"
+    (downloadClick)="downloadReport($event)"
+></kfthcl-download-pdf>
+
+<kfthcl-copy-modal
+    *ngIf="isCopyModalOpen && hasLanguageAccess"
+    [id]="spPropsForModals.id"
+    [languages]="languages"
+    [title]="spPropsForModals.title"
+    [selectedLanguage]="selectedLanguage"
+    [(visible)]="isCopyModalOpen"
+    modalTitle="pm.successProfileCopySuccessProfile"
+    [appendCopyToTitle]="true"
+    [profileCollections]="clientProfileCollections"
+    (copySP)="onCopySP($event)"
+    [deselectAllOptionAvailable]="deselectAllOptionAvailable">
+</kfthcl-copy-modal>
+
+<kfthcl-copy-modal-small
+    *ngIf="isCopyModalOpen && !hasLanguageAccess"
+    [id]="spPropsForModals.id"
+    [title]="spPropsForModals.title"
+    [(visible)]="isCopyModalOpen"
+    modalTitle="pm.successProfileCopySuccessProfile"
+    [appendCopyToTitle]="true"
+    [clientProfileCollections]="clientProfileCollections"
+    (copySP)="onCopySP($event)"
+    [deselectAllOptionAvailable]="deselectAllOptionAvailable">
+</kfthcl-copy-modal-small>

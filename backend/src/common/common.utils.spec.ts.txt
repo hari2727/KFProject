@@ -1,0 +1,205 @@
+import { toNumber, Utils, find, RequestCommon } from './common.utils';
+
+describe('Common Utils', () => {
+    describe('toNumber', () => {
+        test('should return decimal number from string', () => {
+            expect(toNumber('0x10')).toEqual(0);
+            expect(toNumber('10')).toEqual(10);
+            expect(toNumber('a10')).toBeNaN();
+        });
+    });
+
+    describe('Utils', () => {
+        describe('simulateJson', () => {
+            test('should return Promise with sent data in the resolver', () => {
+                // Arrange
+                const json = '{}';
+
+                // Act
+                Utils.simulateJson(json).then(result => {
+                    // Assert
+                    expect(result).toEqual(json);
+                });
+            });
+        });
+    });
+
+    describe('find', () => {
+        const arr = Array.from([1, 2, 3, 4, 5], id => ({ id, value: id }));
+
+        test('should find an item in the array by given key name and value', () => {
+            // Act
+            const result = find(arr, 'id', 2);
+
+            // Assert
+            expect(result).toEqual({ index: 1, found: true });
+        });
+
+        test('should not find an item in the array by given key name and value if the value does not exist', () => {
+            // Act
+            const result = find(arr, 'id', 6);
+
+            // Assert
+            expect(result).toEqual({ found: false });
+        });
+
+        test('should not find an item in the array by given key name and value if the key does not exist', () => {
+            // Act
+            const result = find(arr, 'clientId', 6);
+
+            // Assert
+            expect(result).toEqual({ found: false });
+        });
+    });
+
+    describe('requestCommon', () => {
+        const kfConfigService: KfConfigService = new KfConfigService();
+        const getSpy = jest.spyOn(kfConfigService, 'get');
+        const requestCommonInstance = new RequestCommon(kfConfigService);
+        const mockKfhubApiBaseUrl = 'https://server.location';
+
+        describe('getSuccessProfileBaseUrl', () => {
+            test('should concat getKfhubApiBaseUrl and URI_SUCCESS_PROFILE_API_BASE', () => {
+                // Arrange
+                jest.spyOn(requestCommonInstance, 'getKfhubApiBaseUrl').mockReturnValueOnce(mockKfhubApiBaseUrl);
+
+                // Act
+                const result = requestCommonInstance.getSuccessProfileBaseUrl();
+
+                // Assert
+                expect(result).toEqual(`${mockKfhubApiBaseUrl}/v1/hrms/successprofiles`);
+            });
+        });
+        describe('getKfhubApiBaseUrl', () => {
+            test('should return data from KfConfigService get method', () => {
+                // Arrange
+                getSpy.mockReturnValueOnce(mockKfhubApiBaseUrl);
+
+                // Act
+                const result = requestCommonInstance.getKfhubApiBaseUrl();
+
+                // Assert
+                expect(result).toEqual(mockKfhubApiBaseUrl);
+            });
+        });
+
+        describe('getSuccessProfileUrl', () => {
+            const successProfileBaseUrl = 'successProfileBaseUrl';
+
+            beforeEach(() => {
+                jest.spyOn(requestCommonInstance, 'getSuccessProfileBaseUrl').mockReturnValue(successProfileBaseUrl);
+            });
+
+            test('should add the id to successProfileBaseUrl if it exists', () => {
+                // Arrange
+                const id = 123;
+                const successProfileBaseUrl = 'successProfileBaseUrl';
+
+                // Act
+                const result = requestCommonInstance.getSuccessProfileUrl(id);
+
+                // Assert
+                expect(result).toEqual(`${successProfileBaseUrl}/${id}`);
+            });
+
+            test('should not add the id to successProfileBaseUrl if it does not exists', () => {
+                // Act
+                const result = requestCommonInstance.getSuccessProfileUrl();
+
+                // Assert
+                expect(result).toEqual(successProfileBaseUrl);
+            });
+        });
+
+        describe('getPermissionsUrl', () => {
+            test('should return permissions url', () => {
+                // Assert
+                const successProfileBaseUrl = 'successProfileBaseUrl';
+                jest.spyOn(requestCommonInstance, 'getSuccessProfileBaseUrl').mockReturnValue(successProfileBaseUrl);
+
+                // Act
+                const result = requestCommonInstance.getPermissionsUrl();
+
+                // Assert
+                expect(result).toEqual(successProfileBaseUrl + '/permissions');
+            });
+        });
+
+        describe('getKfhubApiHeaders', () => {
+            const authToken = 'authToken';
+            const headers = {
+                authToken,
+                'application-name': 'PRODUCTS_HUB',
+                applicationName: 'TALENT_ARCHITECT',
+                'Content-Type': 'application/json',
+            };
+
+            test('should return headers with ps-session-id if psSessionId exists', () => {
+                // Assert
+                const psSessionId = 12345;
+
+                // Act
+                const result = requestCommonInstance.getKfhubApiHeaders(authToken, psSessionId);
+
+                // Assert
+                expect(result).toEqual({ ...headers, ...{ 'ps-session-id': psSessionId } });
+            });
+
+            test('should return headers without ps-session-id if psSessionId falsy', () => {
+                // Assert
+                const psSessionId = null;
+
+                // Act
+                const result = requestCommonInstance.getKfhubApiHeaders(authToken, psSessionId);
+
+                // Assert
+                expect(result).toEqual(headers);
+            });
+        });
+
+        describe('checkUAMPointsRestrictions', () => {
+            const pointValue = 123;
+            test('should return Restrictions with isExet 0 if hasExecutiveAccessByPointValue and hasPointValueAccess falsy', () => {
+                // Act/Assert
+                expect(
+                    requestCommonInstance.checkUAMPointsRestrictions({
+                        hasExecutiveAccessByPointValue: false,
+                        hasPointValueAccess: false,
+                        pointValue,
+                    }),
+                ).toEqual({
+                    isExec: 0,
+                    pointValue,
+                });
+            });
+
+            test('should return Restrictions with isExet 1 if hasExecutiveAccessByPointValue and hasPointValueAccess truth', () => {
+                // Act/Assert
+                expect(
+                    requestCommonInstance.checkUAMPointsRestrictions({
+                        hasExecutiveAccessByPointValue: true,
+                        hasPointValueAccess: true,
+                        pointValue,
+                    }),
+                ).toEqual({
+                    isExec: 1,
+                    pointValue,
+                });
+            });
+
+            test('should return Restrictions with isExet 2 if hasExecutiveAccessByPointValue falsy and hasPointValueAccess truth', () => {
+                // Act/Assert
+                expect(
+                    requestCommonInstance.checkUAMPointsRestrictions({
+                        hasExecutiveAccessByPointValue: false,
+                        hasPointValueAccess: true,
+                        pointValue,
+                    }),
+                ).toEqual({
+                    isExec: 2,
+                    pointValue,
+                });
+            });
+        });
+    });
+});

@@ -1,0 +1,18 @@
+<div class="section d-flex flex-column" [class.single]="isSingle">
+    <div class="title-header-section d-flex flex-ai-center">
+        <h4 *ngIf="title" class="title-header text-uppercase lh-20 ls-label fw-bold">{{ title }}</h4>
+    </div>
+    <div *ngIf="contentVisible" class="position-relative">
+        <div>
+            <kf-input
+                class="description-textarea w-100"
+                type="textarea"
+                [value]="value"
+                [disabled]="false"
+                [maxlength]="maxlength"
+                (valueChange)="valueOnChange($event)"
+            ></kf-input>
+        </div>
+        <span class="subtext-sm color-medium characters position-absolute float-end" *ngIf="countVisible">{{ maxlength - value.length }} / {{ maxlength }} {{ 'lib.characters' | translate }}</span>
+    </div>
+</div>

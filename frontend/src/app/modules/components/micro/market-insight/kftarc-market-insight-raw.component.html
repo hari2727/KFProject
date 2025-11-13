@@ -1,0 +1,14 @@
+<div class="col-lg-4 col-md-6 market-insights-container" style="border: solid 1px red">
+    <kf-grade-level-pie grade="{{ getGrade() }}" label="{{ getGradeLabel() | async }}"></kf-grade-level-pie>
+
+    <div class="spgr-qinfo-col-op-detail" *ngIf="pricedFacts">
+        <span class="spgr-qinfo-col-op-content" *ngFor="let fact of pricedFacts">
+            <span class="spgr-qinfo-col-op-text">
+                {{ fact.factName }}
+            </span>
+            <span class="spgr-qinfo-col-op-stat" >
+                {{ getFactDetails(fact) | async }}
+            </span>
+        </span>
+    </div>
+</div>

@@ -1,0 +1,55 @@
+<div class="d-flex flex-column search-filter-section">
+    <div class="d-flex w-100 search-control flex-ai-center">
+        <kf-input type="search" [placeholder]="placeholder" [(ngModel)]="search"
+            (ngModelChange)="onChangeSearch($event)" #searchInput class="flex-grow-1">
+        </kf-input>
+
+        <div *ngFor="let filter of filters; let i = index" class="flex-grow-1 ml-8" style="flex-basis: 0;"
+            [style.max-width]="filter.type[0] === searchFilterEnum.Functions ? '400px' : '250px'">
+            <kfthcl-dropdown #dropdown [insideClick]=" true"
+                [overlayMaxWidth]="filter.type[0] === searchFilterEnum.Functions ? 400 : 250" [overlayMaxHeight]="470"
+                overlayCustomClass="filter-overlay-container" class="o-auto bg-white w-100 h-100">
+                <kfthcl-dropdown-toggle class="pc-pointer">
+                    <button
+                        class="color-primary bg-white p-12 pl-8 pr-16 d-flex flex-ai-center flex-row w-100 o-hidden">
+                        <kf-icon class="left-icon" color="primary" icon="filter"></kf-icon>
+                        <span
+                            class="display-text flex-grow-1 text-left ml-8 body-text color-dark o-hidden text-nowrap">{{
+                            filter.term | translate }}</span>
+                        <span class="clear-dropdown-icons flex-grow-0">
+                            <kf-icon [icon]="dropdown.isOpen ? 'arrow-up' : 'arrow-down'" size="sm">
+                            </kf-icon>
+                        </span>
+                    </button>
+                </kfthcl-dropdown-toggle>
+                <kfthcl-dropdown-overlay>
+                    <div class="scroll-container">
+                        <div *ngFor="let item of filter.items" (click)="onChangeFilter(item)"
+                            class="item p-12 fs-body pc-pointer d-flex flex-ai-start" [class.selected]="item.checked">
+                            <kf-checkbox class="checkbox pr-12" [ngModel]="item.checked"></kf-checkbox>
+                            <div class="body-text">{{item.label}}</div>
+                        </div>
+                    </div>
+                </kfthcl-dropdown-overlay>
+            </kfthcl-dropdown>
+        </div>
+    </div>
+    <div class="d-flex flex-row flex-ai-center w-100 mt-16 p-12 pr-16 applied-filters-well"
+        *ngIf="selectedFilters.length > 0">
+        <div class="applied-filters flex-grow-1">
+            <div class="d-inline-block flex-ai-baseline m-4 bg-white px-12 applied-filter"
+                *ngFor="let filter of selectedFilters">
+                <span class="flex-grow-1 flex-shrink-0 mr-8 filter-content subtext-sm fw-semibold">{{
+                    filter.term | translate }}: {{ filter.label }}</span>
+                <span (click)="removeFilter(filter.type, filter.value, filter.parentId)">
+                    <kf-icon icon="close" color="primary" size="xs" class="pc-pointer"></kf-icon>
+                </span>
+            </div>
+        </div>
+        <a *ngIf="selectedFilters.length > 0"
+            class="fs-body-xs lh-16 link-sm ls-utility text-uppercase"
+            (click)="removeAllFilters()">
+            {{ 'lib.ClearAllFilters' | translate }}
+        </a>
+    </div>
+</div>

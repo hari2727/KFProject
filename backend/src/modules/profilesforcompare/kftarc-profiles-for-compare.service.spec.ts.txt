@@ -1,0 +1,200 @@
+import { Test, TestingModule } from '@nestjs/testing';
+
+import { ProfileCollectionIdMockDBResponse, ProfileMatchAndCompareMockDBResponse, ProfileMatchAndCompareMockResponse } from './kftarc-profile-for-compare.service.fixture';
+import { JoinConditionQuery, ProfileCompareQuery } from './kftarc-profiles-for-compare.interface';
+import { KfTarcProfilesForCompareRepository } from './kftarc-profiles-for-compare.repository';
+import { KfTarcProfilesForCompareService } from './kftarc-profiles-for-compare.service';
+
+describe('KfTarcProfilesForCompareService', () => {
+    let module: TestingModule;
+    let profilesForCompareService: KfTarcProfilesForCompareService;
+    let httpService: HttpsService;
+    let repository: KfTarcProfilesForCompareRepository;
+
+    beforeAll(async () => {
+        module = await Test.createTestingModule({
+            providers: [KfTarcProfilesForCompareService, HttpsService, KfTarcProfilesForCompareRepository],
+        }).compile();
+    });
+
+    beforeEach(() => {
+        profilesForCompareService = module.get<KfTarcProfilesForCompareService>(KfTarcProfilesForCompareService);
+        httpService = module.get<HttpsService>(HttpsService);
+        repository = module.get<KfTarcProfilesForCompareRepository>(KfTarcProfilesForCompareRepository);
+    });
+
+    afterAll(() => {
+        jest.clearAllMocks();
+    });
+
+    describe('getSuccessProfileById', () => {
+        test('should get data and return result', async () => {
+            // Arrange
+            const id = 123;
+            const authToken = 'token';
+            const psSessionId = 'psSessionId';
+            const url = 'url';
+            const headers = {
+                authToken,
+                'ps-session-id': psSessionId,
+                'application-name': 'PRODUCTS_HUB',
+                applicationName: 'TALENT_ARCHITECT',
+                'Content-Type': 'application/json',
+            };
+            const dataFromServer = 'dataFromServer';
+            const getSuccessProfileUrl = jest.spyOn(profilesForCompareService, 'getSuccessProfileUrl').mockReturnValueOnce(url);
+            const getKfhubApiHeaders = jest.spyOn(profilesForCompareService, 'getKfhubApiHeaders').mockReturnValueOnce(headers);
+            const get = jest.spyOn(httpService, 'get').mockResolvedValueOnce(dataFromServer);
+            // Act
+
+            const result = await profilesForCompareService.getSuccessProfileById(authToken, id, psSessionId);
+            // Assert
+
+            expect(result).toEqual(dataFromServer);
+            expect(getSuccessProfileUrl).toHaveBeenCalledWith(id);
+            expect(getKfhubApiHeaders).toHaveBeenCalledWith(authToken, psSessionId);
+            expect(get).toHaveBeenCalledWith(url, headers);
+        });
+    });
+
+    describe('getJobsInBulk', () => {
+        const authToken = 'token';
+        const psSessionId = 'psSessionId';
+        const request = {
+            headers: {
+                authtoken: authToken,
+                ['ps-session-id']: psSessionId,
+            },
+        };
+        test('should return an error if successprofileIds length is more than 5', async () => {
+            // Arrange
+            const query = {
+                successprofileIds: '1|2|3|4|5|6',
+            };
+            let err;
+
+            // Act
+            try {
+                await profilesForCompareService.getJobsInBulk(query, request);
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeDefined();
+            expect(err.getStatus()).toEqual(400);
+            expect(err.getExceptionCode()).toEqual('VAL.12063');
+        });
+
+        test('should return an error if successprofileIds is not defined', async () => {
+            // Arrange
+            const query = {};
+            let err;
+
+            // Act
+            try {
+                await profilesForCompareService.getJobsInBulk(query, request);
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeDefined();
+            expect(err.getStatus()).toEqual(400);
+            expect(err.getExceptionCode()).toEqual('VAL.12063');
+        });
+
+        test('should return an array of server getSuccessProfileById results', async () => {
+            // Arrange
+            const query = {
+                successprofileIds: '1|2|3|4|5',
+            };
+            const expectedResult = ['dataFromServer', 'dataFromServer', 'dataFromServer', 'dataFromServer', 'dataFromServer'];
+            const getSuccessProfileById = jest.spyOn(profilesForCompareService, 'getSuccessProfileById').mockResolvedValue('dataFromServer');
+
+            // Act
+            const result = await profilesForCompareService.getJobsInBulk(query, request);
+
+            // Assert
+            expect(result).toEqual(expectedResult);
+            expect(getSuccessProfileById).toHaveBeenCalledTimes(5);
+            expect(getSuccessProfileById.mock.calls).toEqual([
+                [authToken, '1', psSessionId],
+                [authToken, '2', psSessionId],
+                [authToken, '3', psSessionId],
+                [authToken, '4', psSessionId],
+                [authToken, '5', psSessionId],
+            ]);
+        });
+    });
+
+    describe('getJobRoleTypeById', () => {
+        it('should return correct response when profileCollectionIds has items and inputType is SEARCH_JOBS_MY_DESCRIPTIONS', async () => {
+            jest.spyOn(repository, 'getProfileCollectionIds').mockResolvedValueOnce(ProfileCollectionIdMockDBResponse);
+            jest.spyOn(repository, 'getJobRoleByTypeId').mockResolvedValueOnce(ProfileMatchAndCompareMockDBResponse);
+            const jdFilterByConditionQuery = `INNER JOIN
+            (
+                SELECT profileid
+                FROM   dbo.view_profilecollectionprofilesdetails
+                WHERE  profilecollectionid IN (39,39,41,73,154,154,154,290,407,407,407,407,407,512,555,572,572,778)
+                UNION
+                SELECT clientjobid
+                FROM   clientjob
+                WHERE  jobsourceid =:UserId) AS vpcpd ON (
+                cj.parentclientjobid=vpcpd.profileid
+            )`;
+            const query: ProfileCompareQuery = {
+                userId: 1,
+                inputType: 'SEARCH_JOBS_MY_DESCRIPTIONS',
+                type: 'CAREER_ARCHITECTURE_VIEW',
+                jobRoleTypeId: 'ASD11',
+                jobRoleName: 'Documentation Manager',
+                loggedInUserClientId: 23139,
+                locale: 'en',
+            };
+
+            const result = await profilesForCompareService.getJobRoleTypeById(query);
+
+            expect(repository.getProfileCollectionIds).toHaveBeenCalledWith(query.userId);
+            expect(repository.getJobRoleByTypeId).toHaveBeenCalledWith(query, jdFilterByConditionQuery);
+            expect(result).toEqual(ProfileMatchAndCompareMockResponse);
+        });
+
+        it('should return correct response when profileCollectionIds is empty and inputType is SEARCH_JOBS_MY_DESCRIPTIONS', async () => {
+            jest.spyOn(repository, 'getProfileCollectionIds').mockResolvedValueOnce([]);
+            jest.spyOn(repository, 'getJobRoleByTypeId').mockResolvedValueOnce(ProfileMatchAndCompareMockDBResponse);
+
+            const query: ProfileCompareQuery = {
+                userId: 1,
+                inputType: 'SEARCH_JOBS_MY_DESCRIPTIONS',
+                type: 'CAREER_ARCHITECTURE_VIEW',
+                jobRoleTypeId: 'ASD11',
+                jobRoleName: 'Documentation Manager',
+                loggedInUserClientId: 23139,
+                locale: 'en',
+            };
+
+            const result = await profilesForCompareService.getJobRoleTypeById(query);
+
+            expect(repository.getProfileCollectionIds).toHaveBeenCalledWith(query.userId);
+            expect(repository.getJobRoleByTypeId).toHaveBeenCalledWith(query, JoinConditionQuery.JD_SEARCH_JOIN_CONDITION_QUERY);
+            expect(result).toEqual(ProfileMatchAndCompareMockResponse);
+        });
+        it('should log and throw error when an exception occurs', async () => {
+            jest.spyOn(repository, 'getProfileCollectionIds').mockRejectedValue(new Error('Test Error'));
+            const logSpy = jest.spyOn(profilesForCompareService['logger'], 'log').mockImplementation(() => {});
+            const query: ProfileCompareQuery = {
+                userId: 1,
+                inputType: 'SEARCH_JOBS_MY_DESCRIPTIONS',
+                type: 'CAREER_ARCHITECTURE_VIEW',
+                jobRoleTypeId: 'ASD11',
+                jobRoleName: 'Documentation Manager',
+                loggedInUserClientId: 23139,
+                locale: 'en',
+            };
+
+            await expect(profilesForCompareService.getJobRoleTypeById(query)).rejects.toThrow('Test Error');
+            expect(logSpy).toHaveBeenCalledWith('Erorr in getJobRoleTypeById Test Error');
+        });
+    });
+});

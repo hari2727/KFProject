@@ -1,0 +1,117 @@
+<kf-page app="pm">
+    <kf-page-masthead>
+        <h1 class="header mt-0 mb-12">{{ 'pm.jobDescriptions' | translate }}</h1>
+        <div class="d-flex flex-jc-between flex-ai-end" *ngIf="editAboutTheCompanyPermission">
+            <p class="body-text sub-header w-50 mb-0">{{ 'pm.JobDescriptionsPageDescription' | translate }}</p>
+            <div class="subheader-navigation-link d-flex flex-ai-center">
+                <kf-icon icon="pen" color="primary" size="lg" class="mr-8"></kf-icon>
+                <a class="fw-bold link" (click)="editAboutTheCompany()">{{ 'lib.editCompanyDescription' | translate | titlecase
+                    }}</a>
+            </div>
+        </div>
+    </kf-page-masthead>
+
+    <kf-page-content>
+        <div class="filter-wrapper position-relative">
+            <kftarc-jd-search-filter (onFilterChange)="onFilterChange($event)"
+                placeholder="{{ 'pm.SearchJobDescriptions' | translate }}"></kftarc-jd-search-filter>
+        </div>
+
+        <kftarc-jd-search-result (onScrollDown)="scrollDown($event)"
+                                 (onSortByColumn)="sortByColumn($event)"
+                                 [infiniteScrollDisabled]="infiniteScrollDisabled"
+                                 [dataSource]="dataSource"
+                                 [columns]="columns"
+                                 [columnSource]="columnSource"
+                                 [menuItems]="menuItems"
+                                 [totalRows]="totalRows"
+                                 [totalPages]="totalPages"
+                                 [pageIndex]="pageIndex"
+                                 [sorting]="sorting"
+                                 (onContextMenuClick)="onContextMenuClick($event)">
+        </kftarc-jd-search-result>
+    </kf-page-content>
+</kf-page>
+
+
+<kf-modal class="pp-modal" title="{{ 'lib.removalConfirmationQuestion' | translate }} '{{ jobDescriptionTitle }}'?"
+    size="sm" [closeOnEscape]="false" [modal]="true" [dismissableMask]="false" [scrollable]="true"
+    [(visible)]="showRemoveModal">
+    <div class="pp-modal-body">
+        <span class="body-text">
+            {{ 'pm.removeJobDescriptionModal' | translate }}
+        </span>
+    </div>
+    <footer>
+        <button (click)="removeJdChoice(false)" class="btn btn-outline">
+            {{ 'pm.successProfileRemoveModalButtonCancel' | translate }}
+        </button>
+        <button (click)="removeJdChoice(true)" class="btn">
+            {{ 'pm.successProfileRemoveModalButtonYes' | translate }}
+        </button>
+    </footer>
+</kf-modal>
+
+<kf-slide-up *ngIf="isAboutCompanyOpen" [(visible)]="isAboutCompanyOpen" [overrideWithCustomFooter]="true">
+    <div kf-slider-header-content>
+        <h1 class="fw-bold text-capitalize">{{ 'pm.aboutTheCompany' | translate }}</h1>
+        <span class="body-text mt-8 d-block">{{ 'pm.JDinTheFieldBelow' | translate }}</span>
+    </div>
+    <div [formGroup]="fg">
+        <div class="d-flex flex-ai-end mb-16">
+            <div class="warning-message w-100 py-12 px-16 mt-24 bg-white d-inline-flex border border-color-primary">
+                <kf-icon icon="info" color="primary" size="lg" class="mr-12"></kf-icon>
+                <span class="label-text-sm fw-semibold">{{ 'pm.JDIfYouWantToOverwrite' | translate }}</span>
+            </div>
+        </div>
+        <kftarc-jd-section-header-text class="d-block mb-24" formControlName="about" [maxlength]="900" [countVisible]="true"
+            [isSingle]="true">
+        </kftarc-jd-section-header-text>
+
+        <kf-checkbox formControlName="applyToAllJobDescriptions" label="{{ 'lib.applyThisChangeJD' | translate }}">
+        </kf-checkbox>
+    </div>
+
+    <div class="custom-footer-content slider-content learning-content-footer">
+        <div class="footer-left">
+            <button class="btn btn-outline" (click)="closeEditAboutTheCompany()">{{ 'lib.close' | translate }}</button>
+        </div>
+        <div class="footer-right">
+            <button class="btn" (click)="saveAboutTheCompany()">{{ 'pm.save' | translate }}</button>
+        </div>
+    </div>
+
+    <kf-modal class="pp-modal" title="{{ 'lib.confirm' | translate }}" size="sm" [closeOnEscape]="false" [modal]="true"
+        [dismissableMask]="false" [(visible)]="showConfirmAboutModal">
+        <div class="pp-modal-body">
+            <span class="body-text">
+                {{ 'pm.confirmAboutModal' | translate }}
+            </span>
+        </div>
+        <footer>
+            <button class="btn btn-outline" (click)="leaveConfirmAbout(false)">
+                {{ 'lib.close' | translate }}
+            </button>
+            <button class="btn" (click)="leaveConfirmAbout(true)">
+                {{ 'lib.confirm' | translate }}
+            </button>
+        </footer>
+    </kf-modal>
+
+    <kf-modal class="pp-modal" title="{{ 'pm.unsavedChanges' | translate }}" size="sm" [closeOnEscape]="false"
+        [modal]="true" [dismissableMask]="false" [(visible)]="showDiscardAllModal">
+        <div class="pp-modal-body">
+            <span class="body-text">
+                {{ 'pm.youHaveUnsavedChanges' | translate }}
+            </span>
+        </div>
+        <footer>
+            <button class="btn btn-outline" (click)="discardAllChanges(true)">
+                {{ 'pm.continue' | translate }}
+            </button>
+            <button class="btn" (click)="discardAllChanges(false)">
+                {{ 'lib.stay' | translate }}
+            </button>
+        </footer>
+    </kf-modal>
+</kf-slide-up>

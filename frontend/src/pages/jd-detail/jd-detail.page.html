@@ -1,0 +1,168 @@
+<kf-page app="pm">
+    <kf-page-masthead class="masthead d-flex flex-row flex-ai-center">
+        <h1 class="header flex-shrink-2" [pTooltip]="job.title" [tooltipDisabled]="hideTooltip" tooltipPosition="top"
+            (mouseenter)="hover($event)">{{ job.title }}</h1>
+        <kfthcl-dropdown #dropdown [overlayMinWidth]="200" [overlayMaxWidth]="300" [overlayMaxHeight]="300"
+            class="o-auto ml-auto bg-white ml-8">
+            <kfthcl-dropdown-toggle class="pc-pointer">
+                <div class="actions-toggle color-primary bg-white pl-8 pr-8 d-flex flex-ai-center flex-row w-100 o-hidden">
+                    <span class="display-text flex-grow-1 text-left ml-8 body-text color-dark o-hidden text-nowrap">{{
+                        'pm.jobDescriptionActionsMenu' | translate }}</span>
+                    <span class="clear-dropdown-icons flex-grow-0">
+                        <kf-icon [icon]="dropdown.isOpen ? 'arrow-up' : 'arrow-down'" size="sm"></kf-icon>
+                    </span>
+                </div>
+            </kfthcl-dropdown-toggle>
+            <kfthcl-dropdown-overlay>
+                <div class="item p-12 fs-body pc-pointer d-flex flex-ai-start body-text"
+                    (click)="download($event, job, 'pdf')">{{ 'pm.jobDescriptionDownload' | translate }}</div>
+                <div class="item p-12 fs-body pc-pointer d-flex flex-ai-start body-text"
+                    (click)="download($event, job, 'doc')">{{ 'pm.jobDescriptionDownloadWord' | translate }}</div>
+                <div class="item p-12 fs-body pc-pointer d-flex flex-ai-start body-text"
+                    (click)="downloadInterviewGuide(job.interviewGuideUrl)">{{ 'pm.jobDescriptionInterviewGuide' | translate }}
+                </div>
+                <div *ngIf="hasEditMenuItem" class="item p-12 fs-body pc-pointer d-flex flex-ai-start body-text" (click)="editJd()">
+                    {{ 'pm.editJobDescription' | translate }}</div>
+                <div class="item p-12 fs-body pc-pointer d-flex flex-ai-start body-text" (click)="copyJd()">{{
+                    'pm.copyJobDescription' | translate }}</div>
+                <div *ngIf="hasDeleteMenuItem" class="item p-12 fs-body pc-pointer d-flex flex-ai-start body-text"
+                    (click)="removeJobDescription(job)">{{ 'pm.removeJobDescriptionText' | translate }}</div>
+            </kfthcl-dropdown-overlay>
+        </kfthcl-dropdown>
+    </kf-page-masthead>
+    <kf-page-content>
+        <div *ngIf="job.parentJobDetails" class="jd-based-on-link">
+            <span class="body-text fw-semibold jd-link">{{ 'pm.successProfileBasedOn' | translate }}
+                <a *ngIf="job.parentJobDetails && parentSP && parentSP.title" class="link fw-semibold"
+                    [href]="getParentUrl()">
+                    {{ parentSP.title }} <span
+                        *ngIf="parentSP && parentSP.version && parentSP?.profileType !== 'CUSTOM_PROFILE' && !parentSP.parentJobDetails">{{
+                        'pm.version' | translate }} {{ parentSP.version }}</span><span
+                        *ngIf="parentSP && parentSP.parentJobDetails?.version && parentSP.profileType !== 'CUSTOM_PROFILE' && !parentSP.version">{{
+                        'pm.version' |
+                        translate }} {{ parentSP.parentJobDetails.version }}</span>
+                </a>
+            </span>
+        </div>
+
+        <div class="section py-16">
+            <h4 class="title-header mb-10 fw-bold ">{{ 'pm.aboutTheCompany' | translate | uppercase }}</h4>
+            <div class="body-text mt-8 pre-wrap">{{ job.companyDescription || '&#8212;' }}</div>
+        </div>
+        <div class="section py-16">
+            <h4 class="title-header mb-10 fw-bold ">{{ 'pm.jobPurpose' | translate | uppercase }}</h4>
+            <div class="body-text mt-8 pre-wrap">{{ job.description || '&#8212;' }}</div>
+        </div>
+
+        <ng-container *ngFor="let sec of sectionModels; let sectionIndex = index">
+            <ng-container *ngIf="sec.includeSection">
+                <div class="pt-16">
+                    <div class="d-flex flex-ai-center w-100">
+                        <h4 class="title-header mb-10 fw-bold">{{sections.get(sec.code) | translate }}</h4>
+                    </div>
+                </div>
+
+                <ng-container *ngIf="sec.code === secCodeEnum.Tech">
+                    <div class="d-flex flex-row section"
+                        *ngFor="let tech of sec.technologyCommodities; let techIndex = index">
+                        <div class="py-16 flex-grow-1">
+                            <div *ngIf="sec.includeSubCategoryNames" class="body-text fw-semibold">{{ tech.title }}
+                            </div>
+                            <div class="body-text">{{tech.description }}</div>
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="sec.code === secCodeEnum.Tools">
+                    <div class="d-flex flex-row section"
+                        *ngFor="let tool of sec.toolsCommodities; let toolIndex = index">
+                        <div class="py-16 flex-grow-1">
+                            <div *ngIf="sec.includeSubCategoryNames" class="body-text fw-semibold">{{ tool.title }}
+                            </div>
+                            <div class="body-text">
+                                <span *ngFor="let t of tool.tools; let last = last">{{t.title}}{{last ? '':
+                                    '; '}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="sec.code === secCodeEnum.Tasks">
+                    <div class="d-flex flex-row section" *ngFor="let task of sec.tasks; let taskIndex = index">
+                        <div class="py-16 flex-grow-1">
+                            <div class="body-text fw-semibold">{{task.name}}</div>
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-container
+                    *ngIf="sec.code === secCodeEnum.Resp || sec.code === secCodeEnum.BhvrSkills || sec.code === secCodeEnum.TchnSkills">
+                    <div class="d-flex flex-row section" *ngFor="let subCtg of sec.subCtgs; let subCtgIndex = index">
+                        <div class="py-16 flex-grow-1">
+                            <div *ngIf="sec.includeSubCategoryNames" class="body-text fw-semibold">{{subCtg.name}}
+                            </div>
+                            <div class="body-text pre-wrap" >{{subCtg.description}}</div>
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="sec.code === 'CERTIFICATIONS'">
+                    <div class="d-flex flex-row section" *ngFor="let cert of sec.certs">
+                        <div class="py-16 flex-grow-1">
+                            <div *ngIf="sec.includeSubCategoryNames" class="body-text fw-semibold">{{cert.name}}
+                            </div>
+                            <div class="body-text pre-wrap">{{cert.description}}</div>
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="sec.code === secCodeEnum.Education || sec.code === secCodeEnum.Experience">
+                    <div class="d-flex flex-row section" *ngFor="let subCtg of sec.subCtgs; let subCtgIndex = index">
+                        <div class="py-16 flex-grow-1">
+                            <div *ngIf="sec.includeSubCategoryNames" class="body-text fw-semibold">{{subCtg.name}}
+                            </div>
+                            <div class="body-text pre-wrap">{{subCtg.description}}</div>
+                        </div>
+                    </div>
+                </ng-container>
+            </ng-container>
+        </ng-container>
+
+        <div class="section py-16">
+            <h5 class="title-header mb-10 fw-semibold ">{{ 'pm.additionalInformation' | translate | uppercase }}</h5>
+            <div class="body-text mt-8 pre-wrap">{{ job.additionalComments || '&#8212;' }}</div>
+        </div>
+    </kf-page-content>
+</kf-page>
+
+<kf-modal class="pp-modal" title="{{ 'lib.removalConfirmationQuestion' | translate }} '{{ jobDescriptionTitle }}'?"
+    size="sm" [closeOnEscape]="false" [modal]="true" [dismissableMask]="false" [scrollable]="true"
+    [(visible)]="showRemoveModal">
+    <div class="pp-modal-body">
+        <span class="body-text">
+            {{ 'pm.removeJobDescriptionModal' | translate }}
+        </span>
+    </div>
+    <footer>
+        <button (click)="removeJobDescriptionChoice(false)" class="btn btn-outline">
+            {{ 'pm.successProfileRemoveModalButtonCancel' | translate }}
+        </button>
+        <button (click)="removeJobDescriptionChoice(true)" class="btn">
+            {{ 'pm.successProfileRemoveModalButtonYes' | translate }}
+        </button>
+    </footer>
+</kf-modal>
+
+<kf-modal *ngIf="isIGEmptyModalOpen" title="{{ 'pm.notice' | translate }}" size="sm" [(visible)]="isIGEmptyModalOpen">
+    <div class="body-content">{{ 'pm.JDinterviewGuideBEHNotFound' | translate }}</div>
+    <footer>
+        <button class="btn" (click)="closeIGEmptyModal()">{{ 'pm.ok' | translate }}</button>
+    </footer>
+
+</kf-modal>
+
+<kftarc-sp-interview-guide
+    *ngIf="parentSP?.id"
+    [id]="parentSP?.id"
+    [url]="parentSP?.interviewGuideUrl"
+    [compIds]="behavioralCompetenciesCodes"
+    [bcRecords]="behavioralCompsRecords"
+    [skillsRecords]="skillsRecords"
+    [spName]="parentSP?.title"
+    [(visible)]="isIGConfigModalOpen"
+></kftarc-sp-interview-guide>

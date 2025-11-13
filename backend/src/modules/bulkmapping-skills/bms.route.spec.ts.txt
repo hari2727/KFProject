@@ -1,0 +1,10 @@
+import { BulkMappingSkillsRoute } from './bms.route';
+
+
+describe('BulkMappingSkillsRoute', () => {
+
+    test('should not be changed occasionally', () => {
+        expect(BulkMappingSkillsRoute.BASE).toBe('bulkmapping/skills-components');
+    });
+
+});

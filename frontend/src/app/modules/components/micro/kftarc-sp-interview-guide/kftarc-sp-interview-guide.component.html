@@ -1,0 +1,264 @@
+<kf-slide-up [correctSize]="true" [overrideWithCustomFooter]="true" *ngIf="visible" [(visible)]="visible"
+    (visibleChange)="visibleHandler($event)">
+        <div kf-slider-header-content>
+            <div class="d-flex flex-jc-between">
+                <div kf-slider-header-left>
+                    <span class="fs-body-sm">
+                        {{ 'pm.successProfileInterviewGuide' | translate }}
+                    </span>
+                    <h1 class="pb-24">
+                        {{ 'pm.jobDescriptionInterviewGuide' | translate }}
+                    </h1>
+                    <div *ngIf="!reviewPage">
+                        <span class="fs-body fw-bold">
+                            {{ 'lib.step' | translate }} {{ splitBarChartData }} {{ 'lib.of' | translate }} 2:
+                        </span>
+                        <span class="fs-body fw-bold">
+                            {{splitBarChartData === 1 ? ('pm.selectInterviewFromDropdownStep' | translate) : ('pm.selectCategoriesStep' | translate)}}
+                        </span>
+                        <kf-progress-bar 
+                            [barConfig]="barConfigSplit" 
+                            [data]="splitBarChartData" 
+                            class="split-bar">
+                        </kf-progress-bar>
+                    </div>
+                    <span class="fs-body-sm" *ngIf="interviewsCategories && !reviewPage">
+                        {{ 'pm.successProfileInterviewGuide' | translate }}
+                    </span>
+                    <span *ngIf="interviewsCategories && !reviewPage" class="fs-body-sm">
+                        {{ 'pm.categoriesUnderInterviews' | translate }}
+                    </span>
+                </div>
+
+                <div kf-slider-header-right>
+                    <button kf-button color="light" 
+                            *ngIf="reviewPage" 
+                            (click)="edit()"
+                            size="sm"
+                            class="mr-16">
+                        <kf-icon icon="pen" color="primary">
+                        </kf-icon>
+                        <span class="pr-12 pl-12">
+                            {{ 'lib.edit' | translate }}
+                        </span>
+                    </button>
+                    <kf-icon icon="close" class="pc-pointer" (click)="openCloseModalFn()"></kf-icon>
+                </div>
+
+            </div>
+            
+        </div>
+        
+    <div *ngIf="!interviewsCategories || reviewPage" class="wrapper">
+
+        <div class="body-content">
+            {{ 'pm.interviewGuideDescription' | translate }}
+        </div>
+        <div class="container-fluid">
+            <form class="controlls row ml-20" [formGroup]="fg">
+                <div class="row pb-160">
+                    <div class="col-6 pr-16">
+                        <div class="master-select">
+                            <kf-radio-button formControlName="radio" value="master"
+                                label="{{ 'pm.masterGuide' | translate }}"
+                                description="{{ 'pm.masterGuideDescr' | translate }}" (click)="enableGuideFormatStep('master')"
+                                [disabled]="reviewPage"
+                                [singleLine]="false">
+                            </kf-radio-button>
+                        </div>
+                    </div>
+                    <div class="col-6 pl-48">
+                        <div class="split-select">
+                            <kf-radio-button formControlName="radio" value="split"
+                                label="{{ 'pm.splitGuide' | translate }}"
+                                description="{{ 'pm.splitGuideDescr' | translate }}" (click)="enableGuideFormatStep('split')"
+                                [disabled]="reviewPage"
+                                [singleLine]="false">
+                            </kf-radio-button>
+                        </div>
+                        <div class="split-count">
+                            <kf-dropdown [disabled]="igType === 'master' || igType === null || reviewPage" formControlName="dd">
+                                <kf-dropdown-item *ngFor="let split of splits" [value]="split.counts"
+                                    [label]="'0' + split.counts" (click)="splitValueFunction(split.counts)">
+                                </kf-dropdown-item>
+                            </kf-dropdown>
+                        </div>
+                    </div>
+                </div>
+                <div class="row pt-40">
+                    <div class="d-flex flex-column flex-jc-end col-4">
+                        <h3 class="fs-body fw-bold mx-0 mb-16 mt-0">
+                            {{ 'pm.igFormat' | translate }}
+                        </h3>
+                        <div class="ig-format-radio-container">
+                            <div class="format-select d-flex flex-column">
+                                <kf-radio-button [disabled]="!firstStepSelected || reviewPage" formControlName="igFormat" value="pdf"
+                                    label="{{ 'pm.pdfFormat' | translate }}" [singleLine]="true"
+                                    (click)="enableLanguageSelectionStep()">
+                                </kf-radio-button>
+                                <kf-radio-button [disabled]="!firstStepSelected || reviewPage" formControlName="igFormat" value="doc"
+                                label="{{ 'pm.wordDocument'| translate }}" [singleLine]="true" class="pl8"
+                                (click)="enableLanguageSelectionStep()">
+                            </kf-radio-button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column col-5">
+                        <h3 class="fs-body fw-bold mx-0 mb-16 mt-0">
+                            {{ 'pm.selectLanguageForPdf' | translate }}
+                        </h3>
+                        <kf-dropdown formControlName="language" placeholder="{{ 'lib.selectPlaceholder' | translate }}"
+                            [disabled]="!firstStepSelected || reviewPage">
+                            <kf-dropdown-item label="{{ 'lib.selectPlaceholder' | translate }}"   (click)="enableCategorySelectionStep()">
+                            </kf-dropdown-item>
+                            <kf-dropdown-item *ngFor="let l of languages" [value]="l.id" [label]="l.name"
+                                (click)="enableCategorySelectionStep()">
+                            </kf-dropdown-item>
+                        </kf-dropdown>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="custom-footer-content slider-content">
+        <div class="footer-left">
+            <button *ngIf="!interviewsCategories" kf-button color="light" (click)="close()">
+                {{ 'pm.cancel' | translate }}
+            </button>
+            <button *ngIf="interviewsCategories && !showTabs" kf-button color="light" (click)="close()">
+                {{ 'pm.cancel' | translate }}
+            </button>
+            <button *ngIf="interviewsCategories" kf-button color="light" (click)="back()">
+                {{ 'lib.back' | translate }}
+            </button>
+        </div>
+        <div class="footer-right">
+            <button *ngIf="!interviewsCategories" kf-button [disabled]="!thirdStepSelected" (click)="next()">
+                {{ 'lib.next' | translate }}
+            </button>
+            <button *ngIf="interviewsCategories && !reviewPage" kf-button (click)="review()"
+             [disabled]="!(enableBehavioral || enableSkill) || !hasSelectedRecords">
+                {{ 'pm.reviewAndExport' | translate }}
+            </button>
+            <button *ngIf="interviewsCategories && reviewPage" kf-button (click)="download()">
+                {{ 'lib.export' | translate }}
+            </button>
+        </div>
+    </div>
+
+    <div *ngIf="reviewPage" class="mt-40 pt-24 border-top">
+        <span class="fs-body-sm">
+            {{ 'pm.successProfileInterviewGuide' | translate }}
+        </span>
+        <span class="fs-body-sm">
+            {{ 'pm.categoriesUnderInterviews' | translate }}
+        </span>
+    </div>
+    <div *ngIf="interviewsCategories && this.showTabs" class="categories">
+        <kf-tab-view [(selectedIndex)]=selectedTabId class="pt-24 pb-24" (click)="tabSelection(selectedTabId)">
+
+            <kf-tab-panel *ngFor="let tab of tabs;let i=index"  [header]="tabs.length > 1 ? tab.header : null">
+                <ng-container *ngTemplateOutlet="keyCellTmpl; context: { list: i }">
+                </ng-container>
+            </kf-tab-panel>
+        </kf-tab-view>
+    </div>
+    <div *ngIf="interviewsCategories && !this.showTabs" class="categories">
+        <ng-container *ngTemplateOutlet="keyCellTmpl; context: { list: tabs }">
+        </ng-container>
+    </div>
+
+    <ng-template #keyCellTmpl let-list="list">
+        <div class="box-section d-flex">
+
+            <div class="w-50 pr-16" *ngIf="this.recordLists.bc.originalRecords[list]?.records?.length  > 0">
+                <div class="d-flex flex-ai-baseline">
+                    <kf-checkbox 
+                        [disabled]="!thirdStepSelected || reviewPage"
+                        class="mr-24"
+                        [checked]="splitBCRecordsList[list].bcCheckBox"
+                        (click)="selectCategories(splitBCRecordsList[list], 'bc')">
+                    </kf-checkbox>
+                    <div class="">
+                        <h3 [class.color-disabled]="!splitBCRecordsList[list].bcCheckBox || reviewPage" class="pb-8">
+                            {{ 'pm.behavioralCompetencies' | translate }}
+                        </h3>
+                        <p class="fs-body">
+                            {{checkedBc}} {{ 'pm.selectedOutOf' | translate }} {{totalBehaviouralComps}}
+                        </p>
+                    </div>
+                </div>
+                <div class="search-list" [class.opaque-box]="!splitBCRecordsList[list].bcCheckBox || reviewPage">
+                    <kf-input [disabled]="!splitBCRecordsList[list].bcCheckBox || reviewPage" type="search" [(ngModel)]="splitBCRecordsList[list].searchTerm"   (ngModelChange)="onChangeSearch('bc', splitBCRecordsList[list].searchTerm)"
+                        placeholder="Search" />
+
+                    <div class="border-bottom">
+                        <kf-checkbox [disabled]="!splitBCRecordsList[list].bcCheckBox || reviewPage"  label="Select All" [(ngModel)]="allBCSelected[list]"
+                            (change)="toggleSelectAll($event, 'bc')" class="pt-24 pb-24">
+                        </kf-checkbox>
+                    </div>
+
+                    <ul class="pt-24">
+                        <li *ngFor="let record of splitBCRecordsList[list].records; let i = index">
+                            <kf-checkbox [disabled]="!splitBCRecordsList[list].bcCheckBox || reviewPage" type="checkbox" [(ngModel)]="record.selected"
+                                (change)="logSelectedRecords($event, 'bc', i)" label="{{ record.name }}"
+                                class="pb-16">
+                            </kf-checkbox>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="w-50 pl-16" *ngIf="this.recordLists.skills.originalRecords[list]?.records?.length > 0">
+                <div class="d-flex flex-ai-baseline">
+                    <kf-checkbox 
+                        [disabled]="!thirdStepSelected  || reviewPage"
+                        class="mr-24"
+                        [checked]="splitSkillsRecordsList[list].skillCheckBox"
+                        (click)="selectCategories(splitSkillsRecordsList[list], 'skills')">
+                    </kf-checkbox>
+                    <div class="">
+                        <h3 [class.color-disabled]="!splitSkillsRecordsList[list].skillCheckBox || reviewPage" class="pb-8">
+                            {{ 'pm.skills' | translate }}
+                        </h3>
+                        <p class="fs-body">
+                            {{checkedSkills}} {{ 'pm.selectedOutOf' | translate }} {{totalSkills}}
+                        </p>
+                    </div>
+                </div>
+                <div class="search-list" [class.opaque-box]="!splitSkillsRecordsList[list].skillCheckBox || reviewPage">
+                    <kf-input [disabled]="!splitSkillsRecordsList[list].skillCheckBox || reviewPage" type="search" [(ngModel)]="splitSkillsRecordsList[list].searchTerm" placeholder="Search"  (ngModelChange)="onChangeSearch('skills',  splitSkillsRecordsList[list].searchTerm)"/>
+                    <div class="border-bottom">
+                        <kf-checkbox [disabled]="!splitSkillsRecordsList[list].skillCheckBox || reviewPage"  label="Select All" [(ngModel)]="allSkillsSelected[list]"
+                            (change)="toggleSelectAll($event, 'skills')" class="pt-24 pb-24">
+                        </kf-checkbox>
+                    </div>
+
+                    <ul class="pt-24">
+                        <li *ngFor="let record of splitSkillsRecordsList[list].records;  let i = index">
+                            <kf-checkbox [disabled]="!splitSkillsRecordsList[list].skillCheckBox || reviewPage" type="checkbox" [(ngModel)]="record.selected"
+                                (change)="logSelectedRecords($event, 'skills', i)" label="{{ record.name }}"
+                                class="pb-16"></kf-checkbox>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+    </ng-template>
+</kf-slide-up>
+
+<kf-modal [(visible)]="openCloseModal" 
+        width="auto" 
+        height="320"
+        [title]="'pm.cancelIgDownload' | translate">
+            <div class="modal-body body-content">
+                <p>{{ 'pm.cancelIgDownloadMessage' | translate }}</p>
+            </div>
+        <footer>
+            <button kf-button color="light" (click)="openCloseModal = false">{{ 'lib.no' | translate }}</button>
+            <button kf-button color="primary" (click)="close()">{{ 'pm.yesCancelIg' | translate }}</button>
+        </footer>
+</kf-modal>

@@ -1,0 +1,207 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { KfTarcContentService } from './kftarc-content.service';
+import { KfTarchContentRepository } from './kftarc-content.repository';
+import { KfTarcContentInterface, KfTarcLearningContentBody, KfTarcLearningContentDTO, KfTarcQuery } from './kftarc-content.interface';
+
+describe('KfTarcContentService', () => {
+    let module: TestingModule;
+    let kfTarcContentService: KfTarcContentService;
+    let kfTarcContentRepository: KfTarchContentRepository;
+
+    beforeAll(async () => {
+        module = await Test.createTestingModule({
+            providers: [
+                KfTarcContentService,
+                {
+                    provide: KfTarchContentRepository,
+                    useValue: {
+                        getLearningAssetsByJobId: jest.fn(),
+                        getLearningAssetsByCompsRoleLevelsSP: jest.fn(),
+                        getLearningAssetByCompsJobId: jest.fn(),
+                    },
+                },
+            ],
+        }).compile();
+    });
+
+    beforeEach(() => {
+        kfTarcContentService = module.get(KfTarcContentService);
+        kfTarcContentRepository = module.get(KfTarchContentRepository);
+    });
+
+    afterAll(() => {
+        jest.clearAllMocks();
+    });
+
+    describe('validateContent', () => {
+        test('should throw error if groupByLearningAssetID failed', () => {
+            // Arrange
+            const body: KfTarcContentInterface.RequestBody = {
+                learningAssets: [
+                    {
+                        LearningAssetID: 1,
+                        LearningAssetName: '',
+                        LearningAssetDescription: '',
+                        JobSectionID: 1,
+                        JobSectionCode: '',
+                        JobSectionname: '',
+                        JobCategoryID: 1,
+                        JobCategoryName: '',
+                        JobSubCategoryID: 1,
+                        JobSubcategoryCde: '',
+                        JobSubCategoryName: '',
+                        LevelName: '',
+                        SubLevelName: '',
+                        rank: '',
+                    },
+                ],
+            };
+            jest.spyOn(kfTarcContentService, 'groupByLearningAssetID').mockImplementationOnce(() => {
+                throw new Error('error');
+            });
+            let err;
+
+            // Act
+            try {
+                kfTarcContentService.validateContent(body);
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeDefined();
+            expect(err.getStatus()).toEqual(400);
+        });
+
+        test('should add ranks', () => {
+            // Arrange
+            const body = {
+                learningAssets: [
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'b' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'a' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 3, LearningAssetName: 'f' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'e' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'd' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'c' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'c' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'c' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'd' },
+                ] as KfTarcContentInterface.ContentBody[],
+            };
+            // Act
+            const result = kfTarcContentService.validateContent(body);
+
+            // Assert
+            expect(result).toEqual({
+                learningAssets: [
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'a', rank: '1' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'b', rank: '1' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'c', rank: '1' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 1, LearningAssetName: 'd', rank: '1' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'c', rank: '2' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'c', rank: '2' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'd', rank: '2' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.TECHNICAL_SKILLS, LearningAssetID: 2, LearningAssetName: 'e', rank: '2' },
+                    { JobSectionCode: KfTarcContentInterface.Skills.BEHAVIORAL_SKILLS, LearningAssetID: 3, LearningAssetName: 'f', rank: '3' },
+                ],
+            });
+        });
+    });
+
+    describe('lastRankFromRule', () => {
+        test('should return 0 if the last item does not have a property "rank"', () => {
+            // Act/Assert
+            expect(kfTarcContentService.lastRankFromRule({ result: [{}], deleteArrayById: [] } as KfTarcContentInterface.RuleResult)).toEqual('0');
+        });
+
+        test('should return 0 if the "result" does not exists', () => {
+            // Act/Assert
+            expect(kfTarcContentService.lastRankFromRule({ deleteArrayById: [] } as KfTarcContentInterface.RuleResult)).toEqual('0');
+        });
+    });
+
+    describe('getLearningContent', () => {
+        test('should return learning content from getLearningAssetsByJobId response', async () => {
+            // Arrange
+            const query: KfTarcLearningContentDTO = { loggedInUserClientId: 1, successProfileId: '1', locale: 'en' } as KfTarcLearningContentDTO;
+            const learningContent = 'learningContent';
+            const getLearningAssetsByJobId = jest.spyOn(kfTarcContentRepository, 'getLearningAssetsByJobId').mockResolvedValueOnce(learningContent);
+
+            // Act
+            const result = await kfTarcContentService.getLearningContent(query);
+
+            // Assert
+            expect(result).toEqual({ learningAssets: learningContent });
+            expect(getLearningAssetsByJobId).toHaveBeenCalledWith(query.loggedInUserClientId, query.successProfileId, query.locale);
+        });
+    });
+
+    describe('handleLearningContent', () => {
+        test('should return valid and mapped learning content', async () => {
+            // Arrange
+            const query: KfTarcLearningContentDTO = { loggedInUserClientId: 1, successProfileId: '1', locale: 'en' } as KfTarcLearningContentDTO;
+            const learningContent = { learningAssets: 'learningContent' };
+            const validateContent = { learningAssets: [] };
+            const mapLearningContent = { sections: [] };
+            const getLearningContentSpy = jest.spyOn(kfTarcContentService, 'getLearningContent').mockResolvedValueOnce(learningContent);
+            const validateContentSpy = jest.spyOn(kfTarcContentService, 'validateContent').mockReturnValueOnce(validateContent);
+            const mapLearningContentSpy = jest.spyOn(kfTarcContentService, 'mapLearningContent').mockReturnValueOnce(mapLearningContent);
+
+            // Act
+            const result = await kfTarcContentService.handleLearningContent(query);
+
+            // Assert
+            expect(getLearningContentSpy).toHaveBeenCalledWith(query);
+            expect(validateContentSpy).toHaveBeenCalledWith(learningContent);
+            expect(mapLearningContentSpy).toHaveBeenCalledWith(validateContent.learningAssets);
+            expect(result).toEqual(mapLearningContent);
+        });
+    });
+
+    describe('getLearningAssetsByCompsRoleLevels', () => {
+        test('should return LearningAssetsByCompsRoleLevelsSP result', async () => {
+            // Arrange
+            const query: KfTarcLearningContentDTO = { loggedInUserClientId: 1, spCodes: '1', locale: 'en' } as KfTarcLearningContentDTO;
+            const learningAssetsByCompsRoleLevelsSP = 'LearningAssetsByCompsRoleLevelsSP';
+            const getLearningAssetsByCompsRoleLevelsSPSpy = jest
+                .spyOn(kfTarcContentRepository, 'getLearningAssetsByCompsRoleLevelsSP')
+                .mockResolvedValueOnce(learningAssetsByCompsRoleLevelsSP);
+            // Act
+            const result = await kfTarcContentService.getLearningAssetsByCompsRoleLevels(query);
+
+            // Assert
+            expect(getLearningAssetsByCompsRoleLevelsSPSpy).toHaveBeenCalledWith(query.loggedInUserClientId, query.spCodes, query.locale);
+            expect(result).toEqual(learningAssetsByCompsRoleLevelsSP);
+        });
+    });
+
+    describe('lcPost', () => {
+        test('should return mapLearningContentPost result', async () => {
+            // Arrange
+            const body = { behCompCodes: ['a', 'b', 'c'], techCompIds: [1, 2, 3, 4], successprofileId: 1 } as KfTarcLearningContentBody;
+            const query = {
+                loggedInUserClientId: 123,
+                locale: 'en',
+            } as KfTarcQuery;
+            const getLearningAssetByCompsJobId = { sections: [] };
+            const getLearningAssetByCompsJobIdSpy = jest
+                .spyOn(kfTarcContentRepository, 'getLearningAssetByCompsJobId')
+                .mockResolvedValueOnce(getLearningAssetByCompsJobId);
+            const mapLearningContentPostSpy = jest.spyOn(kfTarcContentService, 'mapLearningContentPost').mockReturnValueOnce(getLearningAssetByCompsJobId);
+
+            // Act
+            const result = await kfTarcContentService.lcPost(body, query);
+
+            // Assert
+            expect(getLearningAssetByCompsJobIdSpy).toHaveBeenCalledWith(
+                query.loggedInUserClientId,
+                body.behCompCodes.join('|'),
+                body.techCompIds.join('|'),
+                body.successprofileId,
+                query.locale,
+            );
+            expect(mapLearningContentPostSpy).toHaveBeenCalledWith(getLearningAssetByCompsJobId);
+            expect(result).toEqual(getLearningAssetByCompsJobId);
+        });
+    });
+});

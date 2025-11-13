@@ -1,0 +1,51 @@
+name: <module-name>-qa-automation
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: 'Environment'
+        required: true
+        default: sb
+        options:
+          - sb
+          - dev
+          - qa1
+          - stg
+          - prd
+      region:
+        type: choice
+        description: 'AWS Region'
+        required: true
+        default: us-east-1
+        options:
+          - us-east-1
+          - us-east-2
+          - us-west-1
+          - us-west-2
+      workspace:
+        description: 'Workspace directory'
+        required: true
+        default: ./e2e-automation
+      suite_file:
+        type: choice
+        description: 'Test Suite'
+        required: true
+        default: regression
+        options:
+          - regression
+          - smoke
+
+jobs:
+  build:
+    uses: HayGroup/kfone-common/.github/workflows/qa-automation-build-report-0.0.1.yml@main
+    secrets: inherit
+    with:
+      environment: ${{ inputs.environment }}
+      region: ${{ inputs.region }}
+      workspace: ${{ inputs.workspace }}
+      suite_file: ${{ inputs.suite_file }}
+      XRAY_PROJECT_KEY: KF1
+      XRAY_TEST_PLAN_KEY: KF1-1734 # Replace with your Test Plan Key
+      MODULE_NAME: DEMO # Replace with your Module abbreviation name

@@ -1,0 +1,83 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/mixins.scss';
+
+$footer-height: 46px;
+
+::ng-deep kf-page {
+	min-height: calc(100vh - #{$footer-height}) !important;
+}
+
+.header {
+	font-size: 34px;
+	line-height: normal;
+	letter-spacing: 0.51px;
+}
+
+.pp-modal {
+  .pp-modal-body {
+    .pp-checkbox {
+      display: inline-block;
+    }
+    a {
+      color: $blue !important;
+    }
+  }
+}
+
+.pp-link {
+  color: $blue;
+}
+
+.blocker {
+    height: 100vh;
+    width: 100%;
+    z-index: 20000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #fff;
+    opacity: 0.5;
+}
+
+.spinner {
+    background-color: transparent;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%, -50%);
+    z-index: 20001;
+}
+
+.project-type {
+	::ng-deep .headers {
+		padding-bottom: $default-padding;
+
+		.header {
+			border-right: 1px solid rgba(0, 0, 0, 0.08);
+			padding-right: 30px;
+		}
+
+		.header:last-of-type {
+			border-right: 0;
+		}
+	}
+
+	::ng-deep .project-type-panel {
+
+		kf-radio-button {
+			label, span {
+				font-size: $body-size;
+			}
+
+			.radio-text {
+				margin-left: $default-margin;
+			}
+		}
+	}
+	.product {
+		margin-bottom: $small-margin;
+		&:last-of-type {
+		  margin-bottom: 0;
+		}
+	}
+}

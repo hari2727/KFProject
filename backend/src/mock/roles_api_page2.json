@@ -1,0 +1,804 @@
+{
+    "roles": [
+        {
+            "title": "Academic Faculty Member/Physician II COPY",
+            "jobFamily": "F0138129",
+            "jobSubFamily": "S0138129001",
+            "jobRoleTypeId": "S013812900100",
+            "familyName": "Added Function 22-03",
+            "subFamilyName": "Added Subfunction 22-03",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92666",
+            "grade": {
+                "standardHayGrade": "21"
+            },
+            "expandable": false
+        },
+        {
+            "title": "Academic Faculty Member/Physician III COPY d",
+            "jobFamily": "F0138128",
+            "jobSubFamily": "S0138128002",
+            "jobRoleTypeId": "S013812800200",
+            "familyName": "02.25.2021 CL daily smoke added func",
+            "subFamilyName": "02.25.2021 CL daily smoke subf 3",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92710",
+            "grade": {
+                "standardHayGrade": "20"
+            },
+            "expandable": false
+        },
+        {
+            "title": "Academic Faculty Member/Physician III COPY d COPY",
+            "jobFamily": "F0138128",
+            "jobSubFamily": "S0138128002",
+            "jobRoleTypeId": "S013812800200",
+            "familyName": "02.25.2021 CL daily smoke added func",
+            "subFamilyName": "02.25.2021 CL daily smoke subf 3",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92713",
+            "grade": {
+                "standardHayGrade": "20"
+            },
+            "expandable": false
+        },
+        {
+            "title": "Account Manager Commercial Banking",
+            "jobFamily": "MB",
+            "jobSubFamily": "MBA",
+            "jobRoleTypeId": "MBA01",
+            "familyName": "Mid-tier / Commercial Banking",
+            "subFamilyName": "Mid-tier / Commercial Banking",
+            "profileType": "BEST_IN_CLASS",
+            "grade": {
+                "min": "15",
+                "max": "18"
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "title": "Account Manager Commercial Banking I",
+                    "jobFamily": "MB",
+                    "jobSubFamily": "MBA",
+                    "jobRoleTypeId": "MBA01",
+                    "familyName": "Mid-tier / Commercial Banking",
+                    "subFamilyName": "Mid-tier / Commercial Banking",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75640",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "15"
+                },
+                {
+                    "title": "Account Manager Commercial Banking II",
+                    "jobFamily": "MB",
+                    "jobSubFamily": "MBA",
+                    "jobRoleTypeId": "MBA01",
+                    "familyName": "Mid-tier / Commercial Banking",
+                    "subFamilyName": "Mid-tier / Commercial Banking",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75641",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "16"
+                },
+                {
+                    "title": "Account Manager Commercial Banking III",
+                    "jobFamily": "MB",
+                    "jobSubFamily": "MBA",
+                    "jobRoleTypeId": "MBA01",
+                    "familyName": "Mid-tier / Commercial Banking",
+                    "subFamilyName": "Mid-tier / Commercial Banking",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75642",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "17"
+                },
+                {
+                    "title": "Account Manager Commercial Banking IV",
+                    "jobFamily": "MB",
+                    "jobSubFamily": "MBA",
+                    "jobRoleTypeId": "MBA01",
+                    "familyName": "Mid-tier / Commercial Banking",
+                    "subFamilyName": "Mid-tier / Commercial Banking",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75643",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "18"
+                }
+            ]
+        },
+        {
+            "title": "Account Manager Corporate Banking",
+            "jobFamily": "CB",
+            "jobSubFamily": "CBG",
+            "jobRoleTypeId": "CBG01",
+            "familyName": "Corporate Banking",
+            "subFamilyName": "Corporate Banking",
+            "profileType": "BEST_IN_CLASS",
+            "grade": {
+                "min": "16",
+                "max": "19"
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "title": "Account Manager Corporate Banking I",
+                    "jobFamily": "CB",
+                    "jobSubFamily": "CBG",
+                    "jobRoleTypeId": "CBG01",
+                    "familyName": "Corporate Banking",
+                    "subFamilyName": "Corporate Banking",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75644",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "16"
+                },
+                {
+                    "title": "Account Manager Corporate Banking II",
+                    "jobFamily": "CB",
+                    "jobSubFamily": "CBG",
+                    "jobRoleTypeId": "CBG01",
+                    "familyName": "Corporate Banking",
+                    "subFamilyName": "Corporate Banking",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75645",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "17"
+                },
+                {
+                    "title": "Account Manager Corporate Banking III",
+                    "jobFamily": "CB",
+                    "jobSubFamily": "CBG",
+                    "jobRoleTypeId": "CBG01",
+                    "familyName": "Corporate Banking",
+                    "subFamilyName": "Corporate Banking",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75646",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "18"
+                },
+                {
+                    "title": "Account Manager Corporate Banking IV",
+                    "jobFamily": "CB",
+                    "jobSubFamily": "CBG",
+                    "jobRoleTypeId": "CBG01",
+                    "familyName": "Corporate Banking",
+                    "subFamilyName": "Corporate Banking",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75647",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "19"
+                }
+            ]
+        },
+        {
+            "title": "Account Manager Retail",
+            "jobFamily": "BB",
+            "jobSubFamily": "BBB",
+            "jobRoleTypeId": "BBB01",
+            "familyName": "Branch Financial Services / Banking",
+            "subFamilyName": "Financial Services",
+            "profileType": "BEST_IN_CLASS",
+            "grade": {
+                "min": "12",
+                "max": "15"
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "title": "Account Manager Retail I",
+                    "jobFamily": "BB",
+                    "jobSubFamily": "BBB",
+                    "jobRoleTypeId": "BBB01",
+                    "familyName": "Branch Financial Services / Banking",
+                    "subFamilyName": "Financial Services",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75648",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "12"
+                },
+                {
+                    "title": "Account Manager Retail II",
+                    "jobFamily": "BB",
+                    "jobSubFamily": "BBB",
+                    "jobRoleTypeId": "BBB01",
+                    "familyName": "Branch Financial Services / Banking",
+                    "subFamilyName": "Financial Services",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75649",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "13"
+                },
+                {
+                    "title": "Account Manager Retail III",
+                    "jobFamily": "BB",
+                    "jobSubFamily": "BBB",
+                    "jobRoleTypeId": "BBB01",
+                    "familyName": "Branch Financial Services / Banking",
+                    "subFamilyName": "Financial Services",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75650",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "14"
+                },
+                {
+                    "title": "Account Manager Retail IV",
+                    "jobFamily": "BB",
+                    "jobSubFamily": "BBB",
+                    "jobRoleTypeId": "BBB01",
+                    "familyName": "Branch Financial Services / Banking",
+                    "subFamilyName": "Financial Services",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75651",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "15"
+                }
+            ]
+        },
+        {
+            "title": "Account Manager SME",
+            "jobFamily": "BB",
+            "jobSubFamily": "BBD",
+            "jobRoleTypeId": "BBD01",
+            "familyName": "Branch Financial Services / Banking",
+            "subFamilyName": "Business Banking",
+            "profileType": "BEST_IN_CLASS",
+            "grade": {
+                "min": "13",
+                "max": "16"
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "title": "Account Manager SME I",
+                    "jobFamily": "BB",
+                    "jobSubFamily": "BBD",
+                    "jobRoleTypeId": "BBD01",
+                    "familyName": "Branch Financial Services / Banking",
+                    "subFamilyName": "Business Banking",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75626",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "13"
+                },
+                {
+                    "title": "Account Manager SME II",
+                    "jobFamily": "BB",
+                    "jobSubFamily": "BBD",
+                    "jobRoleTypeId": "BBD01",
+                    "familyName": "Branch Financial Services / Banking",
+                    "subFamilyName": "Business Banking",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75627",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "14"
+                },
+                {
+                    "title": "Account Manager SME III",
+                    "jobFamily": "BB",
+                    "jobSubFamily": "BBD",
+                    "jobRoleTypeId": "BBD01",
+                    "familyName": "Branch Financial Services / Banking",
+                    "subFamilyName": "Business Banking",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75628",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "15"
+                },
+                {
+                    "title": "Account Manager SME IV",
+                    "jobFamily": "BB",
+                    "jobSubFamily": "BBD",
+                    "jobRoleTypeId": "BBD01",
+                    "familyName": "Branch Financial Services / Banking",
+                    "subFamilyName": "Business Banking",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75629",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "16"
+                }
+            ]
+        },
+        {
+            "title": "Account Manager Wealth Management",
+            "jobFamily": "PB",
+            "jobSubFamily": "PBA",
+            "jobRoleTypeId": "PBA01",
+            "familyName": "Private Banking",
+            "subFamilyName": "Client Relationship Management",
+            "profileType": "BEST_IN_CLASS",
+            "grade": {
+                "min": "16",
+                "max": "18"
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "title": "Account Manager Wealth Management I",
+                    "jobFamily": "PB",
+                    "jobSubFamily": "PBA",
+                    "jobRoleTypeId": "PBA01",
+                    "familyName": "Private Banking",
+                    "subFamilyName": "Client Relationship Management",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75630",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "16"
+                },
+                {
+                    "title": "Account Manager Wealth Management II",
+                    "jobFamily": "PB",
+                    "jobSubFamily": "PBA",
+                    "jobRoleTypeId": "PBA01",
+                    "familyName": "Private Banking",
+                    "subFamilyName": "Client Relationship Management",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75631",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "17"
+                },
+                {
+                    "title": "Account Manager Wealth Management III",
+                    "jobFamily": "PB",
+                    "jobSubFamily": "PBA",
+                    "jobRoleTypeId": "PBA01",
+                    "familyName": "Private Banking",
+                    "subFamilyName": "Client Relationship Management",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "75632",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "18"
+                }
+            ]
+        },
+        {
+            "title": "Accountant",
+            "jobFamily": "FA",
+            "jobSubFamily": "FAA",
+            "jobRoleTypeId": "FAA02",
+            "familyName": "Finance and Accounting",
+            "subFamilyName": "Accounting and Controlling",
+            "profileType": "BEST_IN_CLASS",
+            "grade": {
+                "min": "12",
+                "max": "16"
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "title": "Accountant I",
+                    "jobFamily": "FA",
+                    "jobSubFamily": "FAA",
+                    "jobRoleTypeId": "FAA02",
+                    "familyName": "Finance and Accounting",
+                    "subFamilyName": "Accounting and Controlling",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "80442",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "12"
+                },
+                {
+                    "title": "Accountant II",
+                    "jobFamily": "FA",
+                    "jobSubFamily": "FAA",
+                    "jobRoleTypeId": "FAA02",
+                    "familyName": "Finance and Accounting",
+                    "subFamilyName": "Accounting and Controlling",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "80443",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "13"
+                },
+                {
+                    "title": "Accountant III",
+                    "jobFamily": "FA",
+                    "jobSubFamily": "FAA",
+                    "jobRoleTypeId": "FAA02",
+                    "familyName": "Finance and Accounting",
+                    "subFamilyName": "Accounting and Controlling",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "80445",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "14"
+                },
+                {
+                    "title": "Accountant IV",
+                    "jobFamily": "FA",
+                    "jobSubFamily": "FAA",
+                    "jobRoleTypeId": "FAA02",
+                    "familyName": "Finance and Accounting",
+                    "subFamilyName": "Accounting and Controlling",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "80446",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "15"
+                },
+                {
+                    "title": "Accountant V",
+                    "jobFamily": "FA",
+                    "jobSubFamily": "FAA",
+                    "jobRoleTypeId": "FAA02",
+                    "familyName": "Finance and Accounting",
+                    "subFamilyName": "Accounting and Controlling",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "80447",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "16"
+                }
+            ]
+        },
+        {
+            "title": "Accounting Clerk",
+            "jobFamily": "FA",
+            "jobSubFamily": "FAA",
+            "jobRoleTypeId": "FAA01",
+            "familyName": "Finance and Accounting",
+            "subFamilyName": "Accounting and Controlling",
+            "profileType": "BEST_IN_CLASS",
+            "grade": {
+                "min": "8",
+                "max": "11"
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "title": "Accounting Clerk I",
+                    "jobFamily": "FA",
+                    "jobSubFamily": "FAA",
+                    "jobRoleTypeId": "FAA01",
+                    "familyName": "Finance and Accounting",
+                    "subFamilyName": "Accounting and Controlling",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "80438",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "8"
+                },
+                {
+                    "title": "Accounting Clerk II",
+                    "jobFamily": "FA",
+                    "jobSubFamily": "FAA",
+                    "jobRoleTypeId": "FAA01",
+                    "familyName": "Finance and Accounting",
+                    "subFamilyName": "Accounting and Controlling",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "80439",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "9"
+                },
+                {
+                    "title": "Accounting Clerk III",
+                    "jobFamily": "FA",
+                    "jobSubFamily": "FAA",
+                    "jobRoleTypeId": "FAA01",
+                    "familyName": "Finance and Accounting",
+                    "subFamilyName": "Accounting and Controlling",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "80440",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "10"
+                },
+                {
+                    "title": "Accounting Clerk IV",
+                    "jobFamily": "FA",
+                    "jobSubFamily": "FAA",
+                    "jobRoleTypeId": "FAA01",
+                    "familyName": "Finance and Accounting",
+                    "subFamilyName": "Accounting and Controlling",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "80441",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "11"
+                }
+            ]
+        },
+        {
+            "title": "Accounting Graduate",
+            "jobFamily": "FA",
+            "jobSubFamily": "FAX",
+            "jobRoleTypeId": "FAX02",
+            "familyName": "Finance and Accounting",
+            "subFamilyName": "General",
+            "profileType": "BEST_IN_CLASS",
+            "grade": {
+                "min": "13",
+                "max": "15"
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "title": "Accounting Graduate I",
+                    "jobFamily": "FA",
+                    "jobSubFamily": "FAX",
+                    "jobRoleTypeId": "FAX02",
+                    "familyName": "Finance and Accounting",
+                    "subFamilyName": "General",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "87587",
+                    "shortProfile": "A1",
+                    "haypoints": {},
+                    "standardHayGrade": "13"
+                },
+                {
+                    "title": "Accounting Graduate II",
+                    "jobFamily": "FA",
+                    "jobSubFamily": "FAX",
+                    "jobRoleTypeId": "FAX02",
+                    "familyName": "Finance and Accounting",
+                    "subFamilyName": "General",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "87588",
+                    "shortProfile": "A1",
+                    "haypoints": {},
+                    "standardHayGrade": "14"
+                },
+                {
+                    "title": "Accounting Graduate III",
+                    "jobFamily": "FA",
+                    "jobSubFamily": "FAX",
+                    "jobRoleTypeId": "FAX02",
+                    "familyName": "Finance and Accounting",
+                    "subFamilyName": "General",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "87589",
+                    "shortProfile": "A1",
+                    "haypoints": {},
+                    "standardHayGrade": "15"
+                }
+            ]
+        },
+        {
+            "title": "Accounting Supervisor",
+            "jobFamily": "FA",
+            "jobSubFamily": "FAA",
+            "jobRoleTypeId": "FAA03",
+            "familyName": "Finance and Accounting",
+            "subFamilyName": "Accounting and Controlling",
+            "profileType": "BEST_IN_CLASS",
+            "grade": {
+                "min": "14",
+                "max": "17"
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "title": "Accounting Supervisor I",
+                    "jobFamily": "FA",
+                    "jobSubFamily": "FAA",
+                    "jobRoleTypeId": "FAA03",
+                    "familyName": "Finance and Accounting",
+                    "subFamilyName": "Accounting and Controlling",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "61740",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "14"
+                },
+                {
+                    "title": "Accounting Supervisor II",
+                    "jobFamily": "FA",
+                    "jobSubFamily": "FAA",
+                    "jobRoleTypeId": "FAA03",
+                    "familyName": "Finance and Accounting",
+                    "subFamilyName": "Accounting and Controlling",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "61741",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "15"
+                },
+                {
+                    "title": "Accounting Supervisor III",
+                    "jobFamily": "FA",
+                    "jobSubFamily": "FAA",
+                    "jobRoleTypeId": "FAA03",
+                    "familyName": "Finance and Accounting",
+                    "subFamilyName": "Accounting and Controlling",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "61743",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "16"
+                },
+                {
+                    "title": "Accounting Supervisor IV",
+                    "jobFamily": "FA",
+                    "jobSubFamily": "FAA",
+                    "jobRoleTypeId": "FAA03",
+                    "familyName": "Finance and Accounting",
+                    "subFamilyName": "Accounting and Controlling",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "61744",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "17"
+                }
+            ]
+        },
+        {
+            "title": "Activity Coordinator",
+            "jobFamily": "PW",
+            "jobSubFamily": "PWD",
+            "jobRoleTypeId": "PWD01",
+            "familyName": "Patient Care",
+            "subFamilyName": "Social Services",
+            "profileType": "BEST_IN_CLASS",
+            "grade": {
+                "min": "11",
+                "max": "13"
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "title": "Activity Coordinator I ",
+                    "jobFamily": "PW",
+                    "jobSubFamily": "PWD",
+                    "jobRoleTypeId": "PWD01",
+                    "familyName": "Patient Care",
+                    "subFamilyName": "Social Services",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "76087",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "11"
+                },
+                {
+                    "title": "Activity Coordinator II",
+                    "jobFamily": "PW",
+                    "jobSubFamily": "PWD",
+                    "jobRoleTypeId": "PWD01",
+                    "familyName": "Patient Care",
+                    "subFamilyName": "Social Services",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "76088",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "12"
+                },
+                {
+                    "title": "Activity Coordinator III",
+                    "jobFamily": "PW",
+                    "jobSubFamily": "PWD",
+                    "jobRoleTypeId": "PWD01",
+                    "familyName": "Patient Care",
+                    "subFamilyName": "Social Services",
+                    "profileType": "BEST_IN_CLASS",
+                    "id": "76089",
+                    "shortProfile": "A2",
+                    "haypoints": {},
+                    "standardHayGrade": "13"
+                }
+            ]
+        },
+        {
+            "title": "Actuarial Assistant II 24-02",
+            "jobFamily": "AE",
+            "jobSubFamily": "AEB",
+            "jobRoleTypeId": "AEB00",
+            "familyName": "Asset Management ",
+            "subFamilyName": "Research and Investment",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92600",
+            "grade": {
+                "standardHayGrade": "16"
+            },
+            "expandable": false
+        },
+        {
+            "title": "add 22-03",
+            "jobFamily": "HE",
+            "jobSubFamily": "HEA",
+            "jobRoleTypeId": "HEA01",
+            "familyName": "Health and Environment",
+            "subFamilyName": "Environmental Health",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92685",
+            "grade": {
+                "standardHayGrade": "14"
+            },
+            "expandable": false
+        },
+        {
+            "title": "Added Job 11 12-02",
+            "jobFamily": "CP",
+            "jobSubFamily": "CPC",
+            "jobRoleTypeId": "CPC01",
+            "familyName": "Clinical Research and Development",
+            "subFamilyName": "Data Management",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "90533",
+            "grade": {
+                "standardHayGrade": "19"
+            },
+            "expandable": false
+        },
+        {
+            "title": "Added Job 12-02",
+            "jobFamily": "SE",
+            "jobSubFamily": "SEA",
+            "jobRoleTypeId": "SEA05",
+            "familyName": "Software Engineering",
+            "subFamilyName": "Software Engineering",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "90531",
+            "grade": {
+                "standardHayGrade": "21"
+            },
+            "expandable": false
+        },
+        {
+            "title": "Added job 13 12-02",
+            "jobFamily": "CP",
+            "jobSubFamily": "CPA",
+            "jobRoleTypeId": "CPA04",
+            "familyName": "Clinical Research and Development",
+            "subFamilyName": "Clinical Research",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "90534",
+            "grade": {
+                "standardHayGrade": "17"
+            },
+            "expandable": false
+        },
+        {
+            "title": "Added Job 15-01",
+            "jobFamily": "HE",
+            "jobSubFamily": "HEA",
+            "jobRoleTypeId": "HEA01",
+            "familyName": "Health and Environment",
+            "subFamilyName": "Environmental Health",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "90372",
+            "grade": {
+                "standardHayGrade": "14"
+            },
+            "expandable": false
+        },
+        {
+            "title": "Added Job 22-02 COPY",
+            "jobFamily": "AS",
+            "jobSubFamily": "ASD",
+            "jobRoleTypeId": "ASD00",
+            "familyName": "Administration / Support / Service",
+            "subFamilyName": "Document Production",
+            "profileType": "CUSTOM_PROFILE",
+            "id": "92575",
+            "grade": {
+                "standardHayGrade": "15"
+            },
+            "expandable": false
+        }
+    ],
+    "paging": {
+        "pageIndex": 2,
+        "pageSize": 20,
+        "totalPages": 3,
+        "totalResultRecords": 96
+    }
+}

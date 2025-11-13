@@ -1,0 +1,39 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+
+.container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 0;
+    width: 100%;
+
+    .handle {
+        background: url('#{$app-url-prefix}/assets/images/Drag.svg');
+        background-position: center;
+        background-repeat: no-repeat;
+        height: 63px;
+        width: 26px;
+        cursor: grab;
+        cursor: -webkit-grab;
+        cursor: -moz-grab;
+    }
+
+    .titles {
+        display: flex;
+        flex-direction: column;
+        margin-left: 8px;
+        width: 100%;
+
+        &.input {
+            width: 100%;
+        }
+    }
+}
+.counter{
+    display: block;
+    color: #464646;
+    font-weight: 500;
+    margin-top: 10px;
+    font-size: 12px;
+    text-align: right;
+}

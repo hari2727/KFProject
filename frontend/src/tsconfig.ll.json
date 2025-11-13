@@ -1,0 +1,29 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../out-tsc/app",
+    "baseUrl": "./",
+    "types": [],
+    "paths": {
+      "@kf-products-core/kfhub_lib": ["../../kfhub_lib/src/lib/public_api.ts"],
+      "@kf-products-core/kfhub_lib/*": ["../../kfhub_lib/src/lib/*/public_api.ts"],
+      "@kf-products-core/kfhub_lib/presentation/*": ["../../kfhub_lib/src/lib/presentation/*/public_api" ],
+      "@kf-products-core/kfhub_lib/presentation": ["../../kfhub_lib/src/lib/presentation/public_api" ],
+      "@kf-products-core/kfhub_thcl_lib": ["../../kfhub_thcl_lib/lib/src/public_api.ts"],
+      "@kf-products-core/kfhub_thcl_lib/*": ["../../kfhub_thcl_lib/lib/src/*/public_api.ts"],
+      "@angular/*": [ "../node_modules/@angular/*" ],
+      "*": ["../node_modules/*"]
+    }
+  },
+  "files": [
+    "main.ts",
+    "polyfills.ts"
+  ],
+  "include": [
+    "app/**/*.ts"
+  ],
+  "exclude": [
+    "**/test-setup.ts",
+    "**/*.spec.ts"
+  ]
+}

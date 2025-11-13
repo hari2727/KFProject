@@ -1,0 +1,78 @@
+.level-labels {
+  position: relative;
+
+  .level-average {
+    letter-spacing: 0.5px;
+    font-size: 16px;
+    position: relative;
+    top: -2px;
+    padding: 0 60px;
+    text-align: center;
+  }
+
+  .level-low,
+  .level-high {
+    position: absolute;
+    top: 0;
+    font-size: 9px;
+  }
+
+  .level-low {
+    left: 0;
+  }
+
+  .level-high {
+    right: 0;
+  }
+}
+
+.graph-wrap {
+  position: relative;
+  margin: 10px 0;
+
+  .graph {
+    display: flex;
+    height: 14px;
+    padding: 1px;
+
+    .level-average {
+      flex-grow: 1;
+      margin: 1px;
+
+      &:before,
+      &:after {
+        display: block;
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 1px;
+        height: 16px;
+        background: #919191;
+      }
+
+      &:before {
+        left: 1px;
+      }
+
+      &:after {
+        right: 1px;
+      }
+    }
+  }
+
+  .axis {
+    width: 2px;
+    height: 35px;
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    margin-left: -1px;
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAAFAQMAAABVfa/fAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAZQTFRFAAAAAAAApWe5zwAAAAJ0Uk5TAP9bkSK1AAAADklEQVR4nGNgAIMDDAcAAwoBgUCldS4AAAAASUVORK5CYII=');
+    background-repeat: repeat-y;
+  }
+}
+
+.axis-label {
+  text-align: center;
+  font-size: 9px;
+}

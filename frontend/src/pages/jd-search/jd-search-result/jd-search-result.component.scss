@@ -1,0 +1,21 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/mixins.scss';
+
+.noresults {
+    margin-top: -$size-16;
+}
+
+th {
+    padding: $size-16;
+}
+
+::ng-deep .context-menu-overlay-container {
+    .item:hover {
+        background-color: $dropdown-hover;
+    }
+}
+
+.context-menu-border {
+    border: 1px solid $silver-03;
+}
+

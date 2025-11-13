@@ -1,0 +1,228 @@
+<div class="content-wrapper banners-background-{{totalBanners}}" [class.shadow-mode]="isShadowMode">
+    <div class="sticky-background"></div>
+    <div class="content">
+        <div class="home-header">
+            <div class="search-wrapper">
+                <div class="search">
+                    <kf-auto-complete [placeholder]="'pm.talentSearchBar' | translate" [suggestions]="[]" (enterPressed)="navigateSearch($event)"></kf-auto-complete>
+                </div>
+            </div>
+        </div>
+        <kf-card class="profile-stats" *ngIf="donutData?.length > 0 || (functionValues?.length > 0 && functionHeight)">
+            <div class="chart">
+                <p class="subtext-sm text-uppercase ls-utility fw-semibold text-uppercase text-center mb-24 lh-18">{{ 'pm.usageLevelTitle' | translate }}</p>
+                <div class="donut-chart">
+                    <kf-donut-detailed [donutData]="donutData" [label]="'pm.profiles' | translate"></kf-donut-detailed>
+                </div>
+            </div>
+            <div class="chart" *ngIf="functionHeight">
+                <p class="subtext-sm text-uppercase ls-utility fw-semibold text-uppercase text-center mb-24 lh-18">{{ 'pm.functionUsage' | translate }}</p>
+                <kf-chart [width]="450" [height]="functionHeight" class="functions-chart">
+                    <kf-chart-series type="bar" [data]="functionValues" [style]="barStyleFunction" [label]="'end'">
+                    </kf-chart-series>
+                    <kf-chart-ticks class="functions-tick fs-14 fw-400" [data]="functionNames"></kf-chart-ticks>
+                    <kf-chart-plot [margin]="{left:240,top:8,right:30}"></kf-chart-plot>
+                </kf-chart>
+            </div>
+        </kf-card>
+
+        <kf-card class="no-data-profile-stats" *ngIf="!donutData?.length && !functionValues?.length">
+            <div class="no-result d-flex flex-ai-center flex-jc-center" style="min-height: 300px;">
+                <div class="text-center" style="max-width: 400px; width: 100%;">
+                    <div class="icon-top d-flex flex-jc-center w-100">
+                        <div class="icon"></div>
+                    </div>
+                    <div class="icon-text d-flex flex-jc-center w-100">
+                        <span class="description subtext-sm fw-semibold text-uppercase text-center">{{ 'pm.dashboardSummaryNoDataMessage' | translate }}</span>
+                    </div>
+                    <div class="icon-bottom d-flex flex-jc-center w-100">
+                        <div class="icon"></div>
+                    </div>
+                </div>
+            </div>
+        </kf-card>
+        <kf-card class="recent-profiles">
+            <div [formGroup]="fg" kf-card-header>
+                <div>
+                    <span class="subtext-sm fw-semibold text-uppercase ls-utility">{{ 'pm.successProfiles' | translate }}</span>
+                    <a routerLink="../sp/search" class="link-sm ls-label-sm fw-semibold"> {{ 'pm.viewAll' | translate }} </a>
+                </div>
+                <kf-dropdown
+                    color="light"
+                    formControlName="dropdownSP">
+                    <kf-dropdown-item
+                        [label]="'pm.recentlyModified' | translate"
+                        value="RECENTLY_MODIFIED"
+                    ></kf-dropdown-item>
+                    <kf-dropdown-item
+                        [label]="'pm.recentlyViewed' | translate"
+                        value="RECENTLY_VIEWED"
+                    ></kf-dropdown-item>
+                </kf-dropdown>
+            </div>
+            <div class="profiles" *ngIf="profiles?.length > 0">
+                <ng-container *ngFor="let profile of profiles">
+                    <kftarc-sp-home-card [profile]="profile"></kftarc-sp-home-card>
+                </ng-container>
+            </div>
+            <div class="profiles" *ngIf="!profiles || profiles?.length === 0">
+                <kftarc-sp-home-card></kftarc-sp-home-card>
+            </div>
+        </kf-card>
+        <kf-card class="recent-jobs" *ngIf="!isIcClientUser">
+            <div [formGroup]="fg" kf-card-header>
+                <div>
+                    <span class="subtext-sm fw-semibold text-uppercase ls-utility">{{ 'pm.jobDescriptions' | translate }}</span>
+                    <a routerLink="../jd/search" class="link-sm ls-label-sm fw-semibold"> {{ 'pm.viewAll' | translate }}</a>
+                </div>
+                <div class="body-text">{{ 'pm.recentlyCreated' | translate }}</div>
+            </div>
+            <div class="job-descriptions">
+                <table *ngIf="jobs?.length !== 0">
+                    <colgroup>
+                        <col class="col1">
+                        <col class="col2">
+                        <col class="col3">
+                        <col class="col4">
+                    </colgroup>
+                    <tr>
+                        <th><span class="subtext-sm text-uppercase ls-utility fw-semibold color-medium">{{ 'pm.jobDescriptionTitle' | translate }}</span></th>
+                        <th><span class="subtext-sm text-uppercase ls-utility fw-semibold color-medium">{{ 'pm.CreatedBy' | translate }}</span></th>
+                        <th><span class="subtext-sm text-uppercase ls-utility fw-semibold color-medium">{{ 'pm.createdDate' | translate }}</span></th>
+                        <th><span class="subtext-sm text-uppercase ls-utility fw-semibold color-medium">{{ 'pm.download' | translate }}</span></th>
+                    </tr>
+                    <tr *ngFor="let job of jobs">
+                        <td class="job-title"><a (click)="viewJobDescription(job.id)" class="fw-semibold ls-label">{{ job.title }}</a></td>
+                        <td class="body-text">{{ job.firstName }} {{ job.lastName }}</td>
+                        <td class="body-text">{{ formatDate(job.effectiveDateTime) }}</td>
+                        <td>
+                            <a (click)="download($event, job.id, 'JOB_DESCRIPTION', job.jobExportUrl, job.title)" class="fw-semibold">
+                                <kf-icon icon="download"></kf-icon>
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+                <div class="no-result" *ngIf="jobs?.length === 0">
+                    <div class="icon-top"></div>
+                    <div class="icon-text">
+                        <span class="footnote fw-semibold text-uppercase description"> {{ 'pm.noJobDescriptions' | translate }}</span>
+                    </div>
+                    <div class="icon-bottom"></div>
+                </div>
+            </div>
+        </kf-card>
+        <div class="downloads-wrapper" *ngIf="downloads">
+            <kf-card class="downloads" [ngClass]="{ 'has-clm': hasCLM }">
+                <div class="header" kf-card-header>
+                    <span>
+                        <kf-icon icon="details"></kf-icon>
+                        <span class="subtext-sm fw-semibold text-uppercase ls-utility">{{ 'pm.recentDownloads' | translate }}</span>
+                    </span>
+                </div>
+                <div class="downloads-main" [ngClass]="{ 'no-clm': !hasCLM }" *ngIf="downloads.length > 0">
+                    <div class="download-column first">
+                        <ng-container *ngFor="let d of downloads; let i = index">
+                            <div *ngIf="i === 0 || i === 3" class="download-item">
+                                <ng-container [ngTemplateOutlet]="downloadColumn" [ngTemplateOutletContext]="{download:d}"></ng-container>
+                            </div>
+                        </ng-container>
+                    </div>
+                    <div class="download-column second">
+                        <ng-container *ngFor="let d of downloads; let i = index">
+                            <div *ngIf="i === 1 || i === 4" class="download-item">
+                                <ng-container [ngTemplateOutlet]="downloadColumn" [ngTemplateOutletContext]="{download:d}"></ng-container>
+                            </div>
+                        </ng-container>
+                    </div>
+                    <div class="download-column third">
+                        <ng-container *ngFor="let d of downloads; let i = index">
+                            <div *ngIf="i === 2 || i === 5" class="download-item">
+                                <ng-container [ngTemplateOutlet]="downloadColumn" [ngTemplateOutletContext]="{download:d}"></ng-container>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+                <div *ngIf="downloads.length === 0" class="no-result">
+                    <div class="icon-top"></div>
+                    <div class="icon-text">
+                        <span class="description subtext-sm fw-semibold text-uppercase">{{ 'pm.noDownloads' | translate }}</span>
+                    </div>
+                    <div class="icon-bottom"></div>
+                </div>
+            </kf-card>
+            <kf-card class="clm" *ngIf="hasCLM">
+                <div class="header" kf-card-header>
+                    <span>
+                        <kf-icon icon="clm"></kf-icon>
+                        <span class="description subtext-sm fw-semibold text-uppercase ls-utility">{{ 'pm.contentLibraryCard' | translate }}</span>
+                    </span>
+                </div>
+                <div class="clm-main">
+                    <div class="clm-links">
+                        <p class="sub-title subtext-sm fw-semibold text-uppercase ls-utility lh-18">{{ 'pm.contentLibraryTitle' | translate }}</p>
+                        <a href="/app/clmg/#/clmg/clm/behavioralcompetencies" class="fw-semibold ls-label">{{ 'lib.subCardTitleBehavioralCompetencies' | translate }}</a>
+                        <a href="/app/clmg/#/clmg/clm/technicalcompetency" class="fw-semibold ls-label">{{ 'lib.subCardTitleTechnicalCompetencies' | translate }}</a>
+                        <a href="/app/clmg/#/clmg/clm/responsibilities" class="fw-semibold ls-label">{{ 'lib.subCardTitleResponsibilityCompetencies' | translate }}</a>
+                        <a href="/app/clmg/#/clmg/clm/functions" class="fw-semibold ls-label">{{ 'lib.FUNCTIONS' | translate }}</a>
+                    </div>
+                </div>
+            </kf-card>
+        </div>
+        <div  class="upsell-wrap" *ngIf="advList.length !== 0">
+            <div *ngFor="let adv of advList">
+                <kf-app-chicklet
+                    [productName]="adv"
+                    [own]="false"
+                    [upsellAppVariation]="advList.length"
+                ></kf-app-chicklet>
+            </div>
+        </div>
+    </div>
+</div>
+
+<kf-modal
+        class="pp-modal"
+        [title]="'lib.privacyPolicyHeader' | translate"
+        size="sm"
+        [closeOnEscape]="false"
+        [modal]="true"
+        [dismissableMask]="false"
+        [scrollable]="true"
+        [(visible)]="isPrivacyPolicyOpen"
+>
+    <div class="pp-modal-body">
+        <kf-checkbox class="pp-checkbox" [(ngModel)]="privacyPolicyChecked" ></kf-checkbox>
+        <span class="body-text color-dark">
+            {{ 'pm.privacyPolicy1' | translate }}
+            <a class="pp-link" href="https://cdn.kornferry.com/privacy/en-us/privacy.pdf" target="_blank">
+                {{ 'pm.globalPrivacyPolicy' | translate }}
+            </a>.
+            {{ 'pm.privacyPolicy2' | translate }}
+            <hr>
+            {{ 'pm.privacyPolicy3' | translate }}
+        </span>
+    </div>
+    <footer>
+        <button class="btn btn-outline" (click)="rejectPrivacyPolicy()">
+            {{ 'pm.cancelAndExit' | translate }}
+        </button>
+        <button class="btn" [disabled]="!privacyPolicyChecked" (click)="confirmPrivacyPolicy()">
+            {{ 'pm.acceptAndContinue' | translate }}
+        </button>
+    </footer>
+</kf-modal>
+
+<ng-template #downloadColumn let-d='download'>
+    <a *ngIf="d" (click)="download($event, d.id, 'SUCCESS_PROFILE', d.jobExportUrl || d.interviewGuideUrl, d.title)" target="_blank"
+        [pTooltip]="d.title"
+        [tooltipDisabled]="hideTooltip"
+        tooltipPosition="top"
+        (mouseenter)="hover($event)"
+        class="fw-semibold ls-label job-title line-clamp-2">
+        {{ d.title }}
+    </a>
+    <a *ngIf="d" class="ls-label fw-semibold"
+        (click)="download($event, d.id, 'SUCCESS_PROFILE', d.jobExportUrl || d.interviewGuideUrl, d.title)" target="_blank">
+        <kf-icon icon="download"></kf-icon>
+    </a>
+</ng-template>

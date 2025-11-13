@@ -1,0 +1,81 @@
+@import "node_modules/@kf-products-core/kfhub_lib/styles/variables.scss";
+@import "node_modules/@kf-products-core/kfhub_lib/styles/mixins.scss";
+
+.header {
+    font-size: 34px;
+    line-height: normal;
+    letter-spacing: 0.51px;
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+.actions-toggle {
+    border: none;
+    background-color: $page-background;
+    border-bottom: 1px solid $grey-fade-light;
+}
+
+.item {
+    &:hover {
+        background: $dropdown-hover;
+    }
+}
+
+kfthcl-dropdown {
+    width: 300px;
+}
+
+.masthead {
+    align-items: baseline;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+
+    .title {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+
+        .title-box {
+            display: flex;
+            flex-direction: row;
+        }
+    }
+}
+
+.actions {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+
+    button {
+        margin: 12px 0 12px 12px;
+    }
+}
+
+.description {
+    width: 628px;
+    padding-top: 8px;
+    font-size: 14px;
+}
+
+.jd-based-on-link {
+    margin-bottom: 60px;
+}
+
+.title-header {
+    text-transform: uppercase;
+}
+
+.section {
+    border-bottom: 1px solid $grey-fade-light;
+
+    &:first-child {
+        border-top: 1px solid $grey-fade-light;
+    }
+}
+
+.pre-wrap {
+    white-space: pre-wrap;
+}

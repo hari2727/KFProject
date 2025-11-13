@@ -1,0 +1,46 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { UserService } from '../../common/user/user.service';
+import { ResponsibilitiesService } from '../responsibilities/responsibilities.service';
+import { SkillsController } from './skills.controller';
+import { SkillsService } from './skills.service';
+import { AddNewSubcategories } from '../responsibilities/responsibilities.interface';
+import { ResponsibilitiesRepository } from '../responsibilities/responsibilities.repository';
+
+describe('SkillsController', () => {
+    let controller: SkillsController;
+    let responsibilitiesService: ResponsibilitiesService;
+
+    beforeAll(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            controllers: [SkillsController],
+            providers: [SkillsService, UserService, ResponsibilitiesService, ConfigService, ResponsibilitiesRepository],
+        }).compile();
+
+        controller = module.get<SkillsController>(SkillsController);
+        responsibilitiesService = module.get<ResponsibilitiesService>(ResponsibilitiesService);
+    });
+
+    it('should be defined', () => {
+        expect(controller).toBeDefined();
+    });
+
+    describe('addNewSkills', () => {
+        const queryParams: AddNewSubcategories.Query = {
+            loggedInUserClientId: 123,
+            userId: 456,
+            locale: 'en',
+            preferredLocale: 'en',
+            preferredClientId: 1267,
+            modelVersion: 1246,
+            modelId: 'ABC-90-ER',
+        };
+
+        // it('should call responsibilitiesService.addNewSubcategories', async () => {
+        //     jest.spyOn(responsibilitiesService, 'addNewSubcategories').mockResolvedValue(okResponse);
+        //
+        //     await controller.addNewSkills(queryParams, addNewSubcategoriesBody);
+        //
+        //     expect(responsibilitiesService.addNewSubcategories).toHaveBeenCalledWith(queryParams, addNewSubcategoriesBody, SubcategoryType.TECHNICAL_SKILLS);
+        // });
+    });
+});

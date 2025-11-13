@@ -1,0 +1,25 @@
+<div class="content">
+    <kfthcl-sp-landing-page
+            *ngIf="successProfile && successProfileService"
+            [isEditable]="isEditable"
+            [successProfile]="successProfile"
+            [assessmentRequirements]="assessmentRequirements"
+            [spDescriptionsService]="successProfileService"
+            [spCrudService]="successProfileService"
+            [spMasterSubCategoriesService]="successProfileService"
+            [spLevelSubLevelService]="successProfileService"
+            [spFunctionSubFunctionService]="successProfileService"
+            [computeCompetenciesService]="successProfileService"
+            [calculateAssessmentsService]="successProfileService"
+            [customCompetenciesService]="successProfileService"
+            [spRegionalNormsService]="successProfileService"
+            [workMeasurementService]="successProfileService"
+            (successProfileSave)="onSuccessProfileSave($event)"
+            (leavePage)="redirectToDetailPage($event)"
+            [localeFromFilter]="localeFromFilter"
+            [originalLocale]="originalLocale"
+            (localeFromFilterChanged)="onLocaleFromFilterChanged($event)"
+    >
+    </kfthcl-sp-landing-page>
+</div>
+

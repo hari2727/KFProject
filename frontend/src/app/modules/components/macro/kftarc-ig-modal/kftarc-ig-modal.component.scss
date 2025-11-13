@@ -1,0 +1,58 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/mixins.scss';
+
+.wrapper {
+    .body-content {
+        margin-bottom: $larger-padding;
+    }
+
+    .controlls {
+        margin-left: $breadcrumb-margin;
+    }
+
+    .master-select, .format-select {
+        margin-bottom: $default-padding;
+    }
+
+    .format-select {
+        kf-radio-button {
+            ::ng-deep label {
+                font-weight: normal;
+            }
+        }
+    }
+
+    .h-60 {
+        height: 60%;
+    }
+
+    .h-40 {
+        height: 40%;
+    }
+
+    .split-select {
+        margin-bottom: $smaller-padding;
+    }
+
+    .split-count {
+        // margin-bottom: $default-padding;
+        margin-left: 28px;
+    }
+
+    .warn {
+        margin-left: 28px;
+        max-width: 256px;
+        display: flex;
+
+        kf-icon {
+            padding-right: $smaller-padding;
+        }
+    }
+    .ig-format-radio-container {
+        display: flex;
+    }
+}
+
+kf-dropdown {
+    min-width: $dropdown-min-width;
+}

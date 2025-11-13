@@ -1,0 +1,484 @@
+import { getModelToken } from '@nestjs/mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
+import { KfhubCountryRepository } from './country/kftarc-country.repository';
+import { KfTarcExcludeKeysService } from './exclude-keys/kftarc-arya-exclude-keys.service';
+import { KfTarcAryaHttpsClient } from './http-client/kftarc-arya-https-client.service';
+import { ARYA_INDUSTRIES } from './industries/kftarc-arya-industries.schema';
+import { KfTarcAlternativeJobsParams, KfTarcArayPeerGroups, KfTarcAryaSkillCompareDto, KfTarcAryaSkills, KfTarcAryaSkillsEnum } from './kftarc-arya.interface';
+import { KfTarcAryaService } from './kftarc-arya.service';
+import { KfhubPeerGroupsRepository } from './peer-groups/kftarc-peer-groups.repository';
+import { KfTracArya } from './http-client/kftarc-arya-https-client.interface';
+
+jest.mock('./http-client/kftarc-arya-https-client.service', () => ({
+    KfTarcAryaHttpsClient: {
+        agent: jest.fn(),
+    },
+}));
+
+describe('KfTarcAryaService', () => {
+    let module: TestingModule;
+    let tarcArayService: KfTarcAryaService;
+    const mockSegregateSkills = jest.fn();
+    const mockSegregateJobTitles = jest.fn();
+    const mockGetClientNamesBy = jest.fn();
+    const mockGetPeerGroups = jest.fn();
+    const mockGetAllCountries = jest.fn();
+    const mockLean = jest.fn();
+    beforeAll(async () => {
+        module = await Test.createTestingModule({
+            providers: [
+                {
+                    provide: getModelToken(ARYA_INDUSTRIES),
+                    useValue: {
+                        find: () => ({
+                            lean: mockLean,
+                        }),
+                    },
+                },
+                {
+                    provide: KfhubPeerGroupsRepository,
+                    useValue: {
+                        getClientNamesBy: mockGetClientNamesBy,
+                        getPeerGroups: mockGetPeerGroups,
+                    },
+                },
+                {
+                    provide: KfhubCountryRepository,
+                    useValue: {
+                        getAllCountries: mockGetAllCountries,
+                    },
+                },
+                {
+                    provide: KfTarcExcludeKeysService,
+                    useValue: {
+                        segregateSkills: mockSegregateSkills,
+                        segregateJobTitles: mockSegregateJobTitles,
+                    },
+                },
+                KfTarcAryaService,
+            ],
+        }).compile();
+    });
+
+    beforeEach(() => {
+        tarcArayService = module.get(KfTarcAryaService);
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    // test('should be defined', () => {
+    //     expect(tarcArayService).toBeDefined();
+    // });
+
+    describe('compareSkills', () => {
+        test('should return missingSkills with array of python and .net', () => {
+            // Act/Assert
+            expect(tarcArayService.compareSkills({} as KfTarcAryaSkillCompareDto)).toEqual({ missingSkills: ['python', '.net'] });
+        });
+    });
+
+    describe('getSkills', () => {
+        test('should call skillResponseHandler with null if getAryaCountryIdFor return falsy', async () => {
+            // Arrange
+            jest.spyOn(tarcArayService as any, 'getAryaCountryIdFor').mockResolvedValueOnce(false);
+            const data = {};
+            const jobTitlesResponseHandlerSpy = jest.spyOn(tarcArayService as any, 'skillResponseHandler').mockReturnValueOnce(data);
+
+            // Act
+            const result = await tarcArayService.getSkills({} as KfTarcAryaSkills);
+
+            // Assert
+            expect(jobTitlesResponseHandlerSpy).toHaveBeenCalledWith(null);
+            expect(result).toEqual(data);
+        });
+
+        [KfTarcAryaSkillsEnum.ORGANIZATION, KfTarcAryaSkillsEnum.MARKET].forEach(type => {
+            test(`should call getOrgSkills with query and countryId if query.type is ${type}`, async () => {
+                // Arrange
+                const countryId = 'countryId';
+                const query = {
+                    countryId,
+                    type,
+                    topCount: '10',
+                } as KfTarcAryaSkills;
+                const mockResult = {};
+                const mockResponse = {
+                    skills: [],
+                };
+                const getAryaCountryIdForSpy = jest.spyOn(tarcArayService as any, 'getAryaCountryIdFor').mockResolvedValueOnce(countryId);
+                const getSkillsSpy = jest
+                    .spyOn(tarcArayService as any, type === KfTarcAryaSkillsEnum.ORGANIZATION ? 'getOrgSkills' : 'getMarketSkills')
+                    .mockResolvedValueOnce(mockResult);
+                const skillResponseHandlerSpy = jest.spyOn(tarcArayService as any, 'skillResponseHandler').mockReturnValueOnce(mockResponse);
+                const reduceToSpy = jest.spyOn(tarcArayService as any, 'reduceTo');
+
+                // Act
+                const result = await tarcArayService.getSkills(query);
+
+                // Assert
+                expect(getAryaCountryIdForSpy).toHaveBeenCalledWith(countryId);
+                expect(getSkillsSpy).toHaveBeenCalledWith(query, countryId);
+                expect(skillResponseHandlerSpy).toHaveBeenCalledWith(mockResult);
+                expect(mockSegregateSkills).toHaveBeenCalledWith(mockResponse.skills);
+                expect(reduceToSpy).toHaveBeenCalledWith(mockResponse.skills, parseInt(query.topCount, 10));
+                expect(result).toEqual(mockResponse);
+            });
+        });
+    });
+
+    describe('getOrgSkills', () => {
+        test('should call arya.agent with query.spName, countryId, query.clientNames and return result', async () => {
+            // Arrange
+            const query = {
+                spName: 'spName',
+                clientNames: 'clientNames',
+            };
+            const countryId = 'countryId';
+            const expected = {} as KfTracArya.Response;
+            const aryaAgentSpy = jest.spyOn(KfTarcAryaHttpsClient, 'agent').mockResolvedValueOnce(expected);
+
+            // Act
+            const result = await tarcArayService.getOrgSkills(query, countryId);
+
+            // Assert
+            expect(aryaAgentSpy).toHaveBeenCalledWith(query.spName, countryId, query.clientNames);
+            expect(result).toEqual(expected);
+        });
+    });
+
+    describe('getMarketSkills', () => {
+        test('should call arya.agent with clientNames and industries if peerGroupIds and industryId exists and return result', async () => {
+            // Arrange
+            const query = {
+                spName: '',
+                peerGroupIds: '1,2,3',
+                industryId: '123',
+            };
+            const countryId = 'countryId';
+            const expected = {} as KfTracArya.Response;
+            const aryaAgentSpy = jest.spyOn(KfTarcAryaHttpsClient, 'agent').mockResolvedValueOnce(expected);
+            const mockClientNames = [];
+            const mockIndustries = [];
+            const getAryaIndustriesForSpy = jest.spyOn(tarcArayService as any, 'getAryaIndustriesFor').mockResolvedValueOnce(mockIndustries);
+            mockGetClientNamesBy.mockResolvedValueOnce(mockClientNames);
+
+            // Act
+            const result = await tarcArayService.getMarketSkills(query, countryId);
+
+            // Assert
+            expect(aryaAgentSpy).toHaveBeenCalledWith(query.spName, countryId, mockClientNames, mockIndustries);
+            expect(mockGetClientNamesBy).toHaveBeenCalledWith(query.peerGroupIds.split(','));
+            expect(getAryaIndustriesForSpy).toHaveBeenCalledWith(query.industryId);
+            expect(result).toEqual(expected);
+        });
+
+        test('should call skillResponseHandler with null if industryId exists but industries falsy and return result', async () => {
+            // Arrange
+            const query = {
+                spName: '',
+                industryId: '123',
+            };
+            const countryId = 'countryId';
+            const expected = {} as KfTracArya.Response;
+            const mockIndustries = false;
+            const getAryaIndustriesForSpy = jest.spyOn(tarcArayService as any, 'getAryaIndustriesFor').mockResolvedValueOnce(mockIndustries);
+            const skillResponseHandlerSpy = jest.spyOn(tarcArayService as any, 'skillResponseHandler').mockReturnValueOnce(expected);
+            // Act
+            const result = await tarcArayService.getMarketSkills(query, countryId);
+
+            // Assert
+            expect(skillResponseHandlerSpy).toHaveBeenCalledWith(null);
+            expect(getAryaIndustriesForSpy).toHaveBeenCalledWith(query.industryId);
+            expect(result).toEqual(expected);
+        });
+
+        test('should call arya.agent with default clientNames and industries if peerGroupIds and industryId falsy and return result', async () => {
+            // Arrange
+            const query = {
+                spName: '',
+                peerGroupIds: '',
+                industryId: '',
+            };
+            const countryId = 'countryId';
+            const expected = {} as KfTracArya.Response;
+            const aryaAgentSpy = jest.spyOn(KfTarcAryaHttpsClient, 'agent').mockResolvedValueOnce(expected);
+
+            // Act
+            const result = await tarcArayService.getMarketSkills(query, countryId);
+
+            // Assert
+            expect(aryaAgentSpy).toHaveBeenCalledWith(query.spName, countryId, '', undefined);
+            expect(result).toEqual(expected);
+        });
+    });
+
+    describe('jobTitles', () => {
+        test('should call jobTitlesResponseHandler with null if getAryaCountryIdFor return falsy data', async () => {
+            // Arrange
+            jest.spyOn(tarcArayService as any, 'getAryaCountryIdFor').mockResolvedValueOnce(false);
+            const data = {};
+            const jobTitlesResponseHandlerSpy = jest.spyOn(tarcArayService as any, 'jobTitlesResponseHandler').mockReturnValueOnce(data);
+
+            // Act
+            const result = await tarcArayService.jobTitles({} as KfTarcAlternativeJobsParams);
+
+            // Assert
+            expect(jobTitlesResponseHandlerSpy).toHaveBeenCalledWith(null);
+            expect(result).toEqual(data);
+        });
+
+        test('should get job titles', async () => {
+            // Arrange
+            const query = { spName: 'spName', countryId: 'countryId', topCount: '10' } as KfTarcAlternativeJobsParams;
+            const mockCountryId = 'countryId';
+            const mockResult = {} as KfTracArya.Response;
+            const mockResponse = {
+                jobTitles: [],
+            };
+            const getAryaCountryIdForSpy = jest.spyOn(tarcArayService as any, 'getAryaCountryIdFor').mockResolvedValueOnce(mockCountryId);
+            const aryaAgentSpy = jest.spyOn(KfTarcAryaHttpsClient, 'agent').mockResolvedValueOnce(mockResult);
+            const jobTitlesResponseHandlerSpy = jest.spyOn(tarcArayService as any, 'jobTitlesResponseHandler').mockReturnValueOnce(mockResponse);
+            const reduceToSpy = jest.spyOn(tarcArayService as any, 'reduceTo');
+
+            // Act
+            const result = await tarcArayService.jobTitles(query);
+
+            // Assert
+            expect(getAryaCountryIdForSpy).toHaveBeenCalledWith(query.countryId);
+            expect(jobTitlesResponseHandlerSpy).toHaveBeenCalledWith(mockResult);
+            expect(aryaAgentSpy).toHaveBeenCalledWith(query.spName, mockCountryId);
+            expect(mockSegregateJobTitles).toHaveBeenCalledWith(mockResponse.jobTitles);
+            expect(reduceToSpy).toHaveBeenCalledWith(mockResponse.jobTitles, parseInt(query.topCount, 10));
+            expect(result).toEqual(mockResponse);
+        });
+    });
+
+    describe('getIndustries', () => {
+        const industries = [];
+
+        test('should call industriesModel.find().lean() if industries not exists and return result', async () => {
+            // Arrange
+            mockLean.mockResolvedValueOnce(industries);
+
+            // Act
+            const result = await tarcArayService.getIndustries();
+
+            // Assert
+            expect(mockLean).toHaveBeenCalled();
+            expect(result).toEqual(industries);
+        });
+
+        test('should return industries if exists', async () => {
+            // Act
+            const result = await tarcArayService.getIndustries();
+
+            // Assert
+            expect(mockLean).not.toHaveBeenCalled();
+            expect(result).toEqual(industries);
+        });
+    });
+
+    describe('peerGroups', () => {
+        test('should call peerGroupsRepo.getPeerGroups with query and return the result', () => {
+            // Arrange
+            const expected = [];
+            const query = {} as KfTarcArayPeerGroups;
+            mockGetPeerGroups.mockReturnValueOnce(expected);
+
+            // Act
+            const result = tarcArayService.peerGroups(query);
+
+            // Assert
+            expect(mockGetPeerGroups).toHaveBeenCalledWith(query);
+            expect(result).toEqual(expected);
+        });
+    });
+
+    describe('jobTitlesResponseHandler', () => {
+        test('should return {jobTitles: []} if argument falsy or SimilarTitlesStats falsy or SimilarTitlesStats.length 0', () => {
+            // Arrange
+            const expected = { jobTitles: [] };
+
+            // Act
+            const noArgumentResult = (tarcArayService as any).jobTitlesResponseHandler();
+            const noSimilarTitlesStatsResult = (tarcArayService as any).jobTitlesResponseHandler({});
+            const emptyArrayResult = (tarcArayService as any).jobTitlesResponseHandler({ SimilarTitlesStats: [] });
+
+            // Assert
+            expect(noArgumentResult).toEqual(expected);
+            expect(noSimilarTitlesStatsResult).toEqual(expected);
+            expect(emptyArrayResult).toEqual(expected);
+        });
+
+        test('should map SimilarTitlesStats to jobTitles', () => {
+            // Arrange
+            const SimilarTitlesStats = [
+                {
+                    SimilarTitle: '1',
+                    Count: 1,
+                },
+                {
+                    SimilarTitle: '2',
+                    Count: 2,
+                },
+                {
+                    SimilarTitle: '3',
+                    Count: 3,
+                },
+            ];
+            const expected = {
+                jobTitles: [
+                    {
+                        name: '1',
+                        count: 1,
+                    },
+                    {
+                        name: '2',
+                        count: 2,
+                    },
+                    {
+                        name: '3',
+                        count: 3,
+                    },
+                ],
+            };
+
+            // Act
+            const result = (tarcArayService as any).jobTitlesResponseHandler({
+                SimilarTitlesStats,
+            });
+
+            // Assert
+            expect(result).toEqual(expected);
+        });
+    });
+
+    describe('isEmpty', () => {
+        test('should return true if argument is null', () => {
+            // Act/Assert
+            expect((tarcArayService as any).isEmpty(null)).toEqual(true);
+        });
+
+        test('should return true if there is no keys in argument', () => {
+            // Act/Assert
+            expect((tarcArayService as any).isEmpty({})).toEqual(true);
+        });
+
+        test('should return false if argument not empty', () => {
+            // Act/Assert
+            expect((tarcArayService as any).isEmpty({ a: 'a' })).toEqual(false);
+        });
+    });
+
+    describe('skillResponseHandler', () => {
+        test('should return {skills:[]} if argument is empty', () => {
+            // Act/Assert
+            expect((tarcArayService as any).skillResponseHandler({})).toEqual({ skills: [] });
+        });
+
+        test('should map skills is skills exists', () => {
+            const SkillsStats = [
+                {
+                    SkillName: '1',
+                    Count: 1,
+                },
+                {
+                    SkillName: '2',
+                    Count: 2,
+                },
+                {
+                    SkillName: '3',
+                    Count: 3,
+                },
+            ];
+            const expected = {
+                skills: [
+                    {
+                        name: '1',
+                        count: 1,
+                    },
+                    {
+                        name: '2',
+                        count: 2,
+                    },
+                    {
+                        name: '3',
+                        count: 3,
+                    },
+                ],
+            };
+
+            // Act
+            const result = (tarcArayService as any).skillResponseHandler({ SkillsStats });
+
+            // Assert
+            expect(result).toEqual(expected);
+        });
+    });
+
+    describe('getAryaCountryIdFor', () => {
+        test(`should return null if the country not found`, async () => {
+            // Arrange
+            mockGetAllCountries.mockResolvedValueOnce({
+                find: jest.fn().mockReturnValue(undefined),
+            });
+            // Act
+            const result = await (tarcArayService as any).getAryaCountryIdFor();
+
+            // Assert
+            expect(result).toEqual(null);
+        });
+
+        test(`should return null if AryaCountryId is 'NULL'`, async () => {
+            // Arrange
+            mockGetAllCountries.mockResolvedValueOnce({
+                find: jest.fn().mockReturnValue({ AryaCountryId: 'NULL' }),
+            });
+            // Act
+            const result = await (tarcArayService as any).getAryaCountryIdFor();
+
+            // Assert
+            expect(result).toEqual(null);
+        });
+
+        test(`should return null if AryaCountryId is 0`, async () => {
+            // Arrange
+            mockGetAllCountries.mockResolvedValueOnce({
+                find: jest.fn().mockReturnValue({ AryaCountryId: 0 }),
+            });
+            // Act
+            const result = await (tarcArayService as any).getAryaCountryIdFor();
+
+            // Assert
+            expect(result).toEqual(null);
+        });
+
+        test('should return founded AryaCountryId', async () => {
+            // Arrange
+            const AryaCountryId = 123;
+            mockGetAllCountries.mockResolvedValueOnce({
+                find: jest.fn().mockReturnValue({ AryaCountryId }),
+            });
+            // Act
+            const result = await (tarcArayService as any).getAryaCountryIdFor();
+
+            // Assert
+            expect(result).toEqual(AryaCountryId);
+        });
+    });
+
+    describe('reduceTo', () => {
+        test('should cat data if there length more than the topCount', () => {
+            // Arrange
+            const data = [1, 2, 3, 4, 5];
+
+            // Act
+            (tarcArayService as any).reduceTo(data, 3);
+
+            // Assert
+            expect(data).toEqual([1, 2, 3]);
+        });
+    });
+});

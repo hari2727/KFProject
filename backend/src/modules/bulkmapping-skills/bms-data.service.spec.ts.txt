@@ -1,0 +1,215 @@
+const import_common_data = {
+    templateInsertOperation: jest.fn(),
+};
+jest.mock('../../common/data', () => ({
+    ...jest.requireActual('../../common/data'),
+    ...injectMockedImports(import_common_data)
+}));
+
+const import_typeorm = {
+    entityManager: null,
+    getManager: jest.fn(() => import_typeorm.entityManager)
+};
+jest.mock('typeorm', () => ({
+    ...jest.requireActual('typeorm'),
+    ...injectMockedImports(import_typeorm),
+}));
+
+
+import {
+    BulkMappingSkillsStagingDTO,
+    BulkMappingSkillsStagingItemModificationID,
+    BulkMappingSkillsStagingPayload,
+    BulkMappingSkillsStagingProfileDTO,
+    BulkMappingSkillsStagingSkill,
+    BulkMappingSkillsStagingSkillComponentDTO,
+    BulkMappingSkillsStagingSkillLevelDTO,
+} from './bms.interfaces';
+import {
+    createMockInstance,
+    generateRandomAmount,
+    getBoolean,
+    getNumber,
+    getString,
+    injectMockedImports,
+} from '../../_shared/test/test';
+import { BulkMappingSkillsDataMapper } from './bms-data.mapper';
+import { BulkMappingSkillsDataService } from './bms-data.service';
+import { EntityManager } from 'typeorm/entity-manager/EntityManager';
+
+
+const getSuccessProfileId = (): string =>
+    String(getNumber());
+
+const getItemModificationIdResponse = (): BulkMappingSkillsStagingItemModificationID => ({
+    ItemModificationID: getNumber(),
+});
+
+const getSkill = (addDependents = true): BulkMappingSkillsStagingSkill => ({
+    skillId: getNumber(),
+    levelId: getNumber(),
+    order: getNumber(),
+    dependents: addDependents ? generateRandomAmount(getString, { min: 1 }) : undefined,
+});
+
+describe('BulkMappingSkillsDataService', () => {
+
+    let DTOs: BulkMappingSkillsStagingDTO;
+    let clientId: number;
+    let userId: number;
+    let dataService: BulkMappingSkillsDataService;
+    let itemModificationIdResponse: BulkMappingSkillsStagingItemModificationID[];
+    let itemModificationId: number;
+
+    beforeEach(() => {
+        itemModificationIdResponse = generateRandomAmount(getItemModificationIdResponse, { min: 1 });
+        itemModificationId = itemModificationIdResponse[0].ItemModificationID;
+
+        import_typeorm.entityManager = createMockInstance<EntityManager>({
+            query: jest.fn().mockImplementation(async (query: string, parameters?: any[]): Promise<any> => {
+                return itemModificationIdResponse;
+            })
+        });
+
+        import_common_data.templateInsertOperation = jest.fn((...args: any) => {
+        });
+
+        {
+            const dataMapper = new BulkMappingSkillsDataMapper();
+            const body: BulkMappingSkillsStagingPayload = {
+                skills: [
+                    ...generateRandomAmount(() => getSkill(getBoolean()), { min: 1 }),
+                    ...generateRandomAmount(() => getSkill(true), { min: 1 }),
+                    ...generateRandomAmount(() => getSkill(false), { min: 1 }),
+                ],
+                successProfileIds: generateRandomAmount(getSuccessProfileId, { min: 1 }),
+            };
+            DTOs = dataMapper.createStagingDTOs(itemModificationId, body);
+        }
+        clientId = getNumber();
+        userId = getNumber();
+
+        dataService = new BulkMappingSkillsDataService();
+    });
+
+    it('obtainItemModificationId should call EntityManager.query and return results', async () => {
+        import_typeorm.entityManager.query = jest.fn().mockImplementation(async (): Promise<any> => itemModificationIdResponse);
+
+        const response = await dataService.obtainItemModificationId(clientId, userId);
+
+        expect(import_typeorm.entityManager.query).toBeCalledTimes(1);
+        expect(response).toEqual(itemModificationIdResponse);
+    });
+
+
+    it('obtainItemModificationId should pass userId and clientId into the query', async () => {
+        let passedQuery: string;
+        import_typeorm.entityManager.query = jest.fn().mockImplementation(async (query: string): Promise<any> => {
+            passedQuery = query;
+        })
+
+        await dataService.obtainItemModificationId(clientId, userId);
+
+        expect(passedQuery.includes(String(clientId))).toBe(true);
+        expect(passedQuery.includes(String(userId))).toBe(true);
+    });
+
+    it('.insertStagingProfiles should call templateInsertOperation', async () => {
+        let usedDTOs: BulkMappingSkillsStagingProfileDTO[];
+        let usedTableName: string;
+        let usedColumnNames: string[];
+        let usedTupleValuesGenerator: (value: BulkMappingSkillsStagingProfileDTO) => any[];
+
+        import_common_data.templateInsertOperation = jest.fn((...args: any[]) => {
+            usedDTOs = args.shift();
+            usedTableName = args.shift();
+            usedColumnNames = args.shift();
+            usedTupleValuesGenerator = args.shift();
+        });
+        await dataService.insertStagingProfiles(DTOs.profiles);
+
+        expect(import_common_data.templateInsertOperation).toBeCalledTimes(1);
+
+        expect(usedDTOs).toEqual(DTOs.profiles);
+        expect(usedTableName).toEqual('CMM.dbo.ItemModificationProfilesBulkUpdateProfiles');
+        expect(usedColumnNames).toEqual([
+            'ItemModificationID',
+            'ClientJobID',
+        ]);
+        expect(usedTupleValuesGenerator(DTOs.profiles[0])).toEqual(
+            (dto => [
+                dto.ItemModificationID,
+                dto.ClientJobID,
+            ])(DTOs.profiles[0])
+        );
+    });
+
+    it('.insertStagingSkillLevels should call templateInsertOperation', async () => {
+        let usedDTOs: BulkMappingSkillsStagingSkillLevelDTO[];
+        let usedTableName: string;
+        let usedColumnNames: string[];
+        let usedTupleValuesGenerator: (value: BulkMappingSkillsStagingSkillLevelDTO) => any[];
+
+        import_common_data.templateInsertOperation = jest.fn((...args: any[]) => {
+            usedDTOs = args.shift();
+            usedTableName = args.shift();
+            usedColumnNames = args.shift();
+            usedTupleValuesGenerator = args.shift();
+        });
+        await dataService.insertStagingSkillLevels(DTOs.skillLevels);
+
+        expect(import_common_data.templateInsertOperation).toBeCalledTimes(1);
+
+        expect(usedDTOs).toEqual(DTOs.skillLevels);
+        expect(usedTableName).toEqual('CMM.dbo.ItemModificationProfilesBulkUpdateLevels');
+        expect(usedColumnNames).toEqual([
+            'ItemModificationId',
+            'JobSubCategoryId',
+            'JobLevelDetailOrder',
+            'SectionDetailOrder',
+        ]);
+        expect(usedTupleValuesGenerator(DTOs.skillLevels[0])).toEqual(
+            (dto => [
+                dto.ItemModificationID,
+                dto.JobSubCategoryId,
+                dto.JobLevelDetailOrder,
+                dto.SectionDetailOrder,
+            ])(DTOs.skillLevels[0])
+        );
+    });
+
+    it('.insertStagingSkillComponents should call templateInsertOperation', async () => {
+        let usedDTOs: BulkMappingSkillsStagingSkillComponentDTO[];
+        let usedTableName: string;
+        let usedColumnNames: string[];
+        let usedTupleValuesGenerator: (value: BulkMappingSkillsStagingSkillComponentDTO) => any[];
+
+        import_common_data.templateInsertOperation = jest.fn((...args: any[]) => {
+            usedDTOs = args.shift();
+            usedTableName = args.shift();
+            usedColumnNames = args.shift();
+            usedTupleValuesGenerator = args.shift();
+        });
+        await dataService.insertStagingSkillComponents(DTOs.skillComponents);
+
+        expect(import_common_data.templateInsertOperation).toBeCalledTimes(1);
+
+        expect(usedDTOs).toEqual(DTOs.skillComponents);
+        expect(usedTableName).toEqual('CMM.dbo.ItemModificationProfilesBulkUpdateSkillComponents');
+        expect(usedColumnNames).toEqual([
+            'ItemModificationId',
+            'JobSubCategoryId',
+            'JobSubCategoryDependantName',
+            'JobSubCategoryDependantOrder',
+        ]);
+        expect(usedTupleValuesGenerator(DTOs.skillComponents[0])).toEqual(
+            (dto => [
+                dto.ItemModificationID,
+                dto.JobSubCategoryId,
+                dto.JobSubCategoryDependantName,
+                dto.JobSubCategoryDependantOrder,
+            ])(DTOs.skillComponents[0])
+        );
+    });
+
+});

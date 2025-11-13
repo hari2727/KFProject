@@ -1,0 +1,123 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { PublishStatusService } from './kftarc-publish-status.service';
+import * as typeorm from 'typeorm';
+import { okResponse } from '../../common/common.utils';
+import { GetPublishStatusMock as mock } from './kftarc-publish-status.fixture';
+import { PublishStatusRepository } from './kftarc-publish-status.repository';
+import { PublishStatus, PutActions } from './kftarc-publish-status.enum';
+import { HttpsService } from '../../_shared/https/https.service';
+
+
+type Mockify<T> = { [P in keyof T]: T[P] extends Function ? jest.Mock<{}> : T[P] };
+function mapToMockify<T extends Object>(obj: T): Mockify<T> {
+    let newObject = {} as Mockify<T>;
+    const properties = Object.getOwnPropertyNames(Object.getPrototypeOf(obj));
+    for (let i = 0; i < properties.length; i++) {
+        newObject[properties[i]] = jest.fn();
+    }
+    return newObject;
+}
+jest.mock('typeorm', () => {
+    const actual = jest.requireActual('typeorm');
+    return {
+        ...actual,
+        getManager: jest.fn(),
+        getConnection: jest.fn(),
+    };
+});
+
+describe('PublishStatusService', () => {
+    let publisStatusService: PublishStatusService;
+    let module: TestingModule;
+    let https: HttpsService;
+    let repo: PublishStatusRepository;
+
+    beforeAll(async () => {
+        mapToMockify(typeorm);
+        module = await Test.createTestingModule({
+            providers: [HttpsService, PublishStatusService, PublishStatusRepository],
+        }).compile();
+        repo = module.get<PublishStatusRepository>(PublishStatusRepository);
+        publisStatusService = module.get<PublishStatusService>(PublishStatusService);
+        https = module.get<HttpsService>(HttpsService);
+    });
+
+    beforeEach(async () => {
+        jest.clearAllMocks();
+    });
+
+    describe('getPublishStatus', () => {
+        test('should return Publish Status Records', async () => {
+
+            // Act
+            const publishStatusRecordsObject = publisStatusService.formattPublishStatusStatusOptions(mock.singleDbRecord);
+
+            // Assert
+            expect(publishStatusRecordsObject[0]).toEqual(mock.expectedPublishedRecordsJson);
+        });
+
+        test('should return paging info', async () => {
+
+            // Act
+            const publishStatusRecordsObject = publisStatusService.formattPublishStatusStatusOptions(mock.singleDbRecord);
+            const pagingsObject = publisStatusService.getPaging(publishStatusRecordsObject[0], mock.queryParams)
+
+            // Assert
+            expect(pagingsObject).toEqual(mock.expectedPagingjson);
+        });
+
+        test('should call query for publish status', async () => {
+
+            jest.spyOn(repo, 'getPublishStatusData').mockResolvedValue(mock.mockDbData as any);
+            const results = await publisStatusService.getPublishStatus(mock.queryParams);
+
+            expect(results).not.toBe(null);
+            expect(results).toEqual(mock.expectedJson);
+        });
+    });
+
+    describe('actionSwitcher', () => {
+        test('should switch to "republish" action', async () => {
+            //Arrange
+            jest.spyOn(publisStatusService, 'republishMapping').mockResolvedValueOnce(okResponse);
+            // Act
+            const result = await publisStatusService.actionSwitcher(PutActions.REPUBLISH, {} as any, {} as any);
+            // Assert
+            expect(result).toEqual(okResponse);
+        });
+        test('should throw error on unknown action', async () => {
+            // Act
+            const resultF = publisStatusService.actionSwitcher(mock.randomString, {} as any, {} as any);
+            // Assert
+            expect(resultF).rejects.toThrowError();
+        });
+    });
+
+    describe('republishMapping', () => {
+        test('should return ok on successful republish', async () => {
+            //Arrange
+            jest.spyOn(repo, 'updateBulkBCPublishingStatus').mockResolvedValueOnce();
+            // Act
+            const result = await publisStatusService.republishMapping({} as any, {} as any);
+            // Assert
+            expect(result).toEqual(okResponse);
+        });
+        test('should throw error on unknown action', async () => {
+            //Arrange
+            jest.spyOn(repo, 'updateBulkBCPublishingStatus').mockImplementationOnce(() => {throw new Error()});
+            // Act
+            const resultF = publisStatusService.republishMapping({} as any, {} as any);
+            // Assert
+            expect(resultF).rejects.toThrowError();
+        });
+        test('should call updateBulkBCPublishingStatus with the correct arguments and return an ok response', async () => {
+            // Arrange
+            const updateBulkBCPublishingStatusSpy = jest.spyOn(repo, 'updateBulkBCPublishingStatus').mockResolvedValueOnce();
+            // Act
+            const response = await publisStatusService.republishMapping(mock.queryParams, mock.republishBody);
+            // Assert
+            expect(updateBulkBCPublishingStatusSpy).toHaveBeenCalledWith(mock.queryParams.loggedInUserClientId, +mock.republishBody.itemModification, PublishStatus.NOT_STARTED);
+            expect(response).toEqual(okResponse);
+          });
+    });
+});

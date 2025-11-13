@@ -1,0 +1,1413 @@
+{
+    "roles": [
+        {
+            "id": "111469",
+            "title": "Chief Executive Officer",
+            "jobFamily": "EM",
+            "jobSubFamily": "EMA",
+            "jobRoleTypeId": "EMA12",
+            "levelName": "CEO",
+            "familyName": "Executive Management",
+            "subFamilyName": "Corporate Executives / C-suite",
+            "profileType": "BEST_IN_CLASS",
+            "grade": {
+                "standardHayGrade": "30"
+            },
+            "expandable": false
+        },
+        {
+            "title": "Entry Level Professional",
+            "jobFamily": "GN",
+            "jobSubFamily": "GNX",
+            "jobRoleTypeId": "GNX09",
+            "levelName": "Individual Contributor",
+            "familyName": "General",
+            "subFamilyName": "test11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+            "profileType": "LEVELS",
+            "grade": {
+                "min": 14,
+                "max": 16
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "id": "112319",
+                    "title": "Entry Level Professional I",
+                    "jobFamily": "GN",
+                    "jobSubFamily": "GNX",
+                    "jobRoleTypeId": "GNX09",
+                    "standardHayGrade": "14",
+                    "levelName": "Individual Contributor",
+                    "familyName": "General",
+                    "subFamilyName": "test11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+                    "profileType": "LEVELS",
+                    "shortProfile": "A2",
+                    "totalPoints": 308,
+                    "haypoints": {
+                        "totalPoints": 308,
+                        "min": 0,
+                        "max": 22697,
+                        "jeScores": [
+                            {
+                                "id": 1,
+                                "jeScoreType": "KNOW_HOW",
+                                "points": 175,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PRACTICAL_TECHNICAL_KNOWLEDGE",
+                                        "code": "D+"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "MANAGERIAL_KNOWLEDGE",
+                                        "code": "I"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "COMMUNICATION_INFLUENCING_SKILL",
+                                        "code": "2"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 2,
+                                "jeScoreType": "PROBLEM_SOLVING",
+                                "points": 57,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "FREEDOM_THINK",
+                                        "code": "D"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "THINKING_CHALLENGE",
+                                        "code": "3+"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "PROBLEM_SOLVING_PERCENTAGE",
+                                        "code": "0.33"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 3,
+                                "jeScoreType": "ACCOUNTABILITY",
+                                "points": 76,
+                                "options": [
+                                    {
+                                        "id": 3,
+                                        "type": "FREEDOM_ACT",
+                                        "code": "D-"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "AREA_IMPACT",
+                                        "code": "N"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "NATURE_IMPACT",
+                                        "code": "IV+"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 4,
+                                "jeScoreType": "WORKING_CONDITIONS",
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PHYSICAL_EFFORT"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "PHYSICAL_ENVIRONMENT"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "SENSORY_ATTENTION"
+                                    },
+                                    {
+                                        "id": 4,
+                                        "type": "MENTAL_STRESS"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "112320",
+                    "title": "Entry Level Professional II",
+                    "jobFamily": "GN",
+                    "jobSubFamily": "GNX",
+                    "jobRoleTypeId": "GNX09",
+                    "standardHayGrade": "15",
+                    "levelName": "Individual Contributor",
+                    "familyName": "General",
+                    "subFamilyName": "test11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+                    "profileType": "LEVELS",
+                    "shortProfile": "A2",
+                    "totalPoints": 353,
+                    "haypoints": {
+                        "totalPoints": 353,
+                        "min": 0,
+                        "max": 22697,
+                        "jeScores": [
+                            {
+                                "id": 1,
+                                "jeScoreType": "KNOW_HOW",
+                                "points": 200,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PRACTICAL_TECHNICAL_KNOWLEDGE",
+                                        "code": "E"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "MANAGERIAL_KNOWLEDGE",
+                                        "code": "I"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "COMMUNICATION_INFLUENCING_SKILL",
+                                        "code": "2"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 2,
+                                "jeScoreType": "PROBLEM_SOLVING",
+                                "points": 66,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "FREEDOM_THINK",
+                                        "code": "D+"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "THINKING_CHALLENGE",
+                                        "code": "3"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "PROBLEM_SOLVING_PERCENTAGE",
+                                        "code": "0.33"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 3,
+                                "jeScoreType": "ACCOUNTABILITY",
+                                "points": 87,
+                                "options": [
+                                    {
+                                        "id": 3,
+                                        "type": "FREEDOM_ACT",
+                                        "code": "D"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "AREA_IMPACT",
+                                        "code": "N"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "NATURE_IMPACT",
+                                        "code": "V-"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 4,
+                                "jeScoreType": "WORKING_CONDITIONS",
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PHYSICAL_EFFORT"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "PHYSICAL_ENVIRONMENT"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "SENSORY_ATTENTION"
+                                    },
+                                    {
+                                        "id": 4,
+                                        "type": "MENTAL_STRESS"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "112321",
+                    "title": "Entry Level Professional III",
+                    "jobFamily": "GN",
+                    "jobSubFamily": "GNX",
+                    "jobRoleTypeId": "GNX09",
+                    "standardHayGrade": "16",
+                    "levelName": "Individual Contributor",
+                    "familyName": "General",
+                    "subFamilyName": "test11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+                    "profileType": "LEVELS",
+                    "shortProfile": "A2",
+                    "totalPoints": 406,
+                    "haypoints": {
+                        "totalPoints": 432,
+                        "min": 0,
+                        "max": 22697,
+                        "jeScores": [
+                            {
+                                "id": 1,
+                                "jeScoreType": "KNOW_HOW",
+                                "points": 230,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PRACTICAL_TECHNICAL_KNOWLEDGE",
+                                        "code": "E+"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "MANAGERIAL_KNOWLEDGE",
+                                        "code": "I"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "COMMUNICATION_INFLUENCING_SKILL",
+                                        "code": "2"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 2,
+                                "jeScoreType": "PROBLEM_SOLVING",
+                                "points": 87,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "FREEDOM_THINK",
+                                        "code": "E"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "THINKING_CHALLENGE",
+                                        "code": "3+"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "PROBLEM_SOLVING_PERCENTAGE",
+                                        "code": "0.38"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 3,
+                                "jeScoreType": "ACCOUNTABILITY",
+                                "points": 115,
+                                "options": [
+                                    {
+                                        "id": 3,
+                                        "type": "FREEDOM_ACT",
+                                        "code": "D+"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "AREA_IMPACT",
+                                        "code": "N"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "NATURE_IMPACT",
+                                        "code": "V"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 4,
+                                "jeScoreType": "WORKING_CONDITIONS",
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PHYSICAL_EFFORT"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "PHYSICAL_ENVIRONMENT"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "SENSORY_ATTENTION"
+                                    },
+                                    {
+                                        "id": 4,
+                                        "type": "MENTAL_STRESS"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "title": "Environmental and Health Professional",
+            "jobFamily": "HE",
+            "jobSubFamily": "HEA",
+            "jobRoleTypeId": "HEA01",
+            "familyName": "Health and Environment",
+            "subFamilyName": "Environmental Health",
+            "profileType": "BEST_IN_CLASS",
+            "grade": {
+                "min": 14,
+                "max": 17
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "id": "92150",
+                    "title": "Environmental and Health Professional I",
+                    "jobFamily": "HE",
+                    "jobSubFamily": "HEA",
+                    "jobRoleTypeId": "HEA01",
+                    "standardHayGrade": "14",
+                    "levelName": "Individual Contributor",
+                    "familyName": "Health and Environment",
+                    "subFamilyName": "Environmental Health",
+                    "profileType": "BEST_IN_CLASS",
+                    "shortProfile": "A1",
+                    "totalPoints": 298,
+                    "haypoints": {
+                        "totalPoints": 298,
+                        "min": 0,
+                        "max": 22697,
+                        "jeScores": [
+                            {
+                                "id": 1,
+                                "jeScoreType": "KNOW_HOW",
+                                "points": 175,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PRACTICAL_TECHNICAL_KNOWLEDGE",
+                                        "code": "E-"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "MANAGERIAL_KNOWLEDGE",
+                                        "code": "I"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "COMMUNICATION_INFLUENCING_SKILL",
+                                        "code": "2"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 2,
+                                "jeScoreType": "PROBLEM_SOLVING",
+                                "points": 57,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "FREEDOM_THINK",
+                                        "code": "D+"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "THINKING_CHALLENGE",
+                                        "code": "3"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "PROBLEM_SOLVING_PERCENTAGE",
+                                        "code": "0.33"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 3,
+                                "jeScoreType": "ACCOUNTABILITY",
+                                "points": 66,
+                                "options": [
+                                    {
+                                        "id": 3,
+                                        "type": "FREEDOM_ACT",
+                                        "code": "D-"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "AREA_IMPACT",
+                                        "code": "N"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "NATURE_IMPACT",
+                                        "code": "IV"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 4,
+                                "jeScoreType": "WORKING_CONDITIONS",
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PHYSICAL_EFFORT"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "PHYSICAL_ENVIRONMENT"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "SENSORY_ATTENTION"
+                                    },
+                                    {
+                                        "id": 4,
+                                        "type": "MENTAL_STRESS"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "92151",
+                    "title": "Environmental and Health Professional II",
+                    "jobFamily": "HE",
+                    "jobSubFamily": "HEA",
+                    "jobRoleTypeId": "HEA01",
+                    "standardHayGrade": "15",
+                    "levelName": "Individual Contributor",
+                    "familyName": "Health and Environment",
+                    "subFamilyName": "Environmental Health",
+                    "profileType": "BEST_IN_CLASS",
+                    "shortProfile": "A1",
+                    "totalPoints": 342,
+                    "haypoints": {
+                        "totalPoints": 342,
+                        "min": 0,
+                        "max": 22697,
+                        "jeScores": [
+                            {
+                                "id": 1,
+                                "jeScoreType": "KNOW_HOW",
+                                "points": 200,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PRACTICAL_TECHNICAL_KNOWLEDGE",
+                                        "code": "E"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "MANAGERIAL_KNOWLEDGE",
+                                        "code": "I"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "COMMUNICATION_INFLUENCING_SKILL",
+                                        "code": "2"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 2,
+                                "jeScoreType": "PROBLEM_SOLVING",
+                                "points": 66,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "FREEDOM_THINK",
+                                        "code": "D+"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "THINKING_CHALLENGE",
+                                        "code": "3"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "PROBLEM_SOLVING_PERCENTAGE",
+                                        "code": "0.33"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 3,
+                                "jeScoreType": "ACCOUNTABILITY",
+                                "points": 76,
+                                "options": [
+                                    {
+                                        "id": 3,
+                                        "type": "FREEDOM_ACT",
+                                        "code": "D-"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "AREA_IMPACT",
+                                        "code": "N"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "NATURE_IMPACT",
+                                        "code": "IV+"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 4,
+                                "jeScoreType": "WORKING_CONDITIONS",
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PHYSICAL_EFFORT"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "PHYSICAL_ENVIRONMENT"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "SENSORY_ATTENTION"
+                                    },
+                                    {
+                                        "id": 4,
+                                        "type": "MENTAL_STRESS"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "92152",
+                    "title": "Environmental and Health Professional III",
+                    "jobFamily": "HE",
+                    "jobSubFamily": "HEA",
+                    "jobRoleTypeId": "HEA01",
+                    "standardHayGrade": "16",
+                    "levelName": "Individual Contributor",
+                    "familyName": "Health and Environment",
+                    "subFamilyName": "Environmental Health",
+                    "profileType": "BEST_IN_CLASS",
+                    "shortProfile": "A1",
+                    "totalPoints": 393,
+                    "haypoints": {
+                        "totalPoints": 417,
+                        "min": 0,
+                        "max": 22697,
+                        "jeScores": [
+                            {
+                                "id": 1,
+                                "jeScoreType": "KNOW_HOW",
+                                "points": 230,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PRACTICAL_TECHNICAL_KNOWLEDGE",
+                                        "code": "E+"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "MANAGERIAL_KNOWLEDGE",
+                                        "code": "I"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "COMMUNICATION_INFLUENCING_SKILL",
+                                        "code": "2"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 2,
+                                "jeScoreType": "PROBLEM_SOLVING",
+                                "points": 87,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "FREEDOM_THINK",
+                                        "code": "E"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "THINKING_CHALLENGE",
+                                        "code": "3+"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "PROBLEM_SOLVING_PERCENTAGE",
+                                        "code": "0.38"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 3,
+                                "jeScoreType": "ACCOUNTABILITY",
+                                "points": 100,
+                                "options": [
+                                    {
+                                        "id": 3,
+                                        "type": "FREEDOM_ACT",
+                                        "code": "D"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "AREA_IMPACT",
+                                        "code": "N"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "NATURE_IMPACT",
+                                        "code": "V"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 4,
+                                "jeScoreType": "WORKING_CONDITIONS",
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PHYSICAL_EFFORT"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "PHYSICAL_ENVIRONMENT"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "SENSORY_ATTENTION"
+                                    },
+                                    {
+                                        "id": 4,
+                                        "type": "MENTAL_STRESS"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "92153",
+                    "title": "Environmental and Health Professional IV",
+                    "jobFamily": "HE",
+                    "jobSubFamily": "HEA",
+                    "jobRoleTypeId": "HEA01",
+                    "standardHayGrade": "17",
+                    "levelName": "Individual Contributor",
+                    "familyName": "Health and Environment",
+                    "subFamilyName": "Environmental Health",
+                    "profileType": "BEST_IN_CLASS",
+                    "shortProfile": "A1",
+                    "totalPoints": 479,
+                    "haypoints": {
+                        "totalPoints": 479,
+                        "min": 0,
+                        "max": 22697,
+                        "jeScores": [
+                            {
+                                "id": 1,
+                                "jeScoreType": "KNOW_HOW",
+                                "points": 264,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PRACTICAL_TECHNICAL_KNOWLEDGE",
+                                        "code": "F-"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "MANAGERIAL_KNOWLEDGE",
+                                        "code": "I+"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "COMMUNICATION_INFLUENCING_SKILL",
+                                        "code": "2"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 2,
+                                "jeScoreType": "PROBLEM_SOLVING",
+                                "points": 100,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "FREEDOM_THINK",
+                                        "code": "E"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "THINKING_CHALLENGE",
+                                        "code": "3+"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "PROBLEM_SOLVING_PERCENTAGE",
+                                        "code": "0.38"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 3,
+                                "jeScoreType": "ACCOUNTABILITY",
+                                "points": 115,
+                                "options": [
+                                    {
+                                        "id": 3,
+                                        "type": "FREEDOM_ACT",
+                                        "code": "D+"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "AREA_IMPACT",
+                                        "code": "N"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "NATURE_IMPACT",
+                                        "code": "V"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 4,
+                                "jeScoreType": "WORKING_CONDITIONS",
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PHYSICAL_EFFORT"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "PHYSICAL_ENVIRONMENT"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "SENSORY_ATTENTION"
+                                    },
+                                    {
+                                        "id": 4,
+                                        "type": "MENTAL_STRESS"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "title": "Expert Professional",
+            "jobFamily": "GN",
+            "jobSubFamily": "GNX",
+            "jobRoleTypeId": "GNX11",
+            "levelName": "Individual Contributor",
+            "familyName": "General",
+            "subFamilyName": "test11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+            "profileType": "LEVELS",
+            "grade": {
+                "min": 18,
+                "max": 22
+            },
+            "expandable": true,
+            "profiles": [
+                {
+                    "id": "112328",
+                    "title": "Expert Professional I",
+                    "jobFamily": "GN",
+                    "jobSubFamily": "GNX",
+                    "jobRoleTypeId": "GNX11",
+                    "standardHayGrade": "18",
+                    "levelName": "Individual Contributor",
+                    "familyName": "General",
+                    "subFamilyName": "test11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+                    "profileType": "LEVELS",
+                    "shortProfile": "L",
+                    "totalPoints": 568,
+                    "haypoints": {
+                        "totalPoints": 568,
+                        "min": 0,
+                        "max": 22697,
+                        "jeScores": [
+                            {
+                                "id": 1,
+                                "jeScoreType": "KNOW_HOW",
+                                "points": 304,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PRACTICAL_TECHNICAL_KNOWLEDGE",
+                                        "code": "F+"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "MANAGERIAL_KNOWLEDGE",
+                                        "code": "I+"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "COMMUNICATION_INFLUENCING_SKILL",
+                                        "code": "2"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 2,
+                                "jeScoreType": "PROBLEM_SOLVING",
+                                "points": 132,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "FREEDOM_THINK",
+                                        "code": "E"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "THINKING_CHALLENGE",
+                                        "code": "4"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "PROBLEM_SOLVING_PERCENTAGE",
+                                        "code": "0.43"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 3,
+                                "jeScoreType": "ACCOUNTABILITY",
+                                "points": 132,
+                                "options": [
+                                    {
+                                        "id": 3,
+                                        "type": "FREEDOM_ACT",
+                                        "code": "E-"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "AREA_IMPACT",
+                                        "code": "N"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "NATURE_IMPACT",
+                                        "code": "V"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 4,
+                                "jeScoreType": "WORKING_CONDITIONS",
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PHYSICAL_EFFORT"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "PHYSICAL_ENVIRONMENT"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "SENSORY_ATTENTION"
+                                    },
+                                    {
+                                        "id": 4,
+                                        "type": "MENTAL_STRESS"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "112329",
+                    "title": "Expert Professional II",
+                    "jobFamily": "GN",
+                    "jobSubFamily": "GNX",
+                    "jobRoleTypeId": "GNX11",
+                    "standardHayGrade": "19",
+                    "levelName": "Individual Contributor",
+                    "familyName": "General",
+                    "subFamilyName": "test11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+                    "profileType": "LEVELS",
+                    "shortProfile": "L",
+                    "totalPoints": 654,
+                    "haypoints": {
+                        "totalPoints": 654,
+                        "min": 0,
+                        "max": 22697,
+                        "jeScores": [
+                            {
+                                "id": 1,
+                                "jeScoreType": "KNOW_HOW",
+                                "points": 350,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PRACTICAL_TECHNICAL_KNOWLEDGE",
+                                        "code": "G-"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "MANAGERIAL_KNOWLEDGE",
+                                        "code": "I+"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "COMMUNICATION_INFLUENCING_SKILL",
+                                        "code": "2"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 2,
+                                "jeScoreType": "PROBLEM_SOLVING",
+                                "points": 152,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "FREEDOM_THINK",
+                                        "code": "E"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "THINKING_CHALLENGE",
+                                        "code": "4"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "PROBLEM_SOLVING_PERCENTAGE",
+                                        "code": "0.43"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 3,
+                                "jeScoreType": "ACCOUNTABILITY",
+                                "points": 152,
+                                "options": [
+                                    {
+                                        "id": 3,
+                                        "type": "FREEDOM_ACT",
+                                        "code": "E-"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "AREA_IMPACT",
+                                        "code": "N"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "NATURE_IMPACT",
+                                        "code": "V+"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 4,
+                                "jeScoreType": "WORKING_CONDITIONS",
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PHYSICAL_EFFORT"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "PHYSICAL_ENVIRONMENT"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "SENSORY_ATTENTION"
+                                    },
+                                    {
+                                        "id": 4,
+                                        "type": "MENTAL_STRESS"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "112330",
+                    "title": "Expert Professional III",
+                    "jobFamily": "GN",
+                    "jobSubFamily": "GNX",
+                    "jobRoleTypeId": "GNX11",
+                    "standardHayGrade": "20",
+                    "levelName": "Individual Contributor",
+                    "familyName": "General",
+                    "subFamilyName": "test11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+                    "profileType": "LEVELS",
+                    "shortProfile": "L",
+                    "totalPoints": 750,
+                    "haypoints": {
+                        "totalPoints": 800,
+                        "min": 0,
+                        "max": 22697,
+                        "jeScores": [
+                            {
+                                "id": 1,
+                                "jeScoreType": "KNOW_HOW",
+                                "points": 400,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PRACTICAL_TECHNICAL_KNOWLEDGE",
+                                        "code": "G"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "MANAGERIAL_KNOWLEDGE",
+                                        "code": "I+"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "COMMUNICATION_INFLUENCING_SKILL",
+                                        "code": "2"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 2,
+                                "jeScoreType": "PROBLEM_SOLVING",
+                                "points": 200,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "FREEDOM_THINK",
+                                        "code": "F"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "THINKING_CHALLENGE",
+                                        "code": "4"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "PROBLEM_SOLVING_PERCENTAGE",
+                                        "code": "0.5"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 3,
+                                "jeScoreType": "ACCOUNTABILITY",
+                                "points": 200,
+                                "options": [
+                                    {
+                                        "id": 3,
+                                        "type": "FREEDOM_ACT",
+                                        "code": "E"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "AREA_IMPACT",
+                                        "code": "N"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "NATURE_IMPACT",
+                                        "code": "VI"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 4,
+                                "jeScoreType": "WORKING_CONDITIONS",
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PHYSICAL_EFFORT"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "PHYSICAL_ENVIRONMENT"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "SENSORY_ATTENTION"
+                                    },
+                                    {
+                                        "id": 4,
+                                        "type": "MENTAL_STRESS"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "112331",
+                    "title": "Expert Professional IV",
+                    "jobFamily": "GN",
+                    "jobSubFamily": "GNX",
+                    "jobRoleTypeId": "GNX11",
+                    "standardHayGrade": "21",
+                    "levelName": "Individual Contributor",
+                    "familyName": "General",
+                    "subFamilyName": "test11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+                    "profileType": "LEVELS",
+                    "shortProfile": "L",
+                    "totalPoints": 920,
+                    "haypoints": {
+                        "totalPoints": 988,
+                        "min": 0,
+                        "max": 22697,
+                        "jeScores": [
+                            {
+                                "id": 1,
+                                "jeScoreType": "KNOW_HOW",
+                                "points": 460,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PRACTICAL_TECHNICAL_KNOWLEDGE",
+                                        "code": "G+"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "MANAGERIAL_KNOWLEDGE",
+                                        "code": "II-"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "COMMUNICATION_INFLUENCING_SKILL",
+                                        "code": "2"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 2,
+                                "jeScoreType": "PROBLEM_SOLVING",
+                                "points": 264,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "FREEDOM_THINK",
+                                        "code": "F"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "THINKING_CHALLENGE",
+                                        "code": "4+"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "PROBLEM_SOLVING_PERCENTAGE",
+                                        "code": "0.57"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 3,
+                                "jeScoreType": "ACCOUNTABILITY",
+                                "points": 264,
+                                "options": [
+                                    {
+                                        "id": 3,
+                                        "type": "FREEDOM_ACT",
+                                        "code": "E+"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "AREA_IMPACT",
+                                        "code": "5-"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "NATURE_IMPACT",
+                                        "code": "C"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 4,
+                                "jeScoreType": "WORKING_CONDITIONS",
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PHYSICAL_EFFORT"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "PHYSICAL_ENVIRONMENT"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "SENSORY_ATTENTION"
+                                    },
+                                    {
+                                        "id": 4,
+                                        "type": "MENTAL_STRESS"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "112332",
+                    "title": "Expert Professional V",
+                    "jobFamily": "GN",
+                    "jobSubFamily": "GNX",
+                    "jobRoleTypeId": "GNX11",
+                    "standardHayGrade": "22",
+                    "levelName": "Individual Contributor",
+                    "familyName": "General",
+                    "subFamilyName": "test11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+                    "profileType": "LEVELS",
+                    "shortProfile": "L",
+                    "totalPoints": 1056,
+                    "haypoints": {
+                        "totalPoints": 1136,
+                        "min": 0,
+                        "max": 22697,
+                        "jeScores": [
+                            {
+                                "id": 1,
+                                "jeScoreType": "KNOW_HOW",
+                                "points": 528,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PRACTICAL_TECHNICAL_KNOWLEDGE",
+                                        "code": "G+"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "MANAGERIAL_KNOWLEDGE",
+                                        "code": "II"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "COMMUNICATION_INFLUENCING_SKILL",
+                                        "code": "2"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 2,
+                                "jeScoreType": "PROBLEM_SOLVING",
+                                "points": 304,
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "FREEDOM_THINK",
+                                        "code": "F"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "THINKING_CHALLENGE",
+                                        "code": "4+"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "PROBLEM_SOLVING_PERCENTAGE",
+                                        "code": "0.57"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 3,
+                                "jeScoreType": "ACCOUNTABILITY",
+                                "points": 304,
+                                "options": [
+                                    {
+                                        "id": 3,
+                                        "type": "FREEDOM_ACT",
+                                        "code": "E+"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "AREA_IMPACT",
+                                        "code": "5"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "NATURE_IMPACT",
+                                        "code": "C"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 4,
+                                "jeScoreType": "WORKING_CONDITIONS",
+                                "options": [
+                                    {
+                                        "id": 1,
+                                        "type": "PHYSICAL_EFFORT"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "type": "PHYSICAL_ENVIRONMENT"
+                                    },
+                                    {
+                                        "id": 3,
+                                        "type": "SENSORY_ATTENTION"
+                                    },
+                                    {
+                                        "id": 4,
+                                        "type": "MENTAL_STRESS"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "id": "138828",
+            "title": "General Graduate",
+            "jobFamily": "GN",
+            "jobRoleTypeId": "GNX12",
+            "jobSubFamily": "GNX",
+            "levelName": "Individual Contributor",
+            "familyName": "General",
+            "subFamilyName": "test1",
+            "profileType": "CUSTOM_PROFILE",
+            "grade": {
+                "standardHayGrade": "13"
+            },
+            "expandable": false
+        },
+        {
+            "id": "131914",
+            "title": "PA",
+            "jobFamily": "RY",
+            "jobSubFamily": "RYC",
+            "jobRoleTypeId": "RYC04",
+            "levelName": "Individual Contributor",
+            "familyName": "Healthcare Revenue Cycle",
+            "subFamilyName": "Billing/Coding",
+            "profileType": "CUSTOM_PROFILE",
+            "grade": {
+                "standardHayGrade": "11"
+            },
+            "expandable": false
+        }
+    ],
+    "paging": {
+        "pageIndex": 1,
+        "pageSize": 10,
+        "totalPages": 95,
+        "totalResultRecords": 950
+    }
+}

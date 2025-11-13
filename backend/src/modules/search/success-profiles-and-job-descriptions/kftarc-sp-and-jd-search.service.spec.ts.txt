@@ -1,0 +1,227 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { FilterCategories, PreparedFilterValues, PreparedFilterValuesMapper, PreparedSortsAndFilters } from './kftarc-sp-and-jd-search.interface';
+import { KfTarcSpAndJdSearchRepository } from './kftarc-sp-and-jd-search.repository';
+import { KfTarcSpAndJdSearchService } from './kftarc-sp-and-jd-search.service';
+import {
+    getStringCoalescedByDelimeter,
+    getString,
+    getParsedString,
+    AllowedValuesTestSet,
+    getStringBasedOnAllowedValuesSet,
+    mixInvalidValuesToString,
+    getFilterCategories,
+    getParsedFilterCategories,
+    getRandomNumber,
+    getFilterValues,
+    FilterValuesTestSet,
+    getQueryParams,
+    generateArrayFilledWithResultsOfCallback,
+    getSpAndJd,
+    getParsedStringForFilter,
+} from './kftarc-sp-and-jd-search.service.fixture';
+import { HCMDownloadedProfilesRepository } from '../../custom-sp-export/custom-sp-export.repository';
+
+describe('KfTarcSpAndJdSearchService', () => {
+    let module: TestingModule;
+    let repo: KfTarcSpAndJdSearchRepository;
+    let service: KfTarcSpAndJdSearchService;
+
+    beforeAll(async () => {
+        module = await Test.createTestingModule({
+            providers: [KfTarcSpAndJdSearchRepository, KfTarcSpAndJdSearchService, HCMDownloadedProfilesRepository],
+        }).compile();
+
+        repo = module.get<KfTarcSpAndJdSearchRepository>(KfTarcSpAndJdSearchRepository);
+        service = module.get<KfTarcSpAndJdSearchService>(KfTarcSpAndJdSearchService);
+    });
+    beforeEach(() => {
+        jest.clearAllMocks();
+        jest.resetAllMocks();
+    });
+    describe('.parseStringCoalescedByDelimeter method', () => {
+        test('Retrieving properly splitted string', async () => {
+            let testString = getString();
+            let delimeter: string;
+            let numberOfDelimiters: number;
+            [testString, delimeter, numberOfDelimiters] = getStringCoalescedByDelimeter(testString);
+            const desiredResult = testString.split(delimeter);
+            const res = service.parseStringCoalescedByDelimeter(testString, delimeter);
+            expect(res).toEqual(desiredResult);
+        });
+    });
+
+    describe('.findInvalidPipedValues method', () => {
+        test('Returning result pointing out absence of invalid values', async () => {
+            const parsedStringAndDelimiter = getStringBasedOnAllowedValuesSet(AllowedValuesTestSet).charAt(0);
+            const res = service.findInvalidPipedValues([parsedStringAndDelimiter], AllowedValuesTestSet);
+            expect(res).toEqual(false);
+        });
+
+        test('Returning result pointing out presence of invalid values', async () => {
+            const parsedStringAndDelimiter = getStringBasedOnAllowedValuesSet(FilterValuesTestSet).charAt(0).concat('_INVALID_SYMBOL'); //used this enum because its entities consist of 2 symbols
+            const res = service.findInvalidPipedValues([parsedStringAndDelimiter], FilterValuesTestSet);
+            expect(res).toEqual(true);
+        });
+    });
+
+    describe('.checkCoalescedString method', () => {
+        test('Retrieving error, invalid values presented', async () => {
+            const coalescedString = mixInvalidValuesToString(getStringBasedOnAllowedValuesSet(AllowedValuesTestSet));
+            const parsedStringAndDelimiter = getParsedString(coalescedString);
+            const parseStringCoalescedByDelimiterMock = jest.fn().mockReturnValueOnce(parsedStringAndDelimiter.parsedStr);
+            service.parseStringCoalescedByDelimeter = parseStringCoalescedByDelimiterMock;
+            const findInvalidPipedValuesMock = jest.fn().mockReturnValueOnce(true);
+            service.findInvalidPipedValues = findInvalidPipedValuesMock;
+            let e: Error;
+            try {
+                service.checkCoalescedString(coalescedString, parsedStringAndDelimiter.delimiter, AllowedValuesTestSet);
+            } catch (err) {
+                e = err;
+            }
+            expect(e).toBeInstanceOf(Error);
+        });
+
+        test('Retrieving divided string', async () => {
+            const coalescedString = getStringBasedOnAllowedValuesSet(AllowedValuesTestSet);
+            const parsedStringAndDelimiter = getParsedString(coalescedString);
+            const parseStringCoalescedByDelimiterMock = jest.fn().mockReturnValueOnce(parsedStringAndDelimiter.parsedStr);
+            service.parseStringCoalescedByDelimeter = parseStringCoalescedByDelimiterMock;
+            const findInvalidPipedValuesMock = jest.fn().mockReturnValueOnce(false);
+            service.findInvalidPipedValues = findInvalidPipedValuesMock;
+
+            const res: string[] = service.checkCoalescedString(coalescedString, parsedStringAndDelimiter.delimiter, AllowedValuesTestSet);
+            expect(res).toEqual(parsedStringAndDelimiter.parsedStr);
+        });
+    });
+
+    describe('.prepareSortColumnsAndOrdersForStoredProc method', () => {
+        test('Retrieving object with sort columns and sort orders fields coalesced by commas', async () => {
+            const coalescedSortColumnsString = 'GRADES|FUNCTIONS';
+            const parsedSortColumnsAndDelimiter = getParsedFilterCategories(coalescedSortColumnsString,'|');
+            const coalescedSortOrdersString = 'asc|desc';
+            const parsedSortOrdersAndDelimiter = getParsedFilterCategories(coalescedSortOrdersString, '|');
+
+            const res: { sortColumns: string; sortOrders: string } = service.prepareSortColumnsAndOrdersForStoredProc(
+                parsedSortColumnsAndDelimiter.parsedStr,
+                parsedSortOrdersAndDelimiter.parsedStr,
+            );
+
+            expect(res.sortColumns.split(',').length).toEqual(parsedSortColumnsAndDelimiter.parsedStr.length);
+            expect(res.sortOrders).toHaveLength(parsedSortOrdersAndDelimiter.parsedStr[0].length + parsedSortOrdersAndDelimiter.parsedStr[1].length + 1);
+        });
+    });
+
+    describe('.prepareFilterCategoriesAndValuesForStoredProc method', () => {
+        test('Retrieving object with filter categories and its values coalesced by commas and grades coalesced by semicolons', async () => {
+            const coalescedFilterCategoriesString = 'GRADES|LEVELS|FUNCTIONS|SUBFUNCTIONS';
+            const parsedFilterCategoriesAndDelimiter = {parsedStr: coalescedFilterCategoriesString.split('|'), delimiter: '|'};
+            const coalescedFilterValuesString = 'grade 01;grade 02|level1|F111111|S111111001;S111111002;S111111003';
+            const parsedFilterValuesAndDelimiter = {parsedStr: coalescedFilterValuesString.split('|'), delimiter: '|'};
+
+            const res: PreparedFilterValues = service.prepareFilterCategoriesAndValuesForStoredProc(
+                parsedFilterCategoriesAndDelimiter.parsedStr,
+                parsedFilterValuesAndDelimiter.parsedStr,
+            );
+
+            expect(res.grades).toEqual('grade 01;grade 02');
+            expect(res.subFunctions).toEqual('S111111001,S111111002,S111111003');
+        });
+    });
+
+    describe('.groupColumnNamesAndTheirValues method', () => {
+        test('Retrieving grouped sort and filter values', async () => {
+            const queryParams = getQueryParams();
+            const parsedSortColumnsAndDelimiter = getParsedString(queryParams.sortColumn);
+            const parsedSortOrdersAndDelimiter = getParsedString(queryParams.sortBy);
+            const parsedFilterCategoriesAndDelimiter = getParsedFilterCategories(queryParams.filterBy, '|');
+            const coalescedFilterValuesString = getFilterValues(FilterValuesTestSet, parsedFilterCategoriesAndDelimiter.parsedStr.length);
+            const parsedFilterValuesAndDelimiter = getParsedStringForFilter(coalescedFilterValuesString);
+
+            const prepareSortColumnsAndOrdersForStoredProcMock = jest
+                .fn()
+                .mockReturnValueOnce({
+                    sortColumns: parsedSortColumnsAndDelimiter.parsedStr.join(parsedSortColumnsAndDelimiter.delimiter),
+                    sortOrders: parsedSortOrdersAndDelimiter.parsedStr.join(parsedSortOrdersAndDelimiter.delimiter),
+                });
+            service.prepareSortColumnsAndOrdersForStoredProc = prepareSortColumnsAndOrdersForStoredProcMock;
+
+            const prepareFilterCategoriesAndValuesForStoredProcMock = jest.fn().mockReturnValueOnce(
+                parsedFilterValuesAndDelimiter.parsedStr.reduce((acc, categoryValues, index) => {
+                    acc[PreparedFilterValuesMapper[parsedFilterCategoriesAndDelimiter.parsedStr[index]]] = categoryValues;
+                    return acc;
+                }, {}),
+            );
+            service.prepareFilterCategoriesAndValuesForStoredProc = prepareFilterCategoriesAndValuesForStoredProcMock;
+
+            const checkCoalescedStringMock = jest.fn().mockImplementationOnce(<T>(str: string, delimiter: string) => {
+                return str.split(delimiter);
+            });
+            service.checkCoalescedString = checkCoalescedStringMock;
+            const res = service.groupColumnNamesAndTheirValues(queryParams);
+            expect(res).toHaveProperty('sortOrders');
+            expect(res.grades).toHaveLength(parsedFilterValuesAndDelimiter.parsedStr[0].length);
+        });
+
+        test('Retrieving error due to invalid values', async () => {
+            const queryParams = getQueryParams();
+            queryParams.sortColumn = mixInvalidValuesToString(queryParams.sortColumn);
+            const parsedSortColumnsAndDelimiter = getParsedString(queryParams.sortColumn);
+            const parsedSortOrdersAndDelimiter = getParsedString(queryParams.sortBy);
+            const parsedFilterCategoriesAndDelimiter = getParsedFilterCategories(queryParams.filterBy, '|');
+            const coalescedFilterValuesString = getFilterValues(FilterValuesTestSet, parsedFilterCategoriesAndDelimiter.parsedStr.length);
+            const parsedFilterValuesAndDelimiter = getParsedString(coalescedFilterValuesString);
+
+            const prepareSortColumnsAndOrdersForStoredProcMock = jest
+                .fn()
+                .mockReturnValueOnce({
+                    sortColumns: parsedSortColumnsAndDelimiter.parsedStr.join(parsedSortColumnsAndDelimiter.delimiter),
+                    sortOrders: parsedSortOrdersAndDelimiter.parsedStr.join(parsedSortOrdersAndDelimiter.delimiter),
+                });
+            service.prepareSortColumnsAndOrdersForStoredProc = prepareSortColumnsAndOrdersForStoredProcMock;
+
+            const prepareFilterCategoriesAndValuesForStoredProcMock = jest.fn().mockReturnValueOnce(
+                parsedFilterValuesAndDelimiter.parsedStr.reduce((acc, categoryValues, index) => {
+                    acc[PreparedFilterValuesMapper[parsedFilterCategoriesAndDelimiter.parsedStr[index]]] = categoryValues;
+                    return acc;
+                }, {}),
+            );
+            service.prepareFilterCategoriesAndValuesForStoredProc = prepareFilterCategoriesAndValuesForStoredProcMock;
+
+            const checkCoalescedStringMock = jest
+                .fn()
+                .mockImplementationOnce(() => {
+                    throw new Error(`Invalid value caught in the piped string: ${queryParams.sortColumn}`);
+                })
+                .mockImplementationOnce(<T>(str: string, delimiter: string) => {
+                    return str.split(delimiter);
+                })
+                .mockImplementationOnce(<T>(str: string, delimiter: string) => {
+                    return str.split(delimiter);
+                });
+
+            service.checkCoalescedString = checkCoalescedStringMock;
+            try {
+                service.groupColumnNamesAndTheirValues(queryParams);
+            } catch (err) {
+                expect(err).toBeInstanceOf(Error);
+                expect(err.message).toEqual(`Invalid value caught in the piped string: ${queryParams.sortColumn}`);
+            }
+        });
+    });
+
+    describe('.spAndJdSearch method', ()=>{
+        test('Retrieving proper search result', async()=>{
+           const spsAndJds = generateArrayFilledWithResultsOfCallback(getSpAndJd);
+           const queryParams = getQueryParams();
+            
+            const groupColumnNamesAndTheirValuesMock = jest.fn().mockReturnValueOnce(queryParams);
+            service.groupColumnNamesAndTheirValues = groupColumnNamesAndTheirValuesMock;
+
+            const getSpsAndJdsMock = jest.fn().mockResolvedValueOnce({jobs: spsAndJds, totalRecords: spsAndJds.length});
+            repo.getSpsAndJds = getSpsAndJdsMock;
+
+            const res = await service.spAndJdSearch(queryParams);
+            expect(res.paging.totalResultRecords).toEqual(spsAndJds.length);
+        })
+    })
+});

@@ -1,0 +1,286 @@
+import { BulkMappingSkillsService } from './bms.service';
+import {
+    BulkMappingSkillsQuery,
+    BulkMappingSkillsStagingDTO,
+    BulkMappingSkillsStagingItemModificationID,
+    BulkMappingSkillsStagingPayload,
+    BulkMappingSkillsStagingProfileDTO,
+    BulkMappingSkillsStagingSkill,
+    BulkMappingSkillsStagingSkillComponentDTO,
+    BulkMappingSkillsStagingSkillLevelDTO,
+} from './bms.interfaces';
+import {
+    createMockInstance,
+    generateRandomAmount,
+    getBoolean,
+    getNegativeNumber,
+    getNumber,
+    getRandomAlphabeticalString,
+    getString,
+    overrideInstance,
+} from '../../_shared/test/test';
+import { BulkMappingSkillsDataService } from './bms-data.service';
+import { BulkMappingSkillsDataMapper } from './bms-data.mapper';
+
+
+const getSuccessProfileId = (): string =>
+    String(getNumber());
+
+const getSkill = (addDependents = true): BulkMappingSkillsStagingSkill => ({
+    skillId: getNumber(),
+    levelId: getNumber(),
+    order: getNumber(),
+    dependents: addDependents ? generateRandomAmount(getString, { min: 1 }) : undefined,
+});
+
+const getItemModificationIdResponse = (): BulkMappingSkillsStagingItemModificationID => ({
+    ItemModificationID: getNumber(),
+});
+
+const getBulkMappingSkillsStagingProfileDTO = (): BulkMappingSkillsStagingProfileDTO => ({
+    ItemModificationID: getNumber(),
+    ClientJobID:getNumber(),
+});
+
+const getBulkMappingSkillsStagingSkillLevelDTO = (): BulkMappingSkillsStagingSkillLevelDTO => ({
+    ItemModificationID: getNumber(),
+    JobSubCategoryId: getNumber(),
+    JobLevelDetailOrder: getNumber(),
+    SectionDetailOrder: getNumber(),
+});
+
+const getBulkMappingSkillsStagingSkillComponentDTO = (): BulkMappingSkillsStagingSkillComponentDTO => ({
+    ItemModificationID: getNumber(),
+    JobSubCategoryId: getNumber(),
+    JobSubCategoryDependantName: getString(),
+    JobSubCategoryDependantOrder: getNumber(),
+});
+
+describe('BulkMappingSkillsService', () => {
+
+    let query: BulkMappingSkillsQuery;
+    let body: BulkMappingSkillsStagingPayload;
+    let DTOs: BulkMappingSkillsStagingDTO;
+    let itemModificationIdResponse: BulkMappingSkillsStagingItemModificationID[];
+    let dataService: BulkMappingSkillsDataService;
+    let dataMapper: BulkMappingSkillsDataMapper;
+    let service: BulkMappingSkillsService;
+
+    beforeEach(() => {
+
+        query = {
+            loggedInUserClientId: getNumber(),
+            preferredClientId: String(getNumber()),
+            userId: getNumber(),
+            locale: getString(),
+        };
+
+        body = {
+            skills: generateRandomAmount(() => getSkill(getBoolean()), { min: 1 }),
+            successProfileIds: generateRandomAmount(getSuccessProfileId, { min: 1 }),
+        };
+
+        DTOs = {
+            profiles: generateRandomAmount(getBulkMappingSkillsStagingProfileDTO, { min: 1 }),
+            skillLevels: generateRandomAmount(getBulkMappingSkillsStagingSkillLevelDTO, { min: 1 }),
+            skillComponents: generateRandomAmount(getBulkMappingSkillsStagingSkillComponentDTO, { min: 1 }),
+        };
+
+        itemModificationIdResponse = generateRandomAmount(getItemModificationIdResponse, { min: 1 });
+
+        dataService = createMockInstance<BulkMappingSkillsDataService>({
+            obtainItemModificationId: jest.fn().mockReturnValue(itemModificationIdResponse),
+            insertStagingProfiles: jest.fn(),
+            insertStagingSkillLevels: jest.fn(),
+            insertStagingSkillComponents: jest.fn(),
+        });
+
+        dataMapper = createMockInstance<BulkMappingSkillsDataMapper>({
+            createStagingDTOs: jest.fn().mockReturnValue(DTOs)
+        });
+
+        service = new BulkMappingSkillsService(dataService, dataMapper);
+    });
+
+    it('should throw error if no valid loggedInUserClientId or preferredClientId provided 1', async () => {
+        const brokenQuery = overrideInstance(query, {
+            loggedInUserClientId: undefined,
+            preferredClientId: undefined,
+        });
+        await expect(service.stageSkillComponents(brokenQuery, body)).rejects.toBeInstanceOf(HttpException);
+    });
+
+    it('should throw error if no valid loggedInUserClientId or preferredClientId provided 2', async () => {
+        const brokenQuery = overrideInstance(query, {
+            loggedInUserClientId: 0,
+            preferredClientId: '0',
+        });
+        await expect(service.stageSkillComponents(brokenQuery, body)).rejects.toBeInstanceOf(HttpException);
+    });
+
+    it('should throw error if no valid loggedInUserClientId or preferredClientId provided 3', async () => {
+        const brokenQuery = overrideInstance(query, {
+            loggedInUserClientId: undefined,
+            preferredClientId: getRandomAlphabeticalString(),
+        });
+        await expect(service.stageSkillComponents(brokenQuery, body)).rejects.toBeInstanceOf(HttpException);
+    });
+
+    it('should throw error if no valid loggedInUserClientId or preferredClientId provided 4', async () => {
+        const brokenQuery = overrideInstance(query, {
+            loggedInUserClientId: getNegativeNumber(),
+            preferredClientId: undefined,
+        });
+        await expect(service.stageSkillComponents(brokenQuery, body)).rejects.toBeInstanceOf(HttpException);
+    });
+
+    it('should throw error if no valid loggedInUserClientId or preferredClientId provided 5', async () => {
+        const brokenQuery = overrideInstance(query, {
+            loggedInUserClientId: undefined,
+            preferredClientId: String(getNegativeNumber()),
+        });
+        await expect(service.stageSkillComponents(brokenQuery, body)).rejects.toBeInstanceOf(HttpException);
+    });
+
+    it('should throw error if no valid userId provided 1', async () => {
+        const brokenQuery = overrideInstance(query, {
+            userId: undefined,
+        });
+        await expect(service.stageSkillComponents(brokenQuery, body)).rejects.toBeInstanceOf(HttpException);
+    });
+
+    it('should throw error if no valid userId provided 2', async () => {
+        const brokenQuery = overrideInstance(query, {
+            userId: 0,
+        });
+        await expect(service.stageSkillComponents(brokenQuery, body)).rejects.toBeInstanceOf(HttpException);
+    });
+
+    it('should throw error if no valid userId provided 3', async () => {
+        const brokenQuery = overrideInstance(query, {
+            userId: getNegativeNumber(),
+        });
+        await expect(service.stageSkillComponents(brokenQuery, body)).rejects.toBeInstanceOf(HttpException);
+    });
+
+
+    it('should throw error if no valid skills collection provided 1', async () => {
+        const brokenBody = overrideInstance(body, {
+            skills: undefined,
+        });
+        await expect(service.stageSkillComponents(query, brokenBody)).rejects.toBeInstanceOf(HttpException);
+    });
+
+    it('should throw error if empty skills collection provided 2', async () => {
+        const brokenBody = overrideInstance(body, {
+            skills: [],
+        });
+        await expect(service.stageSkillComponents(query, brokenBody)).rejects.toBeInstanceOf(HttpException);
+    });
+
+    it('should throw error if no valid successProfileIds collection provided 1', async () => {
+        const brokenBody = overrideInstance(body, {
+            successProfileIds: undefined,
+        });
+        await expect(service.stageSkillComponents(query, brokenBody)).rejects.toBeInstanceOf(HttpException);
+    });
+
+    it('should throw error if empty successProfileIds collection provided 2', async () => {
+        const brokenBody = overrideInstance(body, {
+            successProfileIds: [],
+        });
+        await expect(service.stageSkillComponents(query, brokenBody)).rejects.toBeInstanceOf(HttpException);
+    });
+
+    it('should throw error if no ItemModificationId obtained', async () => {
+        dataService.obtainItemModificationId = jest.fn().mockReturnValue(null);
+        await expect(service.stageSkillComponents(query, body)).rejects.toBeInstanceOf(HttpException);
+    });
+
+    it('should throw error if an empty ItemModificationId obtained', async () => {
+        dataService.obtainItemModificationId = jest.fn().mockReturnValue([]);
+        await expect(service.stageSkillComponents(query, body)).rejects.toBeInstanceOf(HttpException);
+    });
+
+    it('should ignore invalid preferredClientId', async () => {
+        const preferredClientIds = [
+            null,
+            undefined,
+            '0',
+            String(getNegativeNumber()),
+            getRandomAlphabeticalString(),
+        ];
+        for (const preferredClientId of preferredClientIds) {
+            query.preferredClientId = preferredClientId;
+            await service.stageSkillComponents(query, body);
+            expect(dataService.obtainItemModificationId)
+                .toHaveBeenCalledWith(query.loggedInUserClientId, query.userId);
+        }
+        expect(dataService.obtainItemModificationId).toHaveBeenCalledTimes(preferredClientIds.length);
+    });
+
+    it('should prefer valid preferredClientId', async () => {
+        await service.stageSkillComponents(query, body);
+        expect(dataService.obtainItemModificationId).toHaveBeenCalledTimes(1);
+        expect(dataService.obtainItemModificationId).toHaveBeenCalledWith(Number(query.preferredClientId), query.userId);
+    });
+
+    it('should return first obtained ItemModificationId', async () => {
+        const response = await service.stageSkillComponents(query, body);
+        expect(response.itemModificationId).toBe(itemModificationIdResponse[0].ItemModificationID);
+    });
+
+    it('should pass first obtained ItemModificationId and a body into the dataMapper', async () => {
+        await service.stageSkillComponents(query, body);
+        expect(dataMapper.createStagingDTOs).toHaveBeenCalledWith(
+            itemModificationIdResponse[0].ItemModificationID,
+            body,
+        );
+    });
+
+    it('should wrap and throw an error raised from the dataMapper', async () => {
+        dataMapper.createStagingDTOs = jest.fn().mockImplementation(() => { throw getString() });
+        await expect(service.stageSkillComponents(query, body)).rejects.toBeInstanceOf(HttpException);
+    });
+
+    it('should pass DTO objects returned by dataMapper into the dataService', async () => {
+        await service.stageSkillComponents(query, body);
+
+        expect(dataService.insertStagingProfiles).toHaveBeenCalledWith(DTOs.profiles);
+        expect(dataService.insertStagingProfiles).toBeCalledTimes(1);
+
+        expect(dataService.insertStagingSkillLevels).toHaveBeenCalledWith(DTOs.skillLevels);
+        expect(dataService.insertStagingSkillLevels).toBeCalledTimes(1);
+
+        expect(dataService.insertStagingSkillComponents).toHaveBeenCalledWith(DTOs.skillComponents);
+        expect(dataService.insertStagingSkillComponents).toBeCalledTimes(1);
+    });
+
+    it('should pass even empty DTO objects returned by dataMapper into the dataService', async () => {
+        DTOs.profiles = [];
+        DTOs.skillLevels = [];
+        DTOs.skillComponents = [];
+
+        await service.stageSkillComponents(query, body);
+
+        expect(dataService.insertStagingProfiles).toHaveBeenCalledWith(DTOs.profiles);
+        expect(dataService.insertStagingSkillLevels).toHaveBeenCalledWith(DTOs.skillLevels);
+        expect(dataService.insertStagingSkillComponents).toHaveBeenCalledWith(DTOs.skillComponents);
+    });
+
+    it('should wrap and throw an error raised from the dataService.insertStagingProfiles', async () => {
+        dataService.insertStagingProfiles = jest.fn().mockImplementation(() => { throw getString() });
+        await expect(service.stageSkillComponents(query, body)).rejects.toBeInstanceOf(HttpException);
+    });
+
+    it('should wrap and throw an error raised from the dataService.insertStagingSkillLevels', async () => {
+        dataService.insertStagingSkillLevels = jest.fn().mockImplementation(() => { throw getString() });
+        await expect(service.stageSkillComponents(query, body)).rejects.toBeInstanceOf(HttpException);
+    });
+
+    it('should wrap and throw an error raised from the dataService.insertStagingSkillComponents', async () => {
+        dataService.insertStagingSkillComponents = jest.fn().mockImplementation(() => { throw getString() });
+        await expect(service.stageSkillComponents(query, body)).rejects.toBeInstanceOf(HttpException);
+    });
+
+});

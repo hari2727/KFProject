@@ -1,0 +1,172 @@
+import { IgCmsModelReader } from './ig-cms-model.reader';
+import { Test, TestingModule } from '@nestjs/testing';
+import { IgCmsConnection } from './ig-cms-connection.service';
+import { CompetencyType } from '../model/ig-cms-enum';
+import { IgMock } from '../mock/ig-mocks';
+import { IgCmsModel } from '../model/ig-cms-model.i';
+import { HttpsService } from '../../../_shared/https/https.service';
+import { HttpException } from '@nestjs/common';
+
+describe('IgCmsConnection', () => {
+    let module: TestingModule;
+    let connection: IgCmsConnection;
+    const httpGetMock = jest.fn(),
+        httpPostMock = jest.fn(),
+        configGetMock = jest.fn().mockReturnValue('CMS_API_KEY');
+
+    beforeAll(async () => {
+        module = await Test.createTestingModule({
+            providers: [
+                { provide: HttpsService, useValue: { get: httpGetMock, post: httpPostMock } },
+                IgCmsModelReader,
+                IgCmsConnection,
+            ],
+        }).compile();
+
+        connection = module.get(IgCmsConnection);
+    });
+
+    afterAll(() => {
+        jest.clearAllMocks();
+    });
+
+    test('to be defined', () => {
+        // Assert
+        expect(connection).toBeDefined();
+    });
+
+    describe('getInterviewGuides', () => {
+        test('should return mapped base data from CMS', async () => {
+            // Arrange
+            httpPostMock.mockResolvedValueOnce(IgMock.igCmsToken);
+            httpGetMock.mockResolvedValueOnce(IgMock.igCmsResponse);
+            // Act
+            const result = await connection.getInterviewGuides('123',CompetencyType.BASE);
+
+            // Assert
+            expect(result).toEqual(IgMock.igCmsMappedBase);
+        });
+        test('should return mapped standart data from CMS', async () => {
+            // Arrange
+            httpPostMock.mockResolvedValueOnce(IgMock.igCmsToken);
+            httpGetMock.mockResolvedValueOnce(IgMock.igCmsResponse);
+            // Act
+            const result = await connection.getInterviewGuides('123',CompetencyType.STANDART);
+
+            // Assert
+            expect(result).toEqual(IgMock.igCmsMappedStandart);
+        });
+        test('should throw HttpException if competencies data from CMS empty', async () => {
+            // Arrange
+            const resp: IgCmsModel.IgCms = {id: '123', competencies: []};
+            httpGetMock.mockResolvedValueOnce(resp);
+            let error;
+
+            // Act
+            try {
+                await connection.getInterviewGuides('123',CompetencyType.BASE);
+            } catch (e) {
+                error = e;
+            }
+
+            // Assert
+            expect(error).toBeDefined();
+            expect(error).toBeInstanceOf(HttpException);
+        });
+        test('should throw HttpException if CMS response has error message', async () => {
+            // Arrange
+            const resp: IgCmsModel.IgCms = {Message: 'some error'};
+            httpGetMock.mockResolvedValueOnce(resp);
+            let error;
+
+            // Act
+            try {
+                await connection.getInterviewGuides('123',CompetencyType.BASE);
+            } catch (e) {
+                error = e;
+            }
+
+            // Assert
+            expect(error).toBeDefined();
+            expect(error).toBeInstanceOf(HttpException);
+        });
+        test('should throw HttpException if something gone wrong', async () => {
+            // Arrange
+            jest.spyOn<any, any>(connection, 'getInterviewGuidesFromCms').mockImplementationOnce(() => {
+                throw new Error('');
+            });
+            let error;
+
+            // Act
+            try {
+                await connection.getInterviewGuides('123',CompetencyType.BASE);
+            } catch (e) {
+                error = e;
+            }
+
+            // Assert
+            expect(error).toBeDefined();
+            expect(error).toBeInstanceOf(HttpException);
+        });
+    });
+
+    describe('getCompetencyById', () => {
+        test('should return mapped competency from CMS', async () => {
+            // Arrange
+            jest.spyOn<any, any>(connection, 'getInterviewGuidesFromCms').mockResolvedValueOnce(IgMock.igCmsResponse);
+
+            // Act
+            const result = await connection.getCompetencyById('123', IgMock.igCmsIdBin, CompetencyType.BASE);
+
+            // Assert
+            expect(result).toEqual(IgMock.igCmsMappedCompBin);
+        });
+    });
+
+    describe('publishInterviewGuide', () => {
+        test('should return ok response', async () => {
+            // Arrange
+            const okResp = { status: '200' };
+            httpPostMock.mockResolvedValueOnce(IgMock.igCmsToken);
+            httpPostMock.mockResolvedValueOnce(okResp);
+
+            // Act
+            const result = await connection.publishInterviewGuide(IgMock.igCmsResponse);
+
+            // Assert
+            expect(result).toEqual(okResp);
+        });
+        test('should throw HttpException if failed to get token', async () => {
+            // Arrange
+            jest.spyOn<any, any>(connection, 'getToken').mockImplementationOnce(()=>{throw new Error()});
+            // Act
+            const resultF = connection.publishInterviewGuide(IgMock.igCmsResponse);
+
+            // Assert
+            await expect(resultF).rejects.toThrow(HttpException);
+        });
+    });
+
+    describe('getToken', () => {
+        test('should return token', async () => {
+            // Arrange
+            httpPostMock.mockResolvedValueOnce(IgMock.igCmsToken);
+
+            // Act
+            const result = await (connection as any).getToken();
+
+            // Assert
+            expect(result).toEqual(IgMock.igCmsToken.token);
+        });
+        test('should throw HttpException if token response incorrect', async () => {
+            // Arrange
+            httpPostMock.mockResolvedValueOnce({message: 'whatever'});
+
+            // Act
+            const resultF = (connection as any).getToken();
+
+            // Assert
+            await expect(resultF).rejects.toThrow(HttpException);
+        });
+    });
+});

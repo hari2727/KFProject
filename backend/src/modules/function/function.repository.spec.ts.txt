@@ -1,0 +1,35 @@
+import * as typeorm from 'typeorm';
+import { getString } from '../search/success-profiles-and-job-descriptions/kftarc-sp-and-jd-search.repository.fixture';
+import { FunctionRepository } from './function.repository';
+import { FamilyStatusQuery, GetJobFamilyRequest, StatsQuey } from './function.service.fixture';
+jest.mock('typeorm', () => {
+    const actual = jest.requireActual('typeorm');
+    return {
+        ...actual,
+    };
+});
+
+describe('FunctionRepository', () => {
+    beforeEach(() => {
+        jest.resetAllMocks();
+    });
+    const repo = new FunctionRepository();
+    describe('transferJobFamilyAndSubFamily', () => {
+        test('transferJobFamilyAndSubFamily should call executeQueryWithEscapeParams', async () => {
+            repo['executeQueryWithEscapeParams'] = jest.fn().mockImplementation();
+            await repo.transferJobFamilyAndSubFamily(23139);
+            expect(repo['executeQueryWithEscapeParams']).toHaveBeenCalled();
+        });
+    });
+
+    describe('getProfileStats', () => {
+        test('getProfileStats should call connection.query', async () => {
+            const query = jest.fn().mockReturnValue('');
+            (typeorm as any).getConnection = () => ({
+                query,
+            });
+            await repo.getProfileStats(StatsQuey);
+            expect(query).toHaveBeenCalled();
+        });
+    });
+});

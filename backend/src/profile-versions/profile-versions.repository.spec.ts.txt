@@ -1,0 +1,45 @@
+import { Equals } from 'class-validator';
+import * as typeorm from 'typeorm';
+import { ProfileVersionsRepository } from './profile-versions.repository';
+import { ProfileVersionsRawResponseMock } from './profile-versions.fixtures';
+import { query } from 'express';
+import { get } from 'superagent';
+
+jest.mock('typeorm', () => {
+    const actual = jest.requireActual('typeorm');
+    return {
+        ...actual,
+    };
+});
+
+describe('ProfileVersionsRepository', () => {
+    let queryParams: any = {
+        successProfileId: 123,
+        loggedInUserClientId: 1,
+        locale: 'en-US',
+        userId: 12334,
+    };
+    let getConnection = jest.fn();
+    beforeEach(() => {
+        jest.resetAllMocks();
+        (typeorm as any).getConnection = getConnection;
+    });
+    const repo = new ProfileVersionsRepository();
+
+    it('shall be defined', () => {
+        expect(repo).toBeDefined();
+    });
+
+    it('getProfileVersionDetails should throw error', async () => {
+        const query = jest.fn().mockRejectedValue(new Error('Error'));
+        getConnection.mockReturnValueOnce({
+            driver: { escapeQueryWithParameters: jest.fn().mockReturnValueOnce(['foo', 'bar']) },
+            query,
+        });
+        try {
+            await repo.getProfileVersionDetails(queryParams);
+        } catch (error) {
+            expect(error).toBeInstanceOf(Error);
+        }
+    });
+});

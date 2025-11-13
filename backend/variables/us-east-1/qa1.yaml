@@ -1,0 +1,32 @@
+environmentVariables:
+  USE_JSON_LOGGER:
+    secret: false
+    value: '"False"'
+  DEBUG:
+    secret: false
+    value: '"False"'
+  AWS_SECRET_NAME:
+    secret: false
+    value: '/system/platform/postgres/profile-manager-secret-001'
+  AWS_REGION:
+    secret: false
+    value: 'us-east-1'
+  Environment:
+    secret: false
+    value: 'qa1'
+  REMOTE_LOADER_COMMONCONFIG_URL:
+    secret: false
+    value: 'http://localhost:2772/applications/kfone-qa1-use1-appconfig-app-001-common/environments/qa1/configurations/Common-Config'
+  REMOTE_LOADER_DBCONFIG_URL:
+    secret: false
+    value: 'http://localhost:2772/applications/kfone-qa1-use1-appconfig-app-001-common/environments/qa1/configurations/PgSQL-idw'
+  REMOTE_LOADER_LOGCONFIG_URL:
+    secret: false
+    value: 'http://localhost:2772/applications/kfone-qa1-use1-appconfig-app-001-common/environments/qa1/configurations/Logging'
+  CONFIG_URL:
+    value: 'http://localhost:2772/applications/kfone-dev-use1-appconfig-app-001-profile-manager/environments/qa1/configurations/profile-manager-config'
+  NODE_TLS_REJECT_UNAUTHORIZED:
+    value: '"0"'
+credentialsRequest:
+  secret_resource_arn:
+    - 'arn:aws:secretsmanager:us-east-1:565393068284:secret:/system/platform/postgres/idw/*'

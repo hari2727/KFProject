@@ -1,0 +1,91 @@
+<div>
+    <div class="w-100 mt-24 h-auto">
+        <div class="d-inline-block">
+            <span class="body-text" *ngIf="dataSource.length === 0"> {{ 'lib.NoResultsFound' | translate }}
+            </span>
+            <div class="body-text" *ngIf="dataSource.length !== 0">
+                {{ 'lib.LabelShowing' | translate }} {{ dataSource.length }} of {{ totalRows }} {{
+                'lib.successProfiles' | translate }}
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-24 w-100 mb-450">
+        <kf-table-ui [dataSource]="dataSource" [infiniteScrollDisabled]="infiniteScrollDisabled"
+            (onScrollDown)="scrollDown()" kf-sort [kfSorting]="_sorting" (kfSortChange)="sortByColumn($event)">
+            <ng-container cdkColumnDef="name">
+                <th cdk-header-cell *cdkHeaderCellDef class="color-primary">
+                    <div kf-sort-header="name">
+                        {{ 'lib.name' | translate }}
+                    </div>
+                </th>
+                <td cdk-cell *cdkCellDef="let row">
+                    <div class="text-left name-column d-flex flex-ai-center o-hidden text-break">
+                        <div class="flex-as-center mr-8">
+                            <kf-icon class="color-dark" [iconImage]="row.name.icon" [pTooltip]="row.type"></kf-icon>
+                        </div>
+                        <span class="line-clamp-2"
+                              [pTooltip]="row.name.text"
+                              [tooltipDisabled]="hideTooltip"
+                              (mouseenter)="hover($event)">
+                            <a class="fw-semibold ls-label" [routerLink]="row.name.href">{{ row.name.text }}</a>
+                        </span>
+                    </div>
+                </td>
+            </ng-container>
+            <ng-container *ngFor="let column of textColumns;" cdkColumnDef="{{column}}">
+                <th cdk-header-cell *cdkHeaderCellDef class="color-primary"
+                    [class.profile-type-column]="column === 'type'">
+                    <ng-container *ngIf="column !== 'type'">
+                        <div kf-sort-header="{{column}}">
+                            {{ columnSource[column]?.title | translate }}
+                        </div>
+                    </ng-container>
+                    <ng-container *ngIf="column === 'type'">
+                        {{ columnSource[column]?.title | translate }}
+                    </ng-container>
+                </th>
+                <td cdk-cell *cdkCellDef="let row">
+                    <div class="text-left py-0 pl-8 align-left">
+                        <span class="body-text"
+                            [ngClass]="{
+                                'text-break': column !== spSearcColumnEnum.Grade,
+                                'no-wrap': column === spSearcColumnEnum.Grade && row[column].length < 33,
+                                'line-clamp-2': column !== spSearcColumnEnum.Grade }"
+                            [pTooltip]="row[column]"
+                            [tooltipDisabled]="hideTooltip"
+                            (mouseenter)="hover($event)">{{ row[column] || '&#8210;' }}</span>
+                    </div>
+                </td>
+            </ng-container>
+            <ng-container cdkColumnDef="menu">
+                <th cdk-header-cell *cdkHeaderCellDef></th>
+                <td cdk-cell *cdkCellDef="let row">
+                    <kfthcl-dropdown #dropdown [originX]="'end'" [overlayMinWidth]="250" [overlayMaxWidth]="400" [overlayMaxHeight]="230"
+                        overlayCustomClass="context-menu-overlay-container" class="o-auto bg-white"
+                        (click)="onContextMenuClick.emit([row.menu, dropdown])">
+                        <kfthcl-dropdown-toggle class="pc-pointer">
+                            <kf-icon icon="dots-three-horizontal" class="pr-4" color="primary"></kf-icon>
+                        </kfthcl-dropdown-toggle>
+                        <kfthcl-dropdown-overlay>
+                            <div *ngIf="menuItems.length" class="context-menu-border">
+                                <div *ngFor="let item of menuItems"
+                                    (click)="item.action(row.menu.id, row.menu.title, row.menu.jobRoleTypeId, row.menu.isArchitectJob)"
+                                    class="item p-12 fs-body pc-pointer"
+                                    [ngClass]="{'disabled': (row.shortProfile === 'Err' && item.actionType === spActionItemEnum.CopySP) ||
+                                                item.isDisabled && (item.actionType === spActionItemEnum.CreateJD || item.actionType === spActionItemEnum.CreateAssessmentPrj)}"
+                                    pTooltip="{{ generateTooltipText(item.actionType) | translate }} "
+                                    [tooltipDisabled]="row.shortProfile === 'Err' && item.actionType !== spActionItemEnum.CopySP || !item.isDisabled">
+                                    {{ item.label | translate }}</div>
+                            </div>
+                        </kfthcl-dropdown-overlay>
+                    </kfthcl-dropdown>
+                </td>
+            </ng-container>
+        </kf-table-ui>
+
+        <div *ngIf="dataSource.length === 0" class="noresults body-text fw-semibold py-16 px-16 mb-20 bg-white">
+            {{ 'lib.SPSearch_NoResults' | translate }}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,4 @@
+<div class="tiles-name subtext-sm fw-semibold" *ngIf="tiles.name">{{ tiles.name }} ({{ tiles.totalElements }})</div>
+<div class="tiles-container" *ngFor="let tile of tiles.topElements">
+    <div class="tile" [ngStyle]="tileStyles"><span class="subtext-sm fw-semibold">{{ tile.name }}</span></div>
+</div>

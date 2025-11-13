@@ -1,0 +1,4 @@
+bucket         = "kfone-dev-use1-tf-s3-001"
+key            = "template-iac.tfstate"
+region         = "us-east-1"
+dynamodb_table = "terraform-state-lock-dynamo"

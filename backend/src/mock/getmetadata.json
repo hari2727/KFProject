@@ -1,0 +1,104 @@
+ [
+    {
+      "id": "2423",
+      "name": "Orgnization Experience",
+      "code": "ORGNIZATION EXPERIENCE",
+      "categories": [
+        {
+          "id": "2345",
+          "name": "Function Experience",
+          "code": "FUNCTION EXPERIENCE",
+          "years": [
+            "1+",
+            "2+",
+            "3+"
+          ],
+          "scope": {
+            "name": "Functions",
+            "options": [
+              {
+                "id": "CC",
+                "name": "Call Center",
+                "subOptions": [
+                  {
+                    "id": "IB",
+                    "name": "Inbound and Outbound"
+                  }
+                ]
+              }
+            ]
+          },
+          "contribution": {
+            "options": [
+              {
+                "id": "CC",
+                "name": "Call Center"
+              }
+            ]
+          }
+        },
+        {
+          "id": "342424",
+          "name": "Orgnization Size",
+          "code": "ORGNIZATION SIZE",
+          "years": [
+            "2+",
+            "4+"
+          ],
+          "scope": {
+            "options": [
+              {
+                "id": "3434",
+                "name": "Small Size (1000-2500)"
+              },
+              {
+                "id": "3434",
+                "name": "Medium Size Company(5000-10000)"
+              }
+            ]
+          }
+        },
+        {
+          "id": "4545",
+          "name": "Industry",
+          "code": "INDUSTRY",
+          "years": [
+            "2",
+            "3+"
+          ],
+          "scope": {
+            "options": [
+              {
+                "id": "45745",
+                "name": "Information Technology"
+              },
+              {
+                "id": "Manfacturing "
+              }
+            ]
+          }
+        },
+        {
+          "id": "2323",
+          "name": "Location",
+          "code": "LOCATION",
+          "years": [
+            "3+",
+            "4+"
+          ],
+          "scope": {
+            "options": [
+              {
+                "id": "US",
+                "name": "United Status"
+              },
+              {
+                "id": "CA",
+                "name": "Canada"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]

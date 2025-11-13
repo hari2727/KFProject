@@ -1,0 +1,111 @@
+<kf-page app="pm">
+    <kf-page-masthead class="flex-row flex-wrap kf-class bottom-padding">
+        <h1 class="header mt-0 mb-4 w-100">{{'pm.orgTitle'| translate}}</h1>
+        <div class="d-flex flex-jc-between w-100">
+            <p class="sub-header body-text mb-0">{{'pm.customeProfileDescription'| translate}}</p>
+        </div>
+        <button 
+        class="d-flex items-center publish-center enabled-btn"
+        (click)="publishCenter(DOWNLOAD)">
+            <span>
+                {{ 'pm.publishCenter' | translate }}
+            </span>
+        </button>
+        <hr class="w-100 my-4 m-top border-button">
+    </kf-page-masthead>
+
+    <kf-page-content>
+
+        <div class="position-relative">
+            <div class="position-absolute right-0">
+                <div class="flex flex-col items-end space-y-1">
+                   
+                    <!-- Export to HCM and Download -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Export to HCM Button -->
+                        <button 
+                        class="d-flex items-center custom-export" 
+                        [disabled]="selectedSuccessprofileIds.length === 0"
+                        (click)="exportToHCM()"
+                        >
+                        <span 
+                          [ngClass]="{'text-disabled': selectedSuccessprofileIds.length === 0, 'text-normal': selectedSuccessprofileIds.length > 0}">
+                          {{ 'pm.exportToHCM' | translate }}
+                        </span>
+                      </button>
+                        
+                          <!-- Separator -->
+                          <span class="separator"></span>
+                    
+                        <!-- Dropdown for Download -->
+                        <kfthcl-dropdown #dropdown [insideClick]="true"
+                            [overlayMaxWidth]="250" [overlayMaxHeight]="470"
+                            [class.disabled]="selectedSuccessprofileIds.length === 0"
+                            [disabled]="selectedSuccessprofileIds.length === 0"
+                            overlayCustomClass="filter-overlay-container">
+                            
+                            <kfthcl-dropdown-toggle 
+                            [ngClass]="{'pc-pointer': selectedSuccessprofileIds.length > 0}">
+                            <button 
+                              class="btn btn-outline d-flex items-center custom-button border-button"
+                              [disabled]="selectedSuccessprofileIds.length === 0">
+                              <span class="text-primary">{{ 'lib.download' | translate }}</span>
+                              <kf-icon 
+                                [icon]="dropdown.isOpen ? 'arrow-up' : 'arrow-down'" 
+                                size="sm" 
+                                class="ml-2">
+                              </kf-icon>
+                            </button>
+                          </kfthcl-dropdown-toggle>
+                    
+                            <kfthcl-dropdown-overlay>
+                                <div *ngFor="let item of searchColumnItems" 
+                                    (click)="onDropdownChange(item)" 
+                                    class="item p-12 pc-pointer custom-hover">
+                                    <span class="body-text">{{ item | translate }}</span>
+                                </div>
+                            </kfthcl-dropdown-overlay>
+                        </kfthcl-dropdown>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <kftarc-csp-search-filter 
+            [filters]="filters" 
+            (onFilterChange)="onFilterChange($event)" 
+            (onClickFilter)="callSearchMetadata()">
+            
+            <thcl-search-input class="input-container" 
+                [search]="search" 
+                placeholder="{{ 'pm.SearchCustomProfiles' | translate }}"
+                (onInputChange)="onInputChange($event)">
+            </thcl-search-input>
+        
+        </kftarc-csp-search-filter>
+        </div>
+
+        <!-- Search Result Table -->
+        <kftarc-csp-search-result
+            [infiniteScrollDisabled]="infiniteScrollDisabled"
+            [dataSource]="dataSource"
+            [columns]="columns"
+            [columnSource]="columnSource"
+            [menuItems]="menuItems"
+            [totalRows]="totalRows"
+            [totalPages]="totalPages"
+            [pageIndex]="pageIndex"
+            [exportToHCMessage]="exportToHCMessage"
+            [sorting]="sorting"
+            (onScrollDown)="scrollDown($event)"
+            (onSortByColumn)="sortByColumn($event)"
+            (onSelect)="onCspsSelect($event)"
+            (exportToHCMessageChange)="handleVisibleMessageChange($event)"
+            >
+        </kftarc-csp-search-result>
+    </kf-page-content>
+</kf-page>
+
+
+
+

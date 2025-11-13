@@ -1,0 +1,118 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/mixins.scss';
+
+::ng-deep .skills-filter-overlay-container {
+    max-height: 500px;
+    overscroll-behavior: none;
+    background-color: white;
+}
+
+.scroll-container {
+    overflow-y: auto;
+    max-height: 470px;
+    border: 1px solid $silver;
+    border-bottom: none;
+    overscroll-behavior: none;
+    background-color: white;
+}
+
+.section {
+    .section-header, .section-item, .section-filter {
+        kf-input {
+            min-width: 0;
+        }
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        cursor: pointer;
+        padding: $small-padding;
+        kfthcl-indicator {
+            margin-right: $small-padding;
+        }
+    }
+    .section-header {
+        border-bottom: 1px solid #dedede;
+        .section-header-caption {
+            flex: 1;
+        }
+    }
+    .section-filter {
+        justify-content: center;
+        align-items: center;
+        kf-input {
+            width: 100%;
+        }
+    }
+    .section-item {
+        padding-left: 24px;
+        &:hover {
+            background: $dropdown-hover;
+        }
+        &.selected {
+            background-color: $dropdown-selected;
+        }
+        &.disabled {
+            cursor: not-allowed;
+            color: $disabled-color;
+        }
+    }
+    .selected-items {
+        border-bottom: 1px solid $silver;
+        padding: $small-padding;
+        margin: 0 $small-padding;
+        .selected-item {
+            display: flex;
+            flex-direction: row;
+            margin-bottom: $smallest-padding;
+            .selected-item-text {
+                flex: 1;
+            }
+            .selected-item-remove {
+                cursor: pointer;
+            }
+        }
+    }
+}
+
+.controlls {
+    button {
+        width: 100%;
+        margin: 0;
+    }
+}
+
+.skill-filter-title {
+    letter-spacing: 0.5px;
+    margin-right: 10px;
+}
+
+.toggler {
+    cursor: pointer;
+    display: flex;
+    align-items:  baseline;
+    justify-content: space-between;
+    width: 200px;
+    border-bottom: 1px solid #b2b2b2;
+    padding-right: 4px;
+    .dropdown-toggle {
+        white-space: nowrap;
+        width: 180px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    &:hover {
+        .dropdown-toggle {
+            color: $black;
+        }
+    }
+    &.open {
+        outline: 0;
+        border-bottom: 1px solid $cerulean;
+        box-shadow: 0 2px 0 0 rgba(0,123,199,.25);
+    }
+}
+
+kftarc-skill-filter {
+    display: flex;
+}

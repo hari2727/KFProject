@@ -1,0 +1,42 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { ProfileCollectionsService } from './profile-collections.service';
+import { QueryProps } from '../../common/common.interface';
+import { ProfileCollectionsRepository } from './profile-collections.repository';
+import { PCRawResponse } from './profile-collections.fixture';
+
+describe('ProfileCollectionsService', () => {
+    let service: ProfileCollectionsService;
+    let repository: ProfileCollectionsRepository;
+    let defaultQuery: QueryProps.Default = { loggedInUserClientId: 1, userId: 1, locale: 'en' };
+
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [ProfileCollectionsService, ProfileCollectionsRepository],
+        }).compile();
+
+        service = module.get<ProfileCollectionsService>(ProfileCollectionsService);
+        repository = module.get<ProfileCollectionsRepository>(ProfileCollectionsRepository);
+    });
+
+    it('should be defined', () => {
+        expect(service).toBeDefined();
+    });
+
+    test('should call getProfileCollections', async () => {
+        const { loggedInUserClientId, userId } = defaultQuery;
+        const spy = jest.spyOn(repository, 'getProfileCollections').mockResolvedValue(PCRawResponse);
+        await service.getProfileCollections(defaultQuery);
+        expect(spy).toBeCalled();
+        expect(spy).toBeCalledWith(loggedInUserClientId, userId);
+    });
+
+    test('should throw error if invalid client id', async () => {
+        try {
+            await service.getProfileCollections({ loggedInUserClientId: 'a', userId: 1, locale: 'en' } as any);
+        } catch (e) {
+            expect(e).toBeDefined();
+            expect(e).toBeInstanceOf(HttpException);
+            expect(e.message).toBe('Invalid client id or userId');
+        }
+    });
+});

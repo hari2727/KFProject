@@ -1,0 +1,95 @@
+import { calculatePackSize, packEntities } from './data';
+import { generateRandomAmount, getRandomNumber } from './test';
+
+
+describe('packEntities', () => {
+
+    it('should split array into the chunks 1', () => {
+        const packSize = getRandomNumber(0, 1000);
+        const minSize = 0;
+        const maxSize = getRandomNumber(0, 5000);
+
+        const entities = generateRandomAmount(() => true, { min: minSize, max: maxSize});
+        const packs = packEntities(entities, packSize);
+        for (const pack of packs) {
+            expect(pack.length).toBeLessThanOrEqual(Math.max(1, packSize));
+        }
+        expect(packs.flat().length).toEqual(entities.length);
+    });
+
+    it('should split array into the chunks 2', () => {
+        const packSize = getRandomNumber(0, 1000);
+        const minSize = packSize + getRandomNumber(0, 5000);
+        const maxSize = minSize + getRandomNumber(0, 5000);
+
+        const entities = generateRandomAmount(() => true, { min: minSize, max: maxSize });
+        const packs = packEntities(entities, packSize);
+        for (const pack of packs) {
+            expect(pack.length).toBeLessThanOrEqual(Math.max(1, packSize));
+        }
+        expect(packs.flat().length).toEqual(entities.length);
+    });
+
+    it('should split array into the chunks 3', () => {
+        const packSize = 0;
+        const minSize = packSize + getRandomNumber(0, 5000);
+        const maxSize = minSize + getRandomNumber(0, 5000);
+
+        const entities = generateRandomAmount(() => true, { min: minSize, max: maxSize });
+        const packs = packEntities(entities, packSize);
+        for (const pack of packs) {
+            expect(pack.length).toBeLessThanOrEqual(Math.max(1, packSize));
+        }
+        expect(packs.flat().length).toEqual(entities.length);
+    });
+
+    it('should split array into the chunks 4', () => {
+        const packSize = getRandomNumber(1, 5000);
+        const entities = [];
+
+        const packs = packEntities(entities, packSize);
+        for (const pack of packs) {
+            expect(pack.length).toBeLessThanOrEqual(Math.max(1, packSize));
+        }
+        expect(packs.flat().length).toEqual(entities.length);
+    });
+
+    it('should split array into the chunks 5', () => {
+        const packSize = 0;
+        const entities = [];
+
+        const packs = packEntities(entities, packSize);
+        for (const pack of packs) {
+            expect(pack.length).toBeLessThanOrEqual(Math.max(1, packSize));
+        }
+        expect(packs.flat().length).toEqual(entities.length);
+    });
+
+});
+
+describe('calculatePackSize', () => {
+
+    const _calculatePackSize = (paramsPerRow: number): number =>
+        Math.round(2000 / Math.max(paramsPerRow, 1));
+
+    it('should calculate maximum packSize 1', () => {
+        const value = -1;
+        expect(calculatePackSize(value)).toEqual(_calculatePackSize(value));
+    });
+
+    it('should calculate maximum packSize 2', () => {
+        const value = 0;
+        expect(calculatePackSize(value)).toEqual(_calculatePackSize(value));
+    });
+
+    it('should calculate maximum packSize 3', () => {
+        const value = getRandomNumber(1)
+        expect(calculatePackSize(value)).toEqual(_calculatePackSize(value));
+    });
+
+    it('should calculate maximum packSize 4', () => {
+        const value = getRandomNumber(10000)
+        expect(calculatePackSize(value)).toEqual(_calculatePackSize(value));
+    });
+
+});

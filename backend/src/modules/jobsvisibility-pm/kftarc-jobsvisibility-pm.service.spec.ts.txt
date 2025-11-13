@@ -1,0 +1,140 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { KfTarcPMJobsVisibilityStatusService } from './kftarc-jobsvisibility-pm.service';
+import { KfTarcPMJobsVisibilityStatusInterface as Kf } from './kftarc-jobsvisibility-pm.interface';
+import * as typeorm from 'typeorm';
+import { request } from 'express';
+import { execStoreProcMocks, globalService, queryObjMocks } from './kftarc-jobsvisibility-pm.fixtures';
+
+jest.mock('typeorm', () => {
+    const actual = jest.requireActual('typeorm');
+    return {
+        ...actual,
+        getManager: jest.fn(),
+        getConnection: jest.fn(),
+    };
+});
+
+describe('KfTarcPMJobsVisibilityStatusService', () => {
+    let pmJobsStatusService: KfTarcPMJobsVisibilityStatusService;
+    let module: TestingModule;
+
+    const mockRequest = {
+        body: {},
+        headers: {},
+    } as typeof request;
+
+    mockRequest.headers = {
+        authtoken: '',
+    };
+
+    beforeAll(async () => {
+        module = await Test.createTestingModule({
+            providers: [KfTarcPMJobsVisibilityStatusService],
+        }).compile();
+    });
+
+    beforeEach(async () => {
+        pmJobsStatusService = module.get<KfTarcPMJobsVisibilityStatusService>(KfTarcPMJobsVisibilityStatusService);
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    describe('getQueryObj', () => {
+        test('should return queryObj', async () => {
+            // Arrange
+            const type = Kf.QueryObjectType.MUTATION;
+            const status = 0;
+
+            // Act
+            const queryObj = pmJobsStatusService.getQueryObj(globalService.queryParams, type, status);
+
+            // Assert
+            expect(queryObj).not.toBe(null);
+            expect(queryObj).toHaveProperty('paramsObj');
+            expect(queryObj).toHaveProperty('queryString');
+        });
+
+        test('should return queryObj for mutaion', async () => {
+            // Arrange
+            const type = Kf.QueryObjectType.MUTATION;
+            const status = 0;
+
+            // Act
+            const queryObj = pmJobsStatusService.getQueryObj(globalService.queryParams, type, status);
+            // Assert
+            expect(queryObj.paramsObj).toMatchObject(queryObjMocks.dboMutationObject);
+            expect(queryObj.queryString).toBe(execStoreProcMocks.dboMutation);
+        });
+        test('should return queryObj for get query ', async () => {
+            // Arrange
+            const type = Kf.QueryObjectType.QUERY;
+
+            // Act
+            const queryObj = pmJobsStatusService.getQueryObj(globalService.queryParams, type);
+
+            // Assert
+            expect(queryObj.paramsObj).toMatchObject(queryObjMocks.dboQueryObject);
+            expect(queryObj.queryString).toBe(execStoreProcMocks.dboQuery);
+        });
+    });
+
+    describe('execStoreProc', () => {
+        test('should Result in data for mutation without failure', async () => {
+            // Arrange
+            (typeorm as any).getManager.mockReturnValueOnce({
+                query: () => {
+                    return Promise.resolve(execStoreProcMocks.mutationMockDbDataSuccess);
+                },
+            });
+            (typeorm as any).getConnection.mockReturnValueOnce({
+                driver: {
+                    escapeQueryWithParameters: () => {
+                        return [`exec [SuccessProfile].[dbo].[KFArchitectBulkUpdateHideJobs] @0, @1`, Object.values(execStoreProcMocks.defaultQueryParams)];
+                    },
+                },
+            });
+
+            let err;
+
+            // Act
+            try {
+                await pmJobsStatusService.execStoreProc(globalService.queryParams, Kf.QueryObjectType.MUTATION, 0);
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeUndefined();
+        });
+        test('should handle error when Stored Procedure fails', async () => {
+            // Arrange
+            (typeorm as any).getManager.mockReturnValueOnce({
+                query: () => {
+                    return Promise.resolve(execStoreProcMocks.mutationMockDbDataFailure);
+                },
+            });
+            (typeorm as any).getConnection.mockReturnValueOnce({
+                driver: {
+                    escapeQueryWithParameters: () => {
+                        return [`exec [SuccessProfile].[dbo].[KFArchitectBulkUpdateHideJobs] @0, @1`, Object.values(execStoreProcMocks.defaultQueryParams)];
+                    },
+                },
+            });
+            let err;
+
+            // Act
+            try {
+                await pmJobsStatusService.execStoreProc(globalService.queryParams, Kf.QueryObjectType.MUTATION, 0);
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeDefined();
+            expect(err.getStatus()).toEqual(500);
+            expect(err.getExceptionCode()).toEqual('APP.30065');
+        });
+    });
+});

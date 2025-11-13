@@ -1,0 +1,460 @@
+import { Test } from '@nestjs/testing';
+import { KfRolesUtil } from './kftarc-roles.utils';
+import { KfRolesUtilMockData } from './kftarc-roles.utils.mock';
+import { KfTarcRolesInterface as Kf } from './kftarc-roles.interface';
+
+describe('KfTarcRolesUtils', () => {
+    const utils = new KfRolesUtil();
+    beforeAll(async () => {
+        await Test.createTestingModule({
+            providers: [],
+        }).compile();
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    describe('groupProfilesUnderRoles', () => {
+        test('should return roles array', async () => {
+            // Act
+            const roles = utils.groupProfilesUnderRoles(KfRolesUtilMockData.mockDbData);
+
+            // Assert
+            expect(roles).toEqual(KfRolesUtilMockData.expectedJson.roles);
+        });
+
+        test('should return roles array containing sub-profiles for roles', async () => {
+            // Act
+            const roles = utils.groupProfilesUnderRoles(KfRolesUtilMockData.mockDbDataWithSubProfiles);
+
+            // Assert
+            expect(roles).toEqual(KfRolesUtilMockData.expectedRolesWithSubProfiles.roles);
+        });
+
+        test('service Methods for CXO Profiles should get called', async () => {
+            // Arrange
+            const generateOtherProfileMethod = jest.spyOn(utils, 'generateOtherProfile');
+            const getCommonPropertiesForRoleAndProfileMethod = jest.spyOn(utils, 'getCommonPropertiesForRoleAndProfile');
+            const generateRoleMethod = jest.spyOn(utils, 'generateRole');
+            const updateRoleHashMethod = jest.spyOn(utils, 'updateRoleHash');
+
+            // Act
+            const rolesList = utils.groupProfilesUnderRoles(KfRolesUtilMockData.mockDbDataIncldingCXOProfiles);
+            // Assert
+            expect(getCommonPropertiesForRoleAndProfileMethod).toHaveBeenCalled();
+            expect(generateOtherProfileMethod).toHaveBeenCalled();
+            expect(generateRoleMethod).toHaveBeenCalled();
+            expect(updateRoleHashMethod).toHaveBeenCalled();
+            expect(rolesList).toEqual(KfRolesUtilMockData.expectedCXOProfilesRolesList);
+        });
+
+        test('service Methods for custom Profiles should get called', async () => {
+            // Arrange
+            const generateOtherProfileMethod = jest.spyOn(utils, 'generateOtherProfile');
+            const getCommonPropertiesForRoleAndProfileMethod = jest.spyOn(utils, 'getCommonPropertiesForRoleAndProfile');
+            const generateRoleMethod = jest.spyOn(utils, 'generateRole');
+            const updateRoleHashMethod = jest.spyOn(utils, 'updateRoleHash');
+
+            // Act
+            utils.groupProfilesUnderRoles(KfRolesUtilMockData.mockDbDataWithSubProfiles);
+
+            // Assert
+            expect(getCommonPropertiesForRoleAndProfileMethod).toHaveBeenCalled();
+            expect(generateOtherProfileMethod).not.toHaveBeenCalled();
+            expect(generateRoleMethod).toHaveBeenCalled();
+            expect(updateRoleHashMethod).toHaveBeenCalled();
+        });
+
+        test('service Methods for Roles, sub-profiles should get called', async () => {
+            // Arrange
+            const generateOtherProfileMethod = jest.spyOn(utils, 'generateOtherProfile');
+            const getCommonPropertiesForRoleAndProfileMethod = jest.spyOn(utils, 'getCommonPropertiesForRoleAndProfile');
+            const generateRoleMethod = jest.spyOn(utils, 'generateRole');
+            const updateRoleHashMethod = jest.spyOn(utils, 'updateRoleHash');
+
+            // Act
+            utils.groupProfilesUnderRoles(KfRolesUtilMockData.mockDbDataWithSubProfiles);
+
+            // Assert
+            expect(getCommonPropertiesForRoleAndProfileMethod).toHaveBeenCalled();
+            expect(generateRoleMethod).toHaveBeenCalled();
+            expect(updateRoleHashMethod).toHaveBeenCalled();
+            expect(generateOtherProfileMethod).not.toHaveBeenCalled();
+        });
+
+        test('service Methods for BOX Profiles should get called', async () => {
+            // Arrange
+            const generateOtherProfileMethod = jest.spyOn(utils, 'generateOtherProfile');
+            const getCommonPropertiesForRoleAndProfileMethod = jest.spyOn(utils, 'getCommonPropertiesForRoleAndProfile');
+            const generateRoleMethod = jest.spyOn(utils, 'generateRole');
+            const updateRoleHashMethod = jest.spyOn(utils, 'updateRoleHash');
+
+            // Act
+            const rolesList = utils.groupProfilesUnderRoles(KfRolesUtilMockData.mockDbDataIncldingBoxProfiles);
+
+            // Assert
+            expect(getCommonPropertiesForRoleAndProfileMethod).toHaveBeenCalled();
+            expect(generateOtherProfileMethod).toHaveBeenCalled();
+            expect(generateRoleMethod).toHaveBeenCalled();
+            expect(updateRoleHashMethod).toHaveBeenCalled();
+            expect(rolesList).toEqual(KfRolesUtilMockData.expectedBoxProfilesRolesList);
+        });
+
+        test('service Methods for JOB Profiles should get called', async () => {
+            // Arrange
+            const getCommonPropertiesForRoleAndProfileMethod = jest.spyOn(utils, 'getCommonPropertiesForRoleAndProfile');
+            const generateRoleMethod = jest.spyOn(utils, 'generateRole');
+            const updateRoleHashMethod = jest.spyOn(utils, 'updateRoleHash');
+
+            // Act
+            const rolesList = utils.groupProfilesUnderRoles(KfRolesUtilMockData.mockDbDataIncludingJobProfiles);
+
+            // Assert
+            expect(getCommonPropertiesForRoleAndProfileMethod).toHaveBeenCalled();
+            expect(generateRoleMethod).toHaveBeenCalled();
+            expect(updateRoleHashMethod).toHaveBeenCalled();
+            expect(rolesList).toEqual(KfRolesUtilMockData.expectedJobProfilesRolesList);
+        });
+
+        test(`should throw an error if databaseDTO not exists`, () => {
+            // Arrange
+            let err;
+
+            // Act
+            try {
+                utils.groupProfilesUnderRoles(undefined);
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeDefined();
+            expect(err.getStatus()).toEqual(500);
+            expect(err.getExceptionCode()).toEqual('APP.30065');
+        });
+
+        test('should throw an error if databaseDTO item not valid', () => {
+            // Arrange
+            let err;
+
+            // Act
+            try {
+                utils.groupProfilesUnderRoles([undefined]);
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeDefined();
+            expect(err.getStatus()).toEqual(500);
+            expect(err.getExceptionCode()).toEqual('APP.30065');
+        });
+
+        ['getCommonPropertiesForRoleAndProfile', 'generateRole', 'updateRoleHash', 'generateSubProfileForRole', 'getRole'].forEach(methodThatCanFail => {
+            test(`should throw an error if with ${methodThatCanFail} something gone wrong`, () => {
+                // Arrange
+                let err;
+                jest.spyOn(utils, methodThatCanFail as keyof KfRolesUtil).mockImplementationOnce(() => {
+                    throw new Error('something gone wrong');
+                });
+
+                // Act
+                try {
+                    utils.groupProfilesUnderRoles(KfRolesUtilMockData.mockDbDataWithSubProfiles);
+                } catch (e) {
+                    err = e;
+                }
+
+                // Assert
+                expect(err).toBeDefined();
+                expect(err.getStatus()).toEqual(500);
+                expect(err.getExceptionCode()).toEqual('APP.30065');
+            });
+        });
+        test(`should throw an error if with generateOtherProfile something gone wrong`, () => {
+            // Arrange
+            let err;
+
+            // Act
+            try {
+                utils.groupProfilesUnderRoles(
+                    KfRolesUtilMockData.mockDbDataWithSubProfiles.map(it => ({ ...it, ParentClientJobID: 1, LevelType: 'BEST_IN_CLASS' })),
+                );
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeDefined();
+            expect(err.getStatus()).toEqual(500);
+            expect(err.getExceptionCode()).toEqual('APP.30065');
+        });
+
+        test('should return data for cxo profile', async () => {
+            // Act
+            const roles = utils.groupProfilesUnderRoles(KfRolesUtilMockData.singleCXOProfile);
+            // Assert
+            expect(roles).toEqual(KfRolesUtilMockData.expecedSingleCXOProfiledata);
+        });
+    });
+    describe('getRoles', () => {
+        test(`should throw an error if RolesContainer haven't a rolesHash property`, async () => {
+            // Arrange
+            const { rolesHash, ...container } = KfRolesUtilMockData.rolesDataContainer;
+            let err;
+
+            // Act
+            try {
+                utils.getRole('', container as Kf.RolesContainer);
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeDefined();
+            expect(err.getStatus()).toEqual(500);
+            expect(err.getExceptionCode()).toEqual('APP.30065');
+        });
+
+        test(`should throw an error if RolesContainer haven't a rolesList property`, async () => {
+            // Arrange
+            const { rolesList, ...container } = KfRolesUtilMockData.rolesDataContainer;
+            let err;
+
+            // Act
+            try {
+                utils.getRole('', container as Kf.RolesContainer);
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeDefined();
+            expect(err.getStatus()).toEqual(500);
+            expect(err.getExceptionCode()).toEqual('APP.30065');
+        });
+    });
+
+    describe('getCommonPropertiesForRoleAndProfile', () => {
+        test('should return filter values to be used in Stored Procedure', async () => {
+            // Act
+            const generatedCommonProps = utils.getCommonPropertiesForRoleAndProfile(KfRolesUtilMockData.singleDbRecordTypeRole);
+
+            // Assert
+            expect(generatedCommonProps).toMatchObject(KfRolesUtilMockData.commonObjProps);
+        });
+
+        test(`should throw an error if generateRole not exists`, () => {
+            // Arrange
+            let err;
+
+            // Act
+            try {
+                utils.getCommonPropertiesForRoleAndProfile(undefined);
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeDefined();
+            expect(err.getStatus()).toEqual(500);
+            expect(err.getExceptionCode()).toEqual('APP.30065');
+        });
+    });
+
+    describe('generateRole', () => {
+        test('should return Role Object', async () => {
+            // Act
+            const generatedRole = utils.generateRole(KfRolesUtilMockData.singleDbRecordTypeRole, KfRolesUtilMockData.commonObjProps);
+
+            // Assert
+            expect(generatedRole).toMatchObject(KfRolesUtilMockData.expectedRole);
+        });
+
+        test(`should throw an error if databaseDTO not exists`, () => {
+            // Arrange
+            let err;
+
+            // Act
+            try {
+                utils.generateRole(undefined, KfRolesUtilMockData.commonObjProps);
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeDefined();
+            expect(err.getStatus()).toEqual(500);
+            expect(err.getExceptionCode()).toEqual('APP.30065');
+        });
+    });
+
+    describe('createJeScores', () => {
+        test('should return null when JEScores is empty string', () => {
+            // Arrange
+            const emptyScores = '';
+            const emptyJeScoresObj = {
+                ...KfRolesUtilMockData.singleDbRecordTypeRole,
+                JELineScore: emptyScores,
+            };
+
+            // Act
+            const JELineScore = utils.createJeScores(emptyScores, null, emptyJeScoresObj);
+
+            // Assert
+            expect(JELineScore).toBe(null);
+        });
+
+        test('should return JEScores array', () => {
+            // Arrange
+            const scoresString = 'F- I+ 3 304  E 3+ (38%) 115  E- N V+  152    571';
+            const jeScoresObj = {
+                ...KfRolesUtilMockData.singleDbRecordTypeRole,
+                JELineScore: scoresString,
+            };
+
+            // Act
+            const JELineScore = utils.createJeScores(scoresString, null, jeScoresObj);
+
+            // Assert
+            expect(JELineScore).not.toBe(null);
+            expect(JELineScore).toHaveLength(3);
+        });
+
+        test('should return JEScores array with work condition', () => {
+            // Arrange
+            const scoresString = 'F- I+ 3 304  E 3+ (38%) 115  E- N V+  152    571';
+            const jeScoresObj = {
+                ...KfRolesUtilMockData.singleDbRecordTypeRole,
+                JELineScore: scoresString,
+            };
+
+            // Act
+            const JELineScore = utils.createJeScores(scoresString, scoresString, jeScoresObj);
+
+            // Assert
+            expect(JELineScore).not.toBe(null);
+            expect(JELineScore).toHaveLength(4);
+        });
+
+        test('should throw an error if something gone wrong', () => {
+            // Arrange
+            const scoresString = 'F- I+ 3 304  E 3+ (38%) 115  E- N V+  152    571';
+            const jeScoresObj = {
+                ...KfRolesUtilMockData.singleDbRecordTypeRole,
+                JELineScore: scoresString,
+            };
+            jest.spyOn(utils, 'splitJeOrWc').mockImplementationOnce(() => {
+                throw new Error('something gone wrong');
+            });
+            let err;
+
+            // Act
+            try {
+                utils.createJeScores(scoresString, null, jeScoresObj);
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeDefined();
+            expect(err.getStatus()).toEqual(500);
+            expect(err.getExceptionCode()).toEqual('APP.30065');
+        });
+    });
+
+    describe('getJEScoreOptions', () => {
+        test('should return an empty object if JeScoreType is not from the supported list', () => {
+            // Act
+            const options = utils.getJEScoreOptions('' as Kf.JeScoreType);
+
+            // Assert
+            expect(options).toEqual({});
+        });
+    });
+
+    describe('generateSubProfileForRole', () => {
+        test(`should throw an error if databaseDTO not exists`, () => {
+            // Arrange
+            let err;
+
+            // Act
+            try {
+                utils.generateSubProfileForRole(undefined, KfRolesUtilMockData.commonObjProps);
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeDefined();
+            expect(err.getStatus()).toEqual(500);
+            expect(err.getExceptionCode()).toEqual('APP.30065');
+        });
+    });
+
+    describe('generateOtherProfile', () => {
+        test(`should throw an error if databaseDTO invalid`, () => {
+            // Arrange
+            const databaseBTO = {
+                HayReferenceLevel: {
+                    toString: jest.fn().mockImplementationOnce(() => {
+                        throw new Error('something gone wrong');
+                    }),
+                },
+            } as any as Kf.databaseDTO;
+            let err;
+
+            // Act
+            try {
+                utils.generateOtherProfile(databaseBTO, KfRolesUtilMockData.commonObjProps);
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeDefined();
+            expect(err.getStatus()).toEqual(500);
+            expect(err.getExceptionCode()).toEqual('APP.30065');
+        });
+    });
+
+    describe('updateRoleHash', () => {
+        test(`should throw an error if container does not exists`, () => {
+            // Arrange
+            let err;
+
+            // Act
+            try {
+                utils.updateRoleHash({} as Kf.Role, undefined);
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeDefined();
+            expect(err.getStatus()).toEqual(500);
+            expect(err.getExceptionCode()).toEqual('APP.30065');
+        });
+    });
+    describe('sanitize', () => {
+        test('should return sanitized value for box profile', () => {
+            // Act
+            const sanitized = utils.sanitizeLevelType('Box-profile');
+            // Assert
+            expect(sanitized).toEqual('BOX_PROFILE');
+        });
+        test('should return sanitized value for cxo profile', () => {
+            // Act
+            const sanitized = utils.sanitizeLevelType('CXO_PROfile');
+            // Assert
+            expect(sanitized).toEqual('CXO-PROFILE');
+        });
+        test('should return sanitized value for best in class profile', () => {
+            // Act
+            const sanitized = utils.sanitizeLevelType('Best-in -class');
+            // Assert
+            expect(sanitized).toEqual('BEST_IN_CLASS');
+        });
+    });
+});

@@ -1,0 +1,160 @@
+<kf-page app="pm">
+    <kf-page-masthead>
+        <h1 class="header">
+            {{ 'pm.SuccessProfilesPageTitle' | translate | KfTitlecase }}
+        </h1>
+        <p class="sub-header body-text">
+            {{ 'pm.SuccessProfilesPageDescription' | translate }}
+        </p>
+    </kf-page-masthead>
+
+    <kf-page-content>
+        <div class="position-relative">
+            <div class="d-flex position-absolute right-0">
+                <div class="matrix-download" [class.disableDownload]="!selectedFilters" (click)="exportMatrix($event)">
+                    <kf-icon icon="export" color="primary"></kf-icon>
+                    <a class="link-sm text-uppercase"> {{ 'pm.export' | translate }}</a>
+                </div>
+                <div class="bg-white">
+                    <kf-buttons-switch
+                        [iconNames]="views"
+                        [selectedIcon]="selectedView"
+                        (selectionChange)="viewChange($event)">
+                    </kf-buttons-switch>
+                </div>
+            </div>
+
+            <kftarc-sp-search-filter
+                [filters]="filters"
+                (onFilterChange)="onFilterChange($event)"
+                (onClickFilter)="callSearchMetadata()"
+            ></kftarc-sp-search-filter>
+        </div>
+        <div class="matrix">
+            <kfthcl-sp-matrix
+                [matrixLoader]="matrixService"
+                [appliedFilters]="selectedFilters"
+                [showYAxisLabels]="showGrades && !hasCustomGrades"
+                [yAxisName]="showGrades && !hasCustomGrades ? ('lib.gradeLCase' | translate) : ''"
+                missingHeader="{{ 'pm.noFunctionsSelected' | translate }}"
+                missingSubheader="{{ 'pm.noSubFunctionsSelected' | translate }}"
+                noFilters="{{ 'pm.useFilters' | translate }}"
+                noContent="{{ 'pm.modifyFilter' | translate }}"
+                emptyContent="{{ 'pm.noRoles' | translate }}"
+                [warningMessage]="warningNotificationMessage"
+                (popupDataChanges)="popupDataChanges($event)"
+                [headerPadding]="16"
+            >
+                <ng-template #popupTemplate let-data>
+                    <div *ngIf="data" class="popup-data">
+                        <div>
+                            <kf-icon [icon]="data?.profileType | KfSpIconType"></kf-icon>
+                        </div>
+                        <div>
+                            <span *ngIf="data.isCustom" class="title-popup">
+                                <a href="#/tarc/sp/detail/{{data.id}}" class="fw-semibold ls-label">{{ data.name }}</a>
+                            </span>
+                            <span *ngIf="!data.isCustom" class="body-text fw-semibold title-popup">{{ data.name }}</span>
+                        </div>
+                        <div>
+                            <span class="body-text">{{ data.level }}</span>
+                        </div>
+                        <div class="margin-bottom">
+                            <span class="body-text">{{ data.subLevel }}</span>
+                        </div>
+                        <div *ngIf="showGrades && (!data.minCustomValue || !data.maxCustomValue || !hasCustomGrades)">
+                            <span class="body-text" *ngIf="data.type !== 'range'"> {{ 'pm.GradeLCase' | translate }}:
+                                <span class="kf-symbol body-text" *ngIf="shouldShowKfGradeIcon(data)">{{ 'lib.kornFerry' | translate }}</span>
+                                {{ data.value }}
+                            </span>
+                            <span class="body-text" *ngIf="data.type === 'range' && data.minValue !== data.maxValue"> {{ 'pm.GradeLCase' | translate }}: {{ data.minValue }} - {{ data.maxValue }}</span>
+                            <span class="body-text" *ngIf="data.type === 'range' && data.minValue === data.maxValue"> {{ 'pm.GradeLCase' | translate }}: {{ data.minValue }}</span>
+                        </div>
+                        <div *ngIf="showGrades && hasCustomGrades && data.minCustomValue && data.maxCustomValue">
+                            <span class="body-text" *ngIf="data.minCustomValue !== data.maxCustomValue"> {{ 'pm.GradeLCase' | translate }}: {{ data.minCustomValue }} - {{ data.maxCustomValue }}</span>
+                            <span class="body-text" *ngIf="data.minCustomValue === data.maxCustomValue"> {{ 'pm.GradeLCase' | translate }}: {{ data.minCustomValue }}</span>
+                        </div>
+                        <div *ngIf="!data.isCustom && !data.isExecutive" class="margin-top">
+                            <a (click)="openMatchTool(data)">
+                                {{ 'pm.profileMatchTool' | translate | KfTitlecase }}
+                            </a>
+                        </div>
+                        <div *ngIf="data.isCustom && !data.isExecutiveUngraded" class="margin-top compare-checkbox">
+                            <kf-checkbox
+                                [forbiddenCheckbox]="isBucketFull && !spSelected"
+                                [ngModel]="spSelected"
+                                (ngModelChange)="spSelectionChange(data, $event)"
+                                (click)="checkBoxClicked()"
+                                label="{{ 'pm.compare' | translate }}"
+                            ></kf-checkbox>
+                        </div>
+                        <div *ngIf="warningNotificationMessage" class="warning-msg">
+                            <kf-icon icon="warning-info" color="danger" size="sm"></kf-icon>
+                            <span class="label-text-sm">{{ warningNotificationMessage }}</span>
+                        </div>
+                        <div *ngIf="!data.isCustom && !data.isExecutive">
+                            <a (click)="openRoleSpSelector(data)">
+                                {{ 'pm.compare' | translate }}
+                            </a>
+                        </div>
+                        <div *ngIf="!data.isCustom && data.isExecutive && !data.isGraded && hasExecGradingAccess" class="margin-top">
+                            <a (click)="openExecGrading(data)">
+                                {{ 'pm.gradeProfile' | translate | KfTitlecase }}
+                            </a>
+                        </div>
+                    </div>
+                </ng-template>
+            </kfthcl-sp-matrix>
+        </div>
+        <div class="matrix-legend">
+            <div *ngIf="showGrades && !hasCustomGrades">
+                <div class="footnote fw-semibold color-medium text-uppercase lh-16" translate>pm.gradeRange</div>
+                <div class="range range4-8 subtext-sm" translate [translateParams]="{range: '4-8'}">pm.grades</div>
+                <div class="range range9-13 subtext-sm" translate [translateParams]="{range: '9-13'}">pm.grades</div>
+                <div class="range range10-14 subtext-sm" translate [translateParams]="{range: '10-14'}">pm.grades</div>
+                <div class="range range15-19 subtext-sm" translate [translateParams]="{range: '15-19'}">pm.grades</div>
+                <div class="range range20-23 subtext-sm" translate [translateParams]="{range: '20-23'}">pm.grades</div>
+                <div class="range range24 subtext-sm" translate [translateParams]="{range: '24+'}">pm.grades</div>
+            </div>
+            <div>
+                <div class="footnote fw-semibold color-medium text-uppercase lh-16" translate>pm.successProfileType</div>
+                <div class="type type-custom subtext-sm" translate>pm.customSuccessProfile</div>
+                <div class="type type-best subtext-sm" translate>pm.kfBestInClassSuccessProfile</div>
+                <div class="type type-best-job-profile subtext-sm" translate>pm.kfBestInClassJobProfile</div>
+            </div>
+        </div>
+        <div *ngIf="!isBucketEmpty" [ngClass]="{'bucket-padder-collapsed': !isBucketExpanded, 'bucket-padder-expanded': isBucketExpanded }"
+        ></div>
+    </kf-page-content>
+</kf-page>
+
+<div *ngIf="!isBucketEmpty" class="bucket-container">
+    <kfthcl-sp-compare-bucket
+        (compareInvoked)="gotoCompare()"
+        (expandChanged)="expandChanged($event)"
+    ></kfthcl-sp-compare-bucket>
+</div>
+
+<kfthcl-profile-match-tool-modal *ngIf="showMatchTool"
+    #profileMatchTool
+    [(visible)]="showMatchTool"
+    [jobFactors]="jobFactors"
+    [spTitle]="spTitle"
+    (btnClickCallback)="onMatchToolBtnChange($event)"
+></kfthcl-profile-match-tool-modal>
+
+<kfthcl-sp-role-profiles-selector
+    [showGrades]="showGrades"
+    [showShortProfiles]="showShortProfile"
+    [visible]="roleSpSelectorVisible"
+    [role]="selectedRole"
+    (closeRequests)="onRoleSpSelectorClose()"
+></kfthcl-sp-role-profiles-selector>
+
+<kfthcl-exec-grading
+    [(visible)]="showExecGrading"
+    [title]="execGradingTitle"
+    [roleId]="execGradingRoleId"
+    [standardHayGrade]="execStandardHayGrade"
+    [jobId]="execGradingJobId">
+</kfthcl-exec-grading>

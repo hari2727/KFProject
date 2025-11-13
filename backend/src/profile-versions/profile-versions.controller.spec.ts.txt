@@ -1,0 +1,43 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { ProfileVersionsService } from './profile-versions.service';
+import { ProfileVersionsRepository } from './profile-versions.repository';
+import { ProfileVersionsRawResponseMock, ProfileVersionsResponseMock } from './profile-versions.fixtures';
+
+describe('ProfileVersionsController', () => {
+    let service: ProfileVersionsService;
+    let repository: ProfileVersionsRepository;
+    let queryParams: any = {
+        successProfileId: 123,
+        loggedInUserClientId: 1,
+        locale: 'en-US',
+        userId: 12334,
+    };
+
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [ProfileVersionsService, ProfileVersionsRepository],
+        }).compile();
+
+        service = module.get<ProfileVersionsService>(ProfileVersionsService);
+        repository = module.get<ProfileVersionsRepository>(ProfileVersionsRepository);
+    });
+
+    it('should be defined', () => {
+        expect(service).toBeDefined();
+    });
+
+    it('should call getProfileVersionDetails', async () => {
+        jest.spyOn(repository, 'getProfileVersionDetails').mockResolvedValue(ProfileVersionsRawResponseMock);
+        const resp = await service.getProfileVersionDetails(queryParams);
+        expect(ProfileVersionsResponseMock).toEqual(resp);
+    });
+
+    it('should throw error in getProfileVersionDetails', async () => {
+        jest.spyOn(repository, 'getProfileVersionDetails').mockRejectedValue(new Error('Error'));
+        try {
+            await service.getProfileVersionDetails(queryParams);
+        } catch (error) {
+            expect(error).toBeInstanceOf(HttpException);
+        }
+    });
+});

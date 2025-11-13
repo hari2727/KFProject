@@ -1,0 +1,1 @@
+export const isLocal = (): boolean => !process.env.Environment;

@@ -1,0 +1,481 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { okResponse } from '../../common/common.utils';
+import { ResponsibilitiesRepository } from './responsibilities.repository';
+import { ResponsibilitiesService } from './responsibilities.service';
+import {
+    addNewSubcategoriesBody,
+    GetResponsibilityDetailIdDBResponseMock,
+    GetResponsibilityDetailIdResponse,
+    GetResponsibilityModelQuery,
+    ModelDataResponse,
+    ModelDBResponse,
+    ModelQuery,
+    NewModelAPIResponse,
+    NewModelDBResponseMock,
+    OldModelAPIResponse,
+    OldModelDBResponseMock,
+    responsibiltiesRepositoryResponse,
+} from './responsibilities.service.fixture';
+import {
+    AddNewSubcategories,
+    SubcategoryType,
+    UpdateResponsibilityBody,
+    UpdateResponsibilityQuery
+} from './responsibilities.interface';
+import { alphabeticalDict, getBoolean, getNumber, getRandomString, getString } from '../../_shared/test/test';
+
+describe('ResponsibilitiesService', () => {
+    let service: ResponsibilitiesService;
+    let repository: ResponsibilitiesRepository;
+    const modelId = 'THYT-RFSR-THST-IKJS';
+
+    beforeAll(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [ResponsibilitiesService, ResponsibilitiesRepository],
+        }).compile();
+
+        service = module.get<ResponsibilitiesService>(ResponsibilitiesService);
+        repository = module.get<ResponsibilitiesRepository>(ResponsibilitiesRepository);
+    });
+
+    test('should be defined', () => {
+        expect(service).toBeDefined();
+    });
+
+    describe('getOldModelResponsibilities', () => {
+        test('should call getOldModelResponsibilities method', async () => {
+            const newModelSpy = jest.spyOn(repository, 'getOldModelResponsibilities').mockResolvedValueOnce([]);
+            const statusSpy = jest.spyOn(repository, 'getResponsibilitiesStatus').mockResolvedValueOnce([{ Modification: 'MODIFIED' }]);
+            await service.getOldModelResponsibilities(ModelQuery, modelId);
+            expect(newModelSpy).toHaveBeenCalled();
+            expect(statusSpy).toHaveBeenCalled();
+        });
+
+        test('should return expected response on getOldModelResponsibilities', async () => {
+            jest.spyOn(repository, 'getOldModelResponsibilities').mockResolvedValueOnce(OldModelDBResponseMock);
+            jest.spyOn(repository, 'getResponsibilitiesStatus').mockResolvedValueOnce([{ Modification: 'MODIFIED' }]);
+            const resp = await service.getOldModelResponsibilities(ModelQuery, modelId);
+            expect(resp).toEqual(OldModelAPIResponse);
+        });
+
+        test('show throw an error if valid preferred clientId not provided', async () => {
+            let e: Error;
+            try {
+                const queryParams = { ...ModelQuery, preferredClientId: null };
+                await service.getOldModelResponsibilities(queryParams, '1233434');
+            } catch (err) {
+                e = err;
+            }
+            expect(e).toBeDefined();
+            expect(e.message).toEqual('Please provide valid query Params');
+        });
+
+        test('show throw an error if valid preferred locale not provided', async () => {
+            let e: Error;
+            try {
+                const queryParams = { ...ModelQuery, preferredLocale: '' };
+                await service.getOldModelResponsibilities(queryParams, '1233434');
+            } catch (err) {
+                e = err;
+            }
+            expect(e).toBeDefined();
+            expect(e.message).toEqual('Please provide valid query Params');
+        });
+
+        test('show throw an error if outputType not provided or null', async () => {
+            let e: Error;
+            try {
+                const queryParams = { ...ModelQuery, outputType: '' };
+                await service.getOldModelResponsibilities(queryParams, '1233434');
+            } catch (err) {
+                e = err;
+            }
+            expect(e).toBeDefined();
+            expect(e.message).toEqual('Please provide valid query Params');
+        });
+
+        test('show throw an error if modelVersion not provided or null', async () => {
+            let e: Error;
+            try {
+                const queryParams = { ...ModelQuery, modelVersion: null };
+                await service.getOldModelResponsibilities(queryParams, '1233434');
+            } catch (err) {
+                e = err;
+            }
+            expect(e).toBeDefined();
+            expect(e.message).toEqual('Please provide valid query Params');
+        });
+    });
+
+    describe('getNewModelResponsibilities', () => {
+        test('should call getNewModelResponsibilities method', async () => {
+            const newModelSpy = jest.spyOn(repository, 'getNewModelResponsibilities').mockResolvedValueOnce(NewModelDBResponseMock);
+            const statusSpy = jest.spyOn(repository, 'getResponsibilitiesStatus').mockResolvedValueOnce([{ Modification: 'MODIFIED' }]);
+            await service.getNewModelResponsibilities(ModelQuery, modelId);
+            expect(newModelSpy).toHaveBeenCalled();
+            expect(statusSpy).toHaveBeenCalled();
+        });
+
+        test('should return expected response on getNewModelResponsibilities', async () => {
+            jest.spyOn(repository, 'getNewModelResponsibilities').mockResolvedValueOnce(NewModelDBResponseMock);
+            jest.spyOn(repository, 'getResponsibilitiesStatus').mockResolvedValueOnce([{ Modification: 'MODIFIED' }]);
+            const resp = await service.getNewModelResponsibilities(ModelQuery, modelId);
+            expect(resp).toEqual(NewModelAPIResponse);
+        });
+    });
+
+    test('should call getModelResponsibilities method', async () => {
+        const modelSpy = jest.spyOn(repository, 'getResponsibilitiesModels').mockResolvedValueOnce([]);
+        await service.getModelResponsibilities(GetResponsibilityModelQuery);
+        expect(modelSpy).toHaveBeenCalled();
+    });
+
+    test('should return expected response on getModelResponsibilities', async () => {
+        jest.spyOn(repository, 'getResponsibilitiesModels').mockResolvedValueOnce(ModelDBResponse);
+        const resp = await service.getModelResponsibilities(GetResponsibilityModelQuery);
+        expect(resp).toEqual(ModelDataResponse);
+    });
+
+    describe('responsibilitiesPublish', () => {
+        test('should check function to have been called with clientId', async () => {
+            jest.spyOn(repository, 'responsibilitiesPublish').mockResolvedValueOnce();
+            let e: Error;
+            let resp: any;
+            const params = {
+                loggedInUserClientId: 23130,
+                userId: 123,
+                locale: 'en',
+            };
+            try {
+                resp = await service.responsibilitiesPublish(params);
+            } catch (err) {
+                e = err;
+            }
+            expect(e).toBeUndefined();
+            expect(repository.responsibilitiesPublish).toHaveBeenCalledWith(params.loggedInUserClientId);
+            expect(resp).toEqual(okResponse);
+        });
+    });
+    describe('getResponsibilityModelDetailId', () => {
+        test('should return expected response on getResponsibilityModelDetailId', async () => {
+            jest.spyOn(repository, 'getResponsibilityModelDetailId').mockResolvedValueOnce(GetResponsibilityDetailIdDBResponseMock);
+            const resp = await service.getResponsibilityModelDetailId(GetResponsibilityModelQuery, 1);
+            expect(resp).toEqual(GetResponsibilityDetailIdResponse);
+        });
+
+        test('should call getResponsibilityModelDetailId method', async () => {
+            const ResponsibilityDetailIdSpy = jest
+                .spyOn(repository, 'getResponsibilityModelDetailId')
+                .mockResolvedValueOnce(GetResponsibilityDetailIdDBResponseMock);
+            await service.getResponsibilityModelDetailId(ModelQuery, 1);
+            expect(ResponsibilityDetailIdSpy).toHaveBeenCalled();
+        });
+    });
+
+    describe('addNewSubcategories', () => {
+        const queryParams: AddNewSubcategories.Query = {
+            loggedInUserClientId: 123,
+            userId: 456,
+            locale: 'de',
+            preferredLocale: 'en',
+            preferredClientId: 1267,
+            modelVersion: 1246,
+            modelId: 'ABC-90-ER',
+        };
+
+        function mockRepoMethods() {
+            jest.spyOn(repository, 'itemModificationSubCategory').mockResolvedValue([{ ItemID: '1234' }]);
+            jest.spyOn(repository, 'addJobSubCategory').mockResolvedValue([{ JobSubCategoryID: 'TEST-10', JobCategoryID: 'Job_category_ID' }]);
+            jest.spyOn(repository, 'addJobLevelDetail').mockResolvedValue([{ JobLevelDetailID: 'TEST-10' }]);
+            jest.spyOn(repository, 'itemModificationSubCategoryDetails').mockResolvedValue();
+            jest.spyOn(repository, 'updateSubCategory').mockResolvedValue();
+        }
+
+        test('should return expected response on addNewSubcategories', async () => {
+            mockRepoMethods();
+
+            const resp = await service.addNewSubcategories(queryParams, addNewSubcategoriesBody, SubcategoryType.RESPONSIBILITY);
+
+            expect(resp).toStrictEqual(okResponse);
+        });
+
+        test('should throw exception if subcategory in parent language is not available', async () => {
+            mockRepoMethods();
+
+            const mockBody: AddNewSubcategories.Body = JSON.parse(JSON.stringify(addNewSubcategoriesBody));
+
+            mockBody.categories[0].subCategories[0][queryParams.preferredLocale] = undefined;
+
+            let e: Error;
+            try {
+                await service.addNewSubcategories(queryParams, mockBody, SubcategoryType.RESPONSIBILITY);
+            } catch (err) {
+                e = err;
+            }
+            expect(e).toBeDefined();
+            expect(e.message).toEqual('Subcategory Parent locale data is missing');
+        });
+
+        test('should throw exception if subcategory in non-parent language is not available', async () => {
+            mockRepoMethods();
+
+            const mockBody: AddNewSubcategories.Body = JSON.parse(JSON.stringify(addNewSubcategoriesBody));
+
+            mockBody.categories[0].subCategories[0][queryParams.locale] = undefined;
+
+            let e: Error;
+            try {
+                await service.addNewSubcategories(queryParams, mockBody, SubcategoryType.RESPONSIBILITY);
+            } catch (err) {
+                e = err;
+            }
+            expect(e).toBeDefined();
+            expect(e.message).toEqual('Subcategory locale data is missing');
+        });
+
+        test('should throw exception if Level locale data is missing', async () => {
+            mockRepoMethods();
+
+            const mockBody: AddNewSubcategories.Body = JSON.parse(JSON.stringify(addNewSubcategoriesBody));
+
+            mockBody.categories[0].subCategories[0][queryParams.locale].levels[2] = undefined;
+
+            let e: Error;
+            try {
+                await service.addNewSubcategories(queryParams, mockBody, SubcategoryType.RESPONSIBILITY);
+            } catch (err) {
+                e = err;
+            }
+            expect(e).toBeDefined();
+            expect(e.message).toEqual('Level locale data is missing');
+        });
+
+        test('should throw exception if body has no subcategories', async () => {
+            mockRepoMethods();
+
+            const mockBody: AddNewSubcategories.Body = JSON.parse(JSON.stringify(addNewSubcategoriesBody));
+
+            mockBody.categories[0].subCategories = [];
+
+            let e: Error;
+            try {
+                await service.addNewSubcategories(queryParams, mockBody, SubcategoryType.RESPONSIBILITY);
+            } catch (err) {
+                e = err;
+            }
+            expect(e).toBeDefined();
+            expect(e.message).toEqual('No data for insertItemModificationSubCategoryDetails query');
+        });
+
+    });
+
+    describe('updateResponsibilities', () => {
+        const query: UpdateResponsibilityQuery = {
+            preferredLocale: 'us-en', //getRandomString({ min: 2, max: 2, dict: alphabeticalDict }),
+            preferredClientId: getNumber(),
+            modelVersion: getNumber(),
+            modelId: getRandomString(),
+            loggedInUserClientId: getNumber(),
+            userId: getNumber(),
+            locale: getRandomString({ min: 2, max: 2, dict: alphabeticalDict }),
+        };
+        const body: UpdateResponsibilityBody = {
+            type: SubcategoryType.RESPONSIBILITY,
+
+            categories: [
+                {
+                    id: getNumber(),
+                    subCategories: [
+                        {
+                            name: getString(),
+                            descriptions: [
+                                {
+                                    description: getString(),
+                                    isCustom: getBoolean(),
+                                    level: getNumber(),
+                                },
+                            ],
+                            definition: getString(),
+                            isCustom: getBoolean(),
+                        },
+                    ],
+                },
+            ],
+        };
+
+        test('should return expected response on updateResponsibilities', async () => {
+            jest.spyOn(repository, 'itemModificationSubCategory').mockResolvedValueOnce([{ ItemID: getString() }]);
+            jest.spyOn(repository, 'itemModificationSubCategoryDetails').mockResolvedValueOnce();
+            jest.spyOn(repository, 'updateSubCategory').mockResolvedValueOnce();
+            jest.spyOn(repository, 'JobSubCategory').mockResolvedValueOnce();
+            const resp = await service.updateResponsibilities(query, body, SubcategoryType.RESPONSIBILITY);
+            expect(resp).toStrictEqual(okResponse);
+        });
+
+    });
+
+    describe('responsibilityDescriptions', () => {
+        const params = {
+            loggedInUserClientId: 23130,
+            userId: 123,
+            locale: 'en',
+            subCategoryIds: '0',
+            type: 'RESPONSIBILITY',
+            preferredLocale: 'en',
+            successProfileId: 123,
+        };
+        test('should check function to have been called with clientId', async () => {
+            jest.spyOn(repository, 'getResponsibilityDescriptions').mockResolvedValueOnce([
+                { JobSubCategoryName: 'Test', JobLevel: 1, JobLevelLabel: 'Test', JobLevelDescription: 'Test' },
+            ]);
+            let e: Error;
+            let resp: any;
+            try {
+                resp = await service.responsibilityDescriptions(params);
+            } catch (err) {
+                e = err;
+            }
+            expect(e).toBeUndefined();
+            expect(resp).toEqual(responsibiltiesRepositoryResponse);
+        });
+
+    });
+
+    describe('validateQueryForResponsibilitiesStatusUpdate', () => {
+        test('should throw error for missing type', async () => {
+            let e: Error;
+            try {
+                service.validateQueryForResponsibilitiesStatusUpdate({
+                    type: null,
+                    categories: [],
+                });
+            } catch (err) {
+                e = err;
+            }
+            expect(e).toBeDefined();
+            expect(e.message).toEqual('Type is missing');
+        });
+
+        test('should throw error for missing job category', async () => {
+            let e: Error;
+            try {
+                service.validateQueryForResponsibilitiesStatusUpdate({
+                    type: SubcategoryType.RESPONSIBILITY,
+                    categories: [],
+                });
+            } catch (err) {
+                e = err;
+            }
+            expect(e).toBeDefined();
+            expect(e.message).toEqual('JobCategoryID is missing');
+        });
+
+        test('should throw error for missing job subcategory', async () => {
+            let e: Error;
+            try {
+                service.validateQueryForResponsibilitiesStatusUpdate({
+                    type: SubcategoryType.RESPONSIBILITY,
+                    categories: [
+                        {
+                            id: 17,
+                            subCategories: [
+                                {
+                                    id: null,
+                                    isActive: false,
+                                },
+                            ],
+                        },
+                    ],
+                });
+            } catch (err) {
+                e = err;
+            }
+            expect(e).toBeDefined();
+            expect(e.message).toEqual('JobSubCategoryID is missing');
+        });
+
+        test('should throw error for missing toggle flag', async () => {
+            let e: Error;
+            try {
+                service.validateQueryForResponsibilitiesStatusUpdate({
+                    type: SubcategoryType.RESPONSIBILITY,
+                    categories: [
+                        {
+                            id: 17,
+                            subCategories: [
+                                {
+                                    id: 9,
+                                    isActive: null,
+                                },
+                            ],
+                        },
+                    ],
+                });
+            } catch (err) {
+                e = err;
+            }
+            expect(e).toBeDefined();
+            expect(e.message).toEqual('Toggle flag value is missing');
+        });
+    });
+
+    describe('responsibilitiesStatusUpdate', () => {
+        const query = {
+            modelId: '61B52907-2A2B-49CB-B959-252E5AC2A655',
+            modelVersion: '1.0',
+            preferredClientId: 12023,
+            preferredLocale: 'en',
+            loggedInUserClientId: 0,
+            userId: 0,
+            locale: 'en',
+        };
+        const body = {
+            type: SubcategoryType.RESPONSIBILITY,
+            categories: [
+                {
+                    id: 17,
+                    subCategories: [
+                        {
+                            id: 9,
+                            isActive: false,
+                        },
+                    ],
+                },
+            ],
+        };
+
+        test('should return expected response on statusUpdate', async () => {
+            jest.spyOn(repository, 'updateJobSubCategory').mockResolvedValueOnce({ affected: 1 });
+            jest.spyOn(repository, 'itemModificationSubCategory').mockResolvedValueOnce([{ ItemID: '1234' }]);
+            jest.spyOn(repository, 'getResponsibilitiesStatus').mockResolvedValueOnce([{ Modification: 'MODIFIED' }]);
+
+            const result = await service.responsibilitiesStatusUpdate(query, body, SubcategoryType.RESPONSIBILITY);
+            expect(result).toEqual({ status: 'MODIFIED' });
+        });
+
+        test('should throw exception for no data found for update query', async () => {
+            jest.spyOn(repository, 'updateJobSubCategory').mockResolvedValueOnce({ affected: 0 });
+            let e: Error;
+            try {
+                await service.responsibilitiesStatusUpdate(query, body, SubcategoryType.RESPONSIBILITY);
+            } catch (err) {
+                e = err;
+            }
+            expect(e).toBeDefined();
+            expect(e.message).toEqual('No data exists for provided JobCategoryID and JobSubCategoryID');
+        });
+
+        test('should throw exception for itemId', async () => {
+            jest.spyOn(repository, 'updateJobSubCategory').mockResolvedValueOnce({ affected: 1 });
+            jest.spyOn(repository, 'itemModificationSubCategory').mockResolvedValueOnce([]);
+            let e: Error;
+            try {
+                await service.responsibilitiesStatusUpdate(query, body, SubcategoryType.RESPONSIBILITY);
+            } catch (err) {
+                e = err;
+            }
+            expect(e).toBeDefined();
+            expect(e.message).toEqual(`ItemID is not available for model version ${query.modelVersion}`);
+        });
+    });
+});

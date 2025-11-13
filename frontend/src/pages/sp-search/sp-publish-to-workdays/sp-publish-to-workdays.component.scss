@@ -1,0 +1,21 @@
+@import "node_modules/@kf-products-core/kfhub_lib/styles/variables.scss";
+
+.workdays-intergration-container {
+    flex-direction: row;
+    background-color: $transparent;
+    box-shadow: none;
+    padding: $size-32 0;
+
+    [icon="download"] + span {
+        color: $cerulean;
+    }
+
+    p {
+        margin: 10px 0;
+    }
+
+    kf-uploader {
+        height: 258px;
+    }
+}
+

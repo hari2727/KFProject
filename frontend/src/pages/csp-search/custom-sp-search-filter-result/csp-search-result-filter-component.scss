@@ -1,0 +1,86 @@
+@import "node_modules/@kf-products-core/kfhub_lib/styles/variables.scss";
+
+:host {
+    display: block;
+}
+
+.applied-filters-well {
+    background: rgba(0, 123, 199, 0.05);
+    border-radius: 2px;
+
+    .applied-filters .applied-filter {
+        border: solid 1px $silver-06;
+        padding-top: $smaller-margin;
+        padding-bottom: $smaller-margin;
+    }
+
+    kf-icon {
+        font-size: 9px !important;
+    }
+}
+
+button {
+    border: solid 1px $silver;
+    outline: none;
+
+    span {
+        text-overflow: ellipsis;
+
+        &.text-placeholder {
+            height: 20px;
+        }
+    }
+
+    .filter-icon {
+        margin: 0 8px;
+    }
+}
+
+button.color-primary {
+    &:hover {
+        border-color: rgba($blue, 0.4);
+    }
+
+    &:focus {
+        border: 1px solid $cerulean;
+        // outline: 1px solid $cerulean !important;
+        box-shadow: $focus-state-box-shadow;
+    }
+
+    &:disabled {
+        background: $silver-30;
+        border-color: rgba($black, 0.1);
+        color: $medium-grey;
+    }
+}
+
+.item {
+    &.selected {
+        background: $dropdown-selected;
+        &:hover {
+            background: $dropdown-hover;
+        }
+    }
+
+    &:hover {
+        background: $dropdown-hover;
+    }
+}
+
+::ng-deep kfthcl-dropdown {
+    &:first-child {
+        margin-left: 0;
+    }
+}
+
+::ng-deep kfthcl-dropdown-toggle {
+    button,
+    span {
+        font-family: $default-font-family;
+    }
+}
+
+
+.border-button{
+    border: solid 1px $silver;
+}

@@ -1,0 +1,34 @@
+<div class="container"
+     *ngIf="sectionVisible && editable && !isNotVisible"
+     [ngClass]="isDragEnabled ? 'draggable' : 'no-draggable'">
+    <div *ngIf="isDragEnabled"
+         class="handle"
+         [ngClass]="dragIcon"></div>
+    <div class="title-desc editable"
+         [ngClass]="{'drag-padding' : isDragEnabled}"
+         *ngIf="editable"
+         [formGroup]="form">
+        <div *ngIf="titleVisible" class="heading">
+            <kf-input class="headingText"
+                [disabled]="false"
+                formControlName="name" maxlength="250"></kf-input>
+        </div>
+        <div class="description">
+            <kf-input class="descriptionText"
+                [disabled]="false"
+                type="textarea"
+                formControlName="description"
+                maxlength="12000"></kf-input>
+        </div>
+    </div>
+</div>
+<div class="container" *ngIf="sectionVisible && !editable">
+    <div class="title-desc viewable">
+        <span *ngIf="titleVisible"
+              class="body-text fw-semibold headingText">{{ form.value.name }}</span>
+        <span *ngFor="let description of descriptionArray">
+            <span class="body-text descriptionText">{{ description }}</span>
+            <span *ngIf="descriptionArray.length > 1"><br/></span>
+        </span>
+    </div>
+</div>

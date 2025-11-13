@@ -1,0 +1,68 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+
+.heading {
+    margin-bottom: $smaller-padding;
+}
+
+.headingText, .descriptionText {
+    line-height: 1.43;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 0;
+    width: 100%;
+
+    &.draggable {
+        border-bottom: solid 1px $grey-fade-light;
+
+        &:first-of-type {
+            border-top: solid 1px $grey-fade-light;
+        }
+    }
+
+    &.no-draggable {
+        border-bottom: solid 1px $grey-fade-light;
+    }
+
+    .handle {
+        background: url('#{$app-url-prefix}/assets/images/Drag.svg') center no-repeat;
+        background-color: $blue;
+        width: 26px;
+        cursor: grab;
+        cursor: -webkit-grab;
+        cursor: -moz-grab;
+    }
+
+    .title-desc {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+
+        &.editable {
+            padding: $default-padding 0 $small-padding;
+        }
+
+        &.drag-padding.editable {
+            padding: $smaller-padding $larger-padding $smallest-padding $default-padding;
+        }
+    }
+}
+
+.counter {
+    display: block;
+    color: #464646;
+    font-weight: 500;
+    margin-top: 10px;
+    font-size: 12px;
+    text-align: right;
+}
+
+kf-input {
+    &[type="textarea"] {
+        width: 100%;
+    }
+}
+

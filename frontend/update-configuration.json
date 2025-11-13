@@ -1,0 +1,13 @@
+{
+    "use as reference": {
+        "copy": [
+            "*"
+        ],
+        "ignore": [
+            "update-configuration.json"
+        ],
+        "variables": {
+            "NodeVersion": "22.11.0"
+        }
+    }
+}

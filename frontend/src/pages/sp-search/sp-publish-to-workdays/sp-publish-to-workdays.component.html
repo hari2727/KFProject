@@ -1,0 +1,39 @@
+<kf-card class="workdays-intergration-container flex-row px-0">
+    <div class="w-50">
+        <h3 class="fs-body fw-bold mx-0 mb-16 mt-0">{{ 'lib.downloadTemplate' | translate }}</h3>
+        <div class="d-flex flex-center">
+            <a (click)="onClickDownload()">
+                <kf-icon icon="export" class="mr-8"></kf-icon> 
+                <span class="fs-body fw-bold">{{ 'lib.downloadTemplate' | translate }}</span>
+            </a>
+        </div>
+    </div>
+    <div class="upload-container w-50 pl-40 border-left">
+        <h3 class="fs-body fw-bold mx-0 mb-16 mt-0">{{ 'lib.uploadPeerGroup' | translate }}</h3>
+
+        <kf-uploader (onFilesAttach)="onFilesAttached($event)" [disabled]="uploaderDisabled" class="d-block"
+            >
+            <div *ngIf="uploaderState === uploadStateEnum.Empty"
+                class="uploader-empty d-flex flex-jc-center flex-ai-center h-100 pc-cursor bg-10">
+                <div class="d-flex flex-ai-center flex-column">
+                    <kf-icon class="mb-8" icon="upload" color="grey" size="lg"></kf-icon>
+                    <div class="upload-descr mb-8 subtext-sm color-medium"> {{ 'lib.xlsDragFileOr' | translate }}</div>
+                    <button class="btn"> {{ 'lib.browseFiles' | translate }}</button>
+                </div>
+            </div>
+            <div *ngIf="uploaderState === uploadStateEnum.Progress" class="uploader-progress">
+                <div class="upload-running subtext-sm color-medium"> {{ 'lib.uploadingSpreadsheet' | translate
+                    }} </div>
+                <div class="body-text fw-bold"> {{ uploadName }}</div>
+                <div>
+                    <kf-progress style="width: 240px;" [max]="5" [value]="progressBarState"></kf-progress>
+                    <kf-icon icon="close" size="sm" color="primary" (click)="onCanceledUpload()"></kf-icon>
+                </div>
+            </div>
+            <div class="uploader-error">
+            </div>
+            <div class="uploader-done">
+            </div>
+        </kf-uploader>
+    </div>
+</kf-card>

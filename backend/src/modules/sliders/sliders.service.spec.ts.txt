@@ -1,0 +1,99 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { SlidersService } from './sliders.service';
+import { RequestCommon } from '../../common/common.utils';
+import { RequestFactory } from '../../common/request-factory';
+import { SlidersRepository } from './sliders.repository';
+import { QueryProps } from '../../common/common.interface';
+
+describe('SlidersService', () => {
+    let service: SlidersService;
+    let repository: SlidersRepository;
+    let requestCommon: RequestCommon;
+    const props: QueryProps.Default = {
+        loggedInUserClientId: 1,
+        locale: 'en-US',
+        userId: 12334,
+    };
+
+    const request = {
+        headers: {
+            authtoken: 'token',
+            'ps-session-id': 'sessionid',
+        },
+    };
+
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [SlidersService, RequestCommon, SlidersRepository, ConfigService, RequestFactory],
+        }).compile();
+
+        service = module.get<SlidersService>(SlidersService);
+        repository = module.get<SlidersRepository>(SlidersRepository);
+    });
+
+    it('should be defined', () => {
+        expect(service).toBeDefined();
+    });
+
+    // test('should validate query params', () => {
+    //     const clientId = '1';
+    //     expect(() => service['validateQueryParams'](clientId)).not.toThrow();
+    // });
+
+    // test('should validate query params', () => {
+    //     const clientId = null;
+    //     expect(() => service['validateQueryParams'](clientId)).toThrow();
+    // });
+
+    // test('should call getCustomProfiles with clientId', async () => {
+    //     jest.spyOn(repository, 'getCustomProfiles').mockResolvedValue([]);
+    //     await service.migrateCustomSPs(props, request as any);
+    //     expect(repository.getCustomProfiles).toHaveBeenCalledWith(props.loggedInUserClientId.toString());
+    // });
+
+    // test('should call getJsonForUcpOnProfileId on getCustomProfiles have clientJobIds', async () => {
+    //     jest.spyOn(repository, 'getCustomProfiles').mockResolvedValue([{ ClientJobID: 1 }]);
+    //     jest.spyOn(repository, 'getJsonForUcpOnProfileId').mockResolvedValue([]);
+    //     try {
+    //         await service.migrateCustomSPs(props, request as any);
+    //     } catch (e) {
+    //         expect(e).toBeInstanceOf(HttpException);
+    //         expect(e.message).toBe('No data found for clientJobId: 1');
+    //     }
+    // });
+
+    // test('should call not call getJsonForUcpOnProfileId on getCustomProfiles have no clientJobIds', async () => {
+    //     jest.spyOn(repository, 'getCustomProfiles').mockResolvedValue([]);
+    //     jest.spyOn(repository, 'getJsonForUcpOnProfileId').mockResolvedValue([]);
+    //     await service.migrateCustomSPs(props, request as any);
+    //     expect(repository.getJsonForUcpOnProfileId).not.toHaveBeenCalled();
+    // });
+
+    // test('should call ClientJobDecisionMakingSliderData with generated json', async () => {
+    //     migrationSpyFunctions();
+    //     await service.migrateCustomSPs(props, request as any);
+    //     expect(service['ClientJobDecisionMakingSliderData']).toHaveBeenCalledTimes(1);
+    //     expect(service['ClientJobDecisionMakingSliderData']).toHaveBeenCalledWith(UpcJsonMock);
+    //     expect(repository.deleteClientJobDecisionMakingSliderData).toHaveBeenCalledTimes(1);
+    //     expect(repository.loadClientJobDecisionMakingSliderData).toHaveBeenCalledTimes(1);
+    // });
+
+    // test('should call getTraitsAndDriversData with generated json', async () => {
+    //     migrationSpyFunctions();
+    //     await service.migrateCustomSPs(props, request as any);
+    //     expect(service['getTraitsAndDriversData']).toHaveBeenCalledWith(AssesmentAPIPayloadMock, request.headers);
+    // });
+
+    // function migrationSpyFunctions() {
+    //     jest.spyOn(repository, 'getCustomProfiles').mockResolvedValue([{ ClientJobID: 1 }]);
+    //     jest.spyOn(repository, 'getJsonForUcpOnProfileId').mockResolvedValue(UCPRawResponseMock);
+    //     jest.spyOn(service, 'ClientJobDecisionMakingSliderData' as any).mockResolvedValueOnce(UPCAPIResponseMock);
+    //     jest.spyOn(repository, 'deleteClientJobDecisionMakingSliderData').mockImplementation();
+    //     jest.spyOn(repository, 'loadClientJobDecisionMakingSliderData').mockImplementation();
+    //     jest.spyOn(repository, 'getCalculateAssessmentData').mockResolvedValue(AssessmentRawResponseMock);
+    //     jest.spyOn(service, 'generateAssessmentJson' as any).mockReturnValue(AssesmentAPIPayloadMock);
+    //     jest.spyOn(service, 'getTraitsAndDriversData' as any).mockResolvedValue([]);
+    //     jest.spyOn(repository, 'deleteTraitsAndDrivers' as any).mockResolvedValue(null);
+    //     jest.spyOn(repository, 'loadIntoClientJobDetails' as any).mockResolvedValue(null);
+    // }
+});

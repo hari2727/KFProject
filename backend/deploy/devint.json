@@ -1,0 +1,14 @@
+{
+    "awsRegion": "us-east-1",
+    "awsProfile": "kfawsdeployerec2",
+    "targetBase": "s3://devintproductshub.kornferry.com",
+    "cloudfrontDistributionId": "E2MHJT0HWIJ4OY",
+    "invalidateCloudFront": true,
+    "put": [
+        {
+            "when": "documentation",
+            "source": "documentation/",
+            "target": "documentation/kfhub_tarc_svc_nest/"
+        }
+    ]
+}

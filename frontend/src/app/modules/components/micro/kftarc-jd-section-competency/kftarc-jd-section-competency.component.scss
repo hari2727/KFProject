@@ -1,0 +1,80 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+
+kf-input {
+    width: 100%;
+}
+
+.section{
+    padding-bottom: $default-padding;
+
+}
+.disableHeading{
+    color: #919191 !important;
+}
+.title-header-section {
+    display: flex;
+    align-items: center;
+
+    .title-header {
+        text-transform: uppercase;
+        flex: 1;
+        font-weight: $_bold-font-weight;
+        margin-bottom: 10px;
+    }
+    .toggle{
+        float:right;
+        display: flex;
+        margin-left: $default-margin;
+
+
+        span {
+            margin-left: $small-margin;
+            line-height: 1.43;
+        }
+    }
+}
+
+.content {
+    &.line {
+       padding-bottom: $small-padding;
+       border-bottom: 1px solid $grey-fade-light;
+    }
+
+    :host ::ng-deep kfthcl-draggable-container {
+        &.editable {
+            .card {
+                position: relative;
+                border-bottom: 0;
+                padding: 0;
+            }
+        }
+        &.static-view {
+            .card:last-of-type {
+                padding-bottom: $large-padding;
+            }
+
+        }
+
+
+
+    }
+}
+
+.close {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    font-size: 12px;
+    line-height: 10px;
+    cursor: pointer;
+}
+
+::ng-deep kftarc-jd-draggable-competency {
+    .description {
+        margin-top: $smaller-padding;
+    }
+
+    .heading + .description {
+        margin-top: 0;
+    }
+}

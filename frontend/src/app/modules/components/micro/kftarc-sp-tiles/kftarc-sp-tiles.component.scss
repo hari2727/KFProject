@@ -1,0 +1,21 @@
+.tiles-name {
+  margin-bottom: 16px;
+}
+
+.tiles-container {
+  margin-bottom: 8px;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+
+  .tile {
+    display: inline-block;
+    padding: 6px 10px;
+    border: 1px solid;
+    max-width: 170px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

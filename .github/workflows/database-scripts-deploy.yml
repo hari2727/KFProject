@@ -1,0 +1,38 @@
+name: kfone-sample-database-deploy
+run-name: kfone-sample-database-deploy-${{ inputs.environment }}-${{ inputs.region }}-${{ inputs.imageTag }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: 'Environment'
+        required: true
+        default: dev
+        options:
+          - sbx
+          - dev
+          - qa1
+          - stg
+          - prd
+      region:
+        type: choice
+        description: 'AWS Region'
+        required: true
+        default: us-east-1
+        options:
+          - us-east-1
+          - us-east-2
+          - us-west-1
+          - us-west-2
+
+jobs:
+  deploy:
+    uses: HayGroup/kfone-common/.github/workflows/pgsql-scripts-deploy-0.0.1.yml@main # Common template for the build jobs, provided by devops team.
+    secrets: inherit
+    with:
+      environment: '${{inputs.environment}}'
+      region: '${{inputs.region}}'
+      database: 'kfone'
+      secret-ids: '/system/platform/postgres/shared/iam-pwd'
+      workspace: 'shared-db-yuniql'

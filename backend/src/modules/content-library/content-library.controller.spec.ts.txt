@@ -1,0 +1,52 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { ContentLibraryController } from './content-library.controller';
+import { FrameworkService } from './competencies/framework/framework.service';
+import { ResponseWithClusterName, ResponseWithOutClusterName, TranslationsQuery } from './competencies/framework/framework.service.fixtures';
+import { FrameworkRepository } from './competencies/framework/framework.repository';
+
+describe('ContentLibraryController', () => {
+    let controller: ContentLibraryController;
+    let service: FrameworkService;
+
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            controllers: [ContentLibraryController],
+            providers: [FrameworkService, FrameworkRepository],
+        }).compile();
+
+        controller = module.get<ContentLibraryController>(ContentLibraryController);
+        service = module.get<FrameworkService>(FrameworkService);
+    });
+
+    it('should be defined', () => {
+        expect(controller).toBeDefined();
+    });
+
+    it('should pass query to the service', async () => {
+        jest.spyOn(service, 'getLanguageCompetencies').mockResolvedValue([]);
+        await service.getLanguageCompetencies(TranslationsQuery);
+        expect(service.getLanguageCompetencies).toHaveBeenCalledWith(TranslationsQuery);
+    });
+
+    it('should return expected response', async () => {
+        jest.spyOn(service, 'getLanguageCompetencies').mockResolvedValue(ResponseWithClusterName);
+        const resp = await service.getLanguageCompetencies(TranslationsQuery);
+        expect(resp).toEqual(ResponseWithClusterName);
+    });
+
+    it('should return expected response without clusterName', async () => {
+        TranslationsQuery.clusterId = null;
+        jest.spyOn(service, 'getLanguageCompetencies').mockResolvedValue(ResponseWithOutClusterName);
+        const resp = await service.getLanguageCompetencies(TranslationsQuery);
+        expect(resp).toEqual(ResponseWithOutClusterName);
+    });
+
+    it('should throw error if query doesnt have required params', async () => {
+        TranslationsQuery.factorId = null;
+        try {
+            await expect(service.getLanguageCompetencies(null)).rejects.toThrow();
+        } catch (err) {
+            expect(err.message).toEqual('Missing required parameters');
+        }
+    });
+});

@@ -1,0 +1,102 @@
+name: Deploy NiFi Flow
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: 'Environment'
+        required: true
+        default: dev
+        options:
+          - sb
+          - dev
+          - qa1
+          - stg
+          - prd
+      region:
+        type: choice
+        description: 'AWS Region'
+        required: true
+        default: us-east-1
+        options:
+          - us-east-1
+          - us-east-2
+          - us-west-1
+          - us-west-2
+      bucket_name:
+        type: string
+        description: 'NiFi Registry Bucket Name'
+        required: true
+      flow_name:
+        type: string
+        description: 'NiFi Flow Name'
+        required: true
+      file_pattern:
+        type: string
+        description: 'File pattern to upload (e.g., *.json)'
+        required: true
+        default: 'Sample-version-1.json'
+      nifi_username:
+        type: string
+        description: 'NiFi UI Username'
+        required: true 
+      nifi_password:
+        type: string
+        description: 'NiFi UI Password'
+        required: true   
+
+jobs:
+  deploy:
+    name: Deploy-NiFi-Flow
+    runs-on: ${{ inputs.environment }}-${{ fromJSON('{"us-east-1":"use1","eu-central-1":"euc1","eu-west-1":"euw1","us-west-2":"usw2"}')[inputs.region] }}-app
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Load Environment Variables
+        run: |
+          chmod +x nifi/scripts/load_env.sh
+          ./nifi/scripts/load_env.sh ${{ inputs.environment }}
+
+      - name: Check NiFi Registry Availability
+        run: |
+          chmod +x nifi/scripts/check_nifi_registry.sh
+          ./nifi/scripts/check_nifi_registry.sh
+
+      - name: Manage NiFi Buckets
+        id: manage_buckets
+        run: |
+          chmod +x nifi/scripts/manage_buckets.sh
+          ./nifi/scripts/manage_buckets.sh ${{ inputs.bucket_name }}
+        env:
+          NIFI_REGISTRY_URL: ${{ env.NIFI_REGISTRY_URL }}
+
+      - name: Manage NiFi Flows
+        if: env.bucket_id != ''
+        id: manage_flows
+        run: |
+          chmod +x nifi/scripts/manage_flows.sh
+          ./nifi/scripts/manage_flows.sh ${{ env.bucket_id }} ${{ inputs.flow_name }}
+        env:
+          NIFI_REGISTRY_URL: ${{ env.NIFI_REGISTRY_URL }}
+
+      - name: Upload JSON Files to Flow
+        if: env.flow_id != ''
+        run: |
+          chmod +x nifi/scripts/upload_files.sh
+          ./nifi/scripts/upload_files.sh ${{ env.flow_id }} ${{ env.bucket_id }} ${{ inputs.file_pattern }}
+        env:
+          NIFI_REGISTRY_URL: ${{ env.NIFI_REGISTRY_URL }}
+
+      - name: Add Uploaded Version to NiFi UI
+        if: env.flow_id != ''
+        run: |
+          chmod +x nifi/scripts/add_to_nifi_ui.sh
+          ./nifi/scripts/add_to_nifi_ui.sh ${{ env.flow_id }} ${{ env.bucket_id }}
+        env:
+          NIFI_REGISTRY_URL: ${{ env.NIFI_REGISTRY_URL }}
+          NIFI_URL: ${{ env.NIFI_URL }}
+          NIFI_REGISTRY_ID: ${{ env.NIFI_REGISTRY_ID }}
+          NIFI_USERNAME: ${{ inputs.nifi_username }}
+          NIFI_PASSWORD: ${{ inputs.nifi_password }}  

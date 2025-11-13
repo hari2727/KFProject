@@ -1,0 +1,173 @@
+@import "node_modules/@kf-products-core/kfhub_lib/styles/variables.scss";
+@import "node_modules/@kf-products-core/kfhub_lib/styles/mixins.scss";
+
+.header {
+    font-size: 34px;
+    line-height: normal;
+    letter-spacing: 0.51px;
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+.sub-header {
+    margin-bottom: 0;
+    margin-top: 12px;
+}
+
+kf-menu-dropdown {
+    ::ng-deep button {
+        span.color-light {
+            color: $black;
+        }
+        kf-icon.light {
+            color: $cerulean;
+        }
+    }
+}
+
+.masthead {
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+.actions {
+    button {
+        margin: 12px 0 12px 12px;
+    }
+}
+
+.description {
+    width: 628px;
+    padding-top: 8px;
+    font-size: 14px;
+}
+
+.parent-job-details {
+    display: flex;
+    align-items: center;
+    padding-bottom: $larger-padding;
+    border-bottom: solid 1px $grey-fade-light;
+
+    > span {
+        margin-left: 32px;
+    }
+
+    .jd-link {
+        margin-left: $default-margin;
+    }
+}
+
+.title-header {
+    text-transform: uppercase;
+}
+
+.handle {
+    background: url("#{$app-url-prefix}/assets/images/Drag.svg") center
+        no-repeat;
+    background-color: $blue;
+    width: 26px;
+    min-width: 26px;
+    cursor: move;
+}
+
+.close {
+    cursor: pointer;
+}
+
+.section-list {
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+@mixin border-bottom() {
+    border-bottom: 1px solid $grey-fade-light;
+}
+
+.border-bottom {
+    @include border-bottom;
+}
+
+.item {
+    background-color: $page-background;
+    @include border-bottom;
+
+    &:first-child {
+        border-top: 1px solid $grey-fade-light;
+    }
+}
+
+.cdk-drag-preview {
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+
+.cdk-drag-placeholder {
+    opacity: 0;
+}
+
+.cdk-drag-animating {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.section.cdk-drop-list-dragging .item:not(.cdk-drag-placeholder) {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+$skills-container-max-height: 194px;
+
+.skills-container {
+    padding: $small-padding;
+    border: 1px solid rgba($grey, 0.3);
+    overflow-y: auto;
+    // height: 100%;
+    max-height: $skills-container-max-height;
+    background-color: $white;
+
+    @supports (-moz-appearance: none) {
+        height: initial;
+        min-height: 130px;
+    }
+    &.edit-mode {
+        max-height: inherit;
+        @supports (-moz-appearance: none) {
+            max-height: $skills-container-max-height;
+        }
+        @media all and (-ms-high-contrast: none) {
+            max-height: $skills-container-max-height;
+        }
+    }
+    thcl-chip {
+        &:not(.add-chip) {
+            border: solid 1px #b2b2b2;
+        }
+        ::ng-deep kf-input input {
+            border-color: rgba(255, 255, 255, 0);
+        }
+        &:hover {
+            ::ng-deep kf-input input {
+                border-color: rgba(145, 145, 145, 0.3);
+                &:hover {
+                    border-color: rgba($blue, 0.4);
+                }
+                &:focus {
+                    border: 1px solid $cerulean;
+                    outline: 1px solid $cerulean;
+                    box-shadow: 0 0 5px 0 rgba(0, 123, 199, 0.5);
+                }
+            }
+        }
+    }
+}
+
+.add-skills {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.add-button {
+    border: 1px solid $blue;
+    background: rgba($white, 0.5);
+    cursor: pointer;
+    user-select: none;
+}

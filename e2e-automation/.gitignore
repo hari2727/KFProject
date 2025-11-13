@@ -1,0 +1,10 @@
+/target
+/Screenshots
+/ScreenshotsFailed
+/test-output
+*.log
+/.project
+/bin
+.idea/*
+target/
+*.iml

@@ -1,0 +1,276 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { KfTarcRolesService } from './kftarc-roles.service';
+import * as typeorm from 'typeorm';
+import { KfRolesUtilMockData } from './kftarc-roles.utils.mock';
+import {
+    ExecStoreProcMocks,
+    GenerateQueryMocks,
+    GetFilterValuesMocks,
+    GlobalServiceMocks
+} from './kftarc-roles.service.fixtures';
+import { HttpsService } from '../../_shared/https/https.service';
+
+jest.mock('typeorm', () => {
+    const actual = jest.requireActual('typeorm');
+    return {
+        ...actual,
+        getManager: jest.fn(),
+        getConnection: jest.fn(),
+    };
+});
+
+describe('KfTarcRolesService', () => {
+    let rolesService: KfTarcRolesService;
+    let module: TestingModule;
+    let https: HttpsService;
+
+    beforeAll(async () => {
+        module = await Test.createTestingModule({
+            providers: [HttpsService, KfTarcRolesService],
+        }).compile();
+    });
+
+    beforeEach(async () => {
+        rolesService = module.get<KfTarcRolesService>(KfTarcRolesService);
+        https = module.get<HttpsService>(HttpsService);
+        jest.clearAllMocks();
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    describe('getFilterValues', () => {
+        test('should return filter values to be used in Stored Procedure', async () => {
+            // Act
+            const segregatedFilterValues = rolesService.getFilterValues(GlobalServiceMocks.queryParamsWithFilters);
+
+            // Assert
+            expect(segregatedFilterValues).not.toBe(null);
+            expect(segregatedFilterValues).toHaveProperty('grades');
+            expect(segregatedFilterValues).toHaveProperty('subFunctions');
+            expect(segregatedFilterValues).toHaveProperty('profiles');
+            expect(segregatedFilterValues).toHaveProperty('roleTypes');
+            expect(segregatedFilterValues).toHaveProperty('valueStreams');
+            expect(segregatedFilterValues).toStrictEqual(GetFilterValuesMocks.expectedFilterObject);
+        });
+
+        test('should return empty values for roleTypes and valueStreams', async () => {
+            // Act
+            const result = rolesService.getFilterValues(GlobalServiceMocks.queryParamsWithErroraneousFilterBy);
+
+            // Assert
+            expect(result).not.toBe(null);
+            expect(result).toStrictEqual(GetFilterValuesMocks.EmptyStringsFilterObject);
+        });
+
+        ['filterBy', 'filterValues'].forEach((filterItem: string) => {
+            test(`should handle error if ${filterItem} invalid `, async () => {
+                // Arrange
+                let e;
+
+                // Act
+                try {
+                    rolesService.getFilterValues({ ...GlobalServiceMocks.queryParamsWithCommonFilters, [filterItem]: true });
+                } catch (err) {
+                    e = err;
+                }
+
+                // Assert
+                expect(e).toBeDefined();
+                expect(e.getStatus()).toEqual(500);
+                expect(e.getExceptionCode()).toEqual('APP.30065');
+            });
+        });
+    });
+
+    describe('getRoles', () => {
+        const expectedJson = KfRolesUtilMockData.expectedJson;
+        const mockDbData = KfRolesUtilMockData.mockDbData;
+
+        test('should return roles list', async () => {
+            // Arrange
+            (typeorm as any).getManager.mockReturnValueOnce({
+                query: () => {
+                    return Promise.resolve(mockDbData);
+                },
+            });
+            (typeorm as any).getConnection.mockReturnValueOnce({
+                driver: {
+                    escapeQueryWithParameters: () => {
+                        return [
+                            `exec [SuccessProfile].[dbo].[SearchAPIRolesAndProfiles] @0,
+                        '@1', @2, @3, @4, @5, @6, @7, @8, @9, @10, @11, @12, @13, @14, @15`,
+                            Object.values(GlobalServiceMocks.defaultQueryParams),
+                        ];
+                    },
+                },
+            });
+            jest.spyOn(https, 'get').mockResolvedValueOnce(GlobalServiceMocks.mockPermissions);
+
+            // Act
+            const rolesList = await rolesService.getRoles(GlobalServiceMocks.defaultQueryParams, GlobalServiceMocks.mockRequest);
+
+            // Assert
+            expect(rolesList).toEqual(expectedJson);
+        });
+
+        test('service Methods should get called', async () => {
+            // Arrange
+            (typeorm as any).getManager.mockReturnValueOnce({
+                query: () => {
+                    return Promise.resolve(mockDbData);
+                },
+            });
+            (typeorm as any).getConnection.mockReturnValueOnce({
+                driver: {
+                    escapeQueryWithParameters: () => {
+                        return [
+                            `exec [SuccessProfile].[dbo].[SearchAPIRolesAndProfiles] @0,
+                        '@1', @2, @3, @4, @5, @6, @7, @8, @9, @10, @11, @12, @13, @14, @15`,
+                            Object.values(GlobalServiceMocks.defaultQueryParams),
+                        ];
+                    },
+                },
+            });
+
+            // Act
+            const resArray = await rolesService.generateQuery(GlobalServiceMocks.defaultQueryParams, GlobalServiceMocks.mockRestrictions);
+
+            // Assert
+            expect(resArray).not.toBe(null);
+            expect(resArray).toHaveLength(2);
+        });
+
+        test('service Method of utils should get called', async () => {
+            // Arrange
+            (typeorm as any).getManager.mockReturnValueOnce({
+                query: () => {
+                    return Promise.resolve(mockDbData);
+                },
+            });
+            (typeorm as any).getConnection.mockReturnValueOnce({
+                driver: {
+                    escapeQueryWithParameters: () => {
+                        return [
+                            `exec [SuccessProfile].[dbo].[SearchAPIRolesAndProfiles] @0,
+                        '@1', @2, @3, @4, @5, @6, @7, @8, @9, @10, @11, @12, @13, @14, @15`,
+                            Object.values(GlobalServiceMocks.defaultQueryParams),
+                        ];
+                    },
+                },
+            });
+            jest.spyOn(https, 'get').mockResolvedValueOnce(GlobalServiceMocks.mockPermissions);
+            const groupProfilesUnderRolesMethod = jest.spyOn((rolesService as any).rolesUtil, 'groupProfilesUnderRoles');
+
+            // Act
+            await rolesService.getRoles(GlobalServiceMocks.defaultQueryParams, GlobalServiceMocks.mockRequest);
+
+            // Assert
+            expect(groupProfilesUnderRolesMethod).toHaveBeenCalledTimes(1);
+        });
+    });
+
+
+
+    describe('execStoreProc', () => {
+        test('should Result roles without failure', async () => {
+            // Arrange
+            (typeorm as any).getManager.mockReturnValueOnce({
+                query: () => {
+                    return Promise.resolve(ExecStoreProcMocks.mockDbData);
+                },
+            });
+            jest.spyOn(rolesService, 'generateQuery').mockResolvedValueOnce([
+                `exec [SuccessProfile].[dbo].[SearchAPIRolesAndProfiles] @0,
+'@1', @2, @3, @4, @5, @6, @7, @8, @9, @10, @11, @12, @13, @14, @15`,
+                Object.values(GlobalServiceMocks.defaultQueryParams),
+            ]);
+            let err;
+
+            // Act
+            try {
+                await rolesService.execStoreProc(GlobalServiceMocks.queryParamsWithFilters, GlobalServiceMocks.mockRestrictions);
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeUndefined();
+        });
+        test('should handle error when Stored Procedure fails', async () => {
+            // Arrange
+            (typeorm as any).getManager.mockReturnValueOnce({
+                query: () => {
+                    return Promise.reject(ExecStoreProcMocks.mockDbData);
+                },
+            });
+            jest.spyOn(rolesService, 'generateQuery').mockRejectedValueOnce(new Error('Stored Procedure fails'));
+            let err;
+
+            // Act
+            try {
+                await rolesService.execStoreProc(GlobalServiceMocks.queryParamsWithFilters, GlobalServiceMocks.mockRestrictions);
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeDefined();
+            expect(err.getStatus()).toEqual(500);
+            expect(err.getExceptionCode()).toEqual('APP.30065');
+        });
+    });
+
+    describe('generateQuery', () => {
+        test('should Result query and parameters without failure', async () => {
+            // Arrange
+            jest.spyOn(rolesService, 'getFilterValues').mockReturnValueOnce(GenerateQueryMocks.mockFilters);
+            (typeorm as any).getConnection.mockReturnValueOnce({
+                driver: {
+                    escapeQueryWithParameters: () => {
+                        return [
+                            `exec [SuccessProfile].[dbo].[SearchAPIRolesAndProfiles] @0,
+                        '@1', @2, @3, @4, @5, @6, @7, @8, @9, @10, @11, @12, @13, @14, @15`,
+                            Object.values(GlobalServiceMocks.defaultQueryParams),
+                        ];
+                    },
+                },
+            });
+
+            let e, resArray;
+
+            // Act
+            try {
+                resArray = await rolesService.generateQuery(GlobalServiceMocks.queryParamsWithFilters, GlobalServiceMocks.mockRestrictions);
+            } catch (err) {
+                e = err;
+            }
+
+            // Assert
+            expect(e).toBeUndefined();
+            expect(resArray).not.toBe(null);
+            expect(resArray).toHaveLength(2);
+        });
+
+        test('should throw an error if with getFilterValues something gone wrong', async () => {
+            // Arrange
+            let err;
+            jest.spyOn(rolesService, 'getFilterValues').mockImplementationOnce(() => {
+                throw new Error('something gone wrong');
+            });
+
+            // Act
+            try {
+                await rolesService.generateQuery(GlobalServiceMocks.queryParamsWithFilters, GlobalServiceMocks.mockRestrictions);
+            } catch (e) {
+                err = e;
+            }
+
+            // Assert
+            expect(err).toBeDefined();
+            expect(err.getStatus()).toEqual(500);
+            expect(err.getExceptionCode()).toEqual('APP.30065');
+        });
+    });
+});

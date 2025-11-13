@@ -1,0 +1,9 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/mixins.scss';
+
+::ng-deep .ui-toast-message a {
+    color: $blue;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}

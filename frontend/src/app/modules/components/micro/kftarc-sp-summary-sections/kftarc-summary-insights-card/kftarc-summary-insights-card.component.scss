@@ -1,0 +1,25 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/mixins.scss';
+
+.card-container {
+    background-color: $white;
+    .title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: solid 1px $light-silver;
+        padding: $large-padding;
+
+        kf-icon {
+            margin-right: 10px;
+            font-size: 22px;
+        }
+
+        h4 {
+            flex: 1;
+            font-size: 18px;
+            letter-spacing: 0.56px;
+            margin: 0;
+        }
+    }
+}

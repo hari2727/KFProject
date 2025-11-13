@@ -1,0 +1,24 @@
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/variables.scss';
+@import 'node_modules/@kf-products-core/kfhub_lib/styles/mixins.scss';
+
+.spgr-qinfo-col-op-detail {
+    padding: 10px 0;
+}
+
+.spgr-qinfo-col-op-content {
+    display: inline-block;
+    width: 62%;
+}
+
+.spgr-qinfo-col-op-text {
+    display: inline-block;
+    width: 35%;
+}
+
+.spgr-qinfo-col-op-stat {
+    display: block;
+    width: 65%;
+    text-align: right;
+    float: right;
+}
+

@@ -1,0 +1,68 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { KfTarcExcludeKeysService } from './kftarc-arya-exclude-keys.service';
+import { KfTarcExcludeKeysInterface } from './kftarc-arya-exclude-keys.interface';
+import { getModelToken } from '@nestjs/mongoose';
+import { ARYA_EXCLUDE_KEYS } from './kftarc-arya-exclude-keys.schema';
+import { Model } from 'mongoose';
+import { KfTarcAryaModule } from '../kftarc-arya.module';
+
+describe('KfTarcExcludeKeysService', () => {
+    let module: TestingModule;
+    let tarcExcludeKeysService: KfTarcExcludeKeysService;
+    beforeAll(async () => {
+        module = await Test.createTestingModule({
+            providers: [
+                KfTarcExcludeKeysService,
+                {
+                    provide: getModelToken(ARYA_EXCLUDE_KEYS),
+                    useValue: {
+                        find: () => ({
+                            lean: async () => [{ jobTitles: ['jobTitle with space', 'jobTitle4', 'jobTitle2'], skills: ['aryaSkill4', 'aryaSkill2'] }],
+                        }),
+                    },
+                },
+            ],
+        }).compile();
+    });
+
+    beforeEach(() => {
+        tarcExcludeKeysService = module.get<KfTarcExcludeKeysService>(KfTarcExcludeKeysService);
+    });
+
+    afterAll(() => {
+        jest.clearAllMocks();
+    });
+
+    describe('segregateSkills', () => {
+        test('should exclude skill if it already exists in dbResult.skills', async () => {
+            // Arrange
+            const aryaSkills = [{ name: 'aryaSkill1' }, { name: 'aryaSkill2' }, { name: 'aryaSkill3' }, { name: 'aryaSkill4' }, { name: 'aryaSkill5' }];
+
+            // Act
+            tarcExcludeKeysService.segregateSkills(aryaSkills);
+
+            // Assert
+            expect(aryaSkills).toEqual([{ name: 'aryaSkill1' }, { name: 'aryaSkill3' }, { name: 'aryaSkill5' }]);
+        });
+    });
+
+    describe('segregateJobTitles', () => {
+        test('should exclude jobTitle if it already exists in dbResult.jobTitles', async () => {
+            // Arrange
+            const aryaJobTitles = [
+                { name: 'jobTitle1' },
+                { name: 'jobTitle2' },
+                { name: 'jobTitle3' },
+                { name: 'jobTitle4' },
+                { name: 'jobTitle with space' },
+                { name: 'jobTitle5' },
+            ];
+
+            // Act
+            tarcExcludeKeysService.segregateJobTitles(aryaJobTitles);
+
+            // Assert
+            expect(aryaJobTitles).toEqual([{ name: 'jobTitle1' }, { name: 'jobTitle3' }, { name: 'jobTitle5' }]);
+        });
+    });
+});

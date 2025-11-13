@@ -1,0 +1,648 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { getModelToken } from '@nestjs/mongoose';
+import { IgCmsConnection } from './cms/ig-cms-connection.service';
+import { IgService } from './ig.service';
+import { IgDraftTransformer } from './generate-draft/ig-draft-generator';
+import { IgMssqlService } from './database/ig-mssql-service';
+import { IgModel as S } from './model/ig-model.i';
+import { INTERVIEW_GUIDE_MODEL, IG_CUSTOM_CONTENT_MODEL } from './database/ig-mongoose.config';
+import { IgMock } from './mock/ig-mocks';
+import { okResponse } from '../../common/common.utils';
+import { IgCustomCompetenciesService } from './custom-competencies/ig-custom-competencies.service';
+import { IgDraftTransformerCustomCompetencies } from './generate-draft/ig-draft-generator-custom-competencies';
+
+describe('IgService', () => {
+    let module: TestingModule;
+    let igService: IgService;
+    const getInterviewGuidesMock = jest.fn();
+    const getCompetencyMock = jest.fn();
+    const generateNewDraftMock = jest.fn();
+    const generateDraftTemplateMock = jest.fn();
+    const changeStatusMock = jest.fn();
+    const draftToCmsStructureMock = jest.fn();
+    const publishInterviewGuideMock = jest.fn();
+    const getCustomCompsMock = jest.fn();
+    const updateCustomCompetencyDataMock = jest.fn();
+    const mongoMock = {
+        updateOne: jest.fn(),
+        insertMany: jest.fn(),
+        findOneLeanMock: jest.fn(),
+    };
+
+    beforeAll(async () => {
+        module = await Test.createTestingModule({
+            providers: [
+                IgService,
+                {
+                    provide: IgCmsConnection,
+                    useValue: {
+                        getInterviewGuides: getInterviewGuidesMock,
+                        getCompetencyById: getCompetencyMock,
+                        publishInterviewGuide: publishInterviewGuideMock,
+                    },
+                },
+                {
+                    provide: IgDraftTransformer,
+                    useValue: {
+                        generateNewDraft: generateNewDraftMock,
+                        changeStatus: changeStatusMock,
+                        draftToCmsStructure: draftToCmsStructureMock,
+                        generateDraftTemplate: generateDraftTemplateMock,
+                    },
+                },
+                { provide: IgMssqlService, useValue: { getCustomComps: getCustomCompsMock } },
+                {
+                    provide: getModelToken(INTERVIEW_GUIDE_MODEL),
+                    useValue: { updateOne: mongoMock.updateOne, insertMany: mongoMock.insertMany, findOne: () => ({ lean: mongoMock.findOneLeanMock }) },
+                },
+                {
+                    provide: getModelToken(IG_CUSTOM_CONTENT_MODEL),
+                    useValue: { updateOne: mongoMock.updateOne, insertMany: mongoMock.insertMany, findOne: () => ({ lean: mongoMock.findOneLeanMock }) },
+                },
+                { provide: IgCustomCompetenciesService, useValue: { updateCustomCompetencyData: updateCustomCompetencyDataMock } },
+                { provide: IgDraftTransformerCustomCompetencies, useValue: {} },
+            ],
+        }).compile();
+
+        igService = module.get(IgService);
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+        jest.clearAllTimers();
+        jest.restoreAllMocks();
+        jest.resetAllMocks();
+    });
+
+    /*
+    describe('eachInterviewLength', () => {
+        test('should set hasDuplicates to true if array is empty', () => {
+            // Arrange
+            const interviewsArr = [];
+            const interviews = 2;
+
+            // Act
+            const result = igService.eachInterviewLength(interviewsArr, interviews);
+
+            // Assert
+            expect(result.hasDuplicates).toEqual(true);
+        });
+
+        test('should set hasDuplicates to true if array length equal interviews', () => {
+            // Arrange
+            const interviewsArr = ['', '', ''];
+            const interviews = 3;
+
+            // Act
+            const result = igService.eachInterviewLength(interviewsArr, interviews);
+
+            // Assert
+            expect(result.hasDuplicates).toEqual(true);
+        });
+
+        [[], [''], ['', '']].forEach(interviewsArr => {
+            test("should set each element's value to 2 if array length is less than interviews", () => {
+                // Arrange
+                const interviews = interviewsArr.length + 1;
+
+                // Act
+                const result = igService.eachInterviewLength(interviewsArr, interviews);
+
+                // Assert
+                expect(result.elements).toEqual(new Array(interviews).fill(2));
+            });
+        });
+
+        [
+            ['', '', ''],
+            ['', '', '', '', ''],
+            ['', '', '', '', '', ''],
+        ].forEach(interviewsArr => {
+            test('should not set hasDuplicates to true if array length is greater than interviews more than 2 times', () => {
+                // Arrange
+                const interviews = Math.ceil(interviewsArr.length / 2 - 1);
+
+                // Act
+                const result = igService.eachInterviewLength(interviewsArr, interviews);
+
+                // Assert
+                expect(result.hasDuplicates).toEqual(false);
+            });
+        });
+    });
+
+    describe('addCompToInterview', () => {
+        const masterUrl = 'masterUrl';
+
+        test('should not add data and question marks by each length if compData is empty', () => {
+            // Arrange
+            const eachLength = [3, 2, 4, 1];
+            const compData = [];
+            const expected = [`${masterUrl}&o_competencies`, `${masterUrl}&o_competencies`, `${masterUrl}&o_competencies`, `${masterUrl}&o_competencies`];
+            // Act
+            const result = igService.addCompToInterview(eachLength, compData, masterUrl);
+
+            // Assert
+            expect(result).toEqual(expected);
+        });
+
+        test('should correct add data by each length', () => {
+            // Arrange
+            const eachLength = [3, 2, 4, 1];
+            const compData = ['data1', 'data2', 'data3', 'data4', 'data5'];
+            const expected = [
+                `${masterUrl}&o_competencies=${compData[0]}%7C${compData[1]}%7C${compData[2]}`,
+                `${masterUrl}&o_competencies=${compData[3]}%7C${compData[4]}`,
+                `${masterUrl}&o_competencies=${compData[0]}%7C${compData[1]}%7C${compData[2]}%7C${compData[3]}`,
+                `${masterUrl}&o_competencies=${compData[4]}`,
+            ];
+            // Act
+            const result = igService.addCompToInterview(eachLength, compData, masterUrl);
+
+            // Assert
+            expect(result).toEqual(expected);
+        });
+    });
+
+    describe('splitInterview', () => {
+        const query = {
+            loggedInUserClientId: 1,
+            userId: 1,
+            locale: 'en',
+        };
+        const body = {
+            masterUrl: 'masterUrl',
+            compData: ['data1', 'data2', 'data3', 'data4', 'data5'],
+        };
+
+        ['eachInterviewLength', 'addCompToInterview'].forEach((failedMethod: string) => {
+            test(`should throw an error if something gone wrong in ${failedMethod}`, async () => {
+                // Arrange
+                jest.spyOn(igService as any, failedMethod).mockImplementationOnce(() => {
+                    throw new Error('something gone wrong');
+                });
+                let err;
+
+                // Act
+                try {
+                    await igService.splitInterview(query, body);
+                } catch (e) {
+                    err = e;
+                }
+
+                // Assert
+                expect(err).toBeDefined();
+                expect(err.getStatus()).toEqual(400);
+            });
+        });
+
+        test('should split interview', async () => {
+            // Arrange
+            const expected = {
+                master: { url: 'masterUrl' },
+                splits: [
+                    { counts: 2, hasDuplicates: false, urls: ['masterUrl&o_competencies=data1%7Cdata2%7Cdata3', 'masterUrl&o_competencies=data4%7Cdata5'] },
+                    {
+                        counts: 3,
+                        hasDuplicates: true,
+                        urls: ['masterUrl&o_competencies=data1%7Cdata2', 'masterUrl&o_competencies=data3%7Cdata4', 'masterUrl&o_competencies=data5%7Cdata1'],
+                    },
+                    {
+                        counts: 4,
+                        hasDuplicates: true,
+                        urls: [
+                            'masterUrl&o_competencies=data1%7Cdata2',
+                            'masterUrl&o_competencies=data3%7Cdata4',
+                            'masterUrl&o_competencies=data5%7Cdata1',
+                            'masterUrl&o_competencies=data2%7Cdata3',
+                        ],
+                    },
+                    {
+                        counts: 5,
+                        hasDuplicates: true,
+                        urls: [
+                            'masterUrl&o_competencies=data1%7Cdata2',
+                            'masterUrl&o_competencies=data3%7Cdata4',
+                            'masterUrl&o_competencies=data5%7Cdata1',
+                            'masterUrl&o_competencies=data2%7Cdata3',
+                            'masterUrl&o_competencies=data4%7Cdata5',
+                        ],
+                    },
+                    {
+                        counts: 6,
+                        hasDuplicates: true,
+                        urls: [
+                            'masterUrl&o_competencies=data1%7Cdata2',
+                            'masterUrl&o_competencies=data3%7Cdata4',
+                            'masterUrl&o_competencies=data5%7Cdata1',
+                            'masterUrl&o_competencies=data2%7Cdata3',
+                            'masterUrl&o_competencies=data4%7Cdata5',
+                            'masterUrl&o_competencies=data1%7Cdata2',
+                        ],
+                    },
+                ],
+            };
+
+            // Act
+            const result = await igService.splitInterview(query, body);
+
+            // Assert
+            expect(result).toEqual(expected);
+        });
+    });
+*/
+
+    describe('getInterviewGuideCompetencies', () => {
+        test('should return draft if it exist and status MODIFIED', async () => {
+            // Arrange
+            const draft = { status: S.Status.MODIFIED, competencies: {}, whatever: 'whatever' },
+                expectedRes = { competencies: draft.competencies, status: draft.status };
+            getInterviewGuidesMock.mockResolvedValueOnce({}); //cms STANDART call
+            getInterviewGuidesMock.mockResolvedValueOnce({}); //cms BASE call
+            jest.spyOn(igService as any, 'getInterviewGuideDraft').mockResolvedValueOnce(draft);
+
+            // Act
+            const result = await igService.getInterviewGuideCompetencies('111', 'en', '111');
+
+            // Assert
+            expect(result).toEqual(expectedRes);
+        });
+
+        test('should return draft if it exist and status BASE', async () => {
+            // Arrange
+            const draft = { status: S.Status.MODIFIED, competencies: {}, whatever: 'whatever' },
+                expectedRes = { competencies: draft.competencies, status: draft.status };
+            getInterviewGuidesMock.mockResolvedValueOnce({}); //cms STANDART call
+            getInterviewGuidesMock.mockResolvedValueOnce({}); //cms BASE call
+            jest.spyOn(igService as any, 'getInterviewGuideDraft').mockResolvedValueOnce(draft);
+
+            // Act
+            const result = await igService.getInterviewGuideCompetencies('111', 'en', '111');
+
+            // Assert
+            expect(result).toEqual(expectedRes);
+        });
+
+        test('should return IG from CMS if draft has status PUBLISHED', async () => {
+            // Arrange
+            const draft = { status: S.Status.PUBLISHED, competencies: {}, whatever: 'whatever' },
+                igComps = { whatever: 'whatever' },
+                expectedRes = { competencies: igComps, status: S.Status.PUBLISHED };
+            getInterviewGuidesMock.mockResolvedValueOnce(igComps); //cms STANDART call
+            getInterviewGuidesMock.mockResolvedValueOnce({}); //cms BASE call
+            jest.spyOn(igService as any, 'getInterviewGuideDraft').mockResolvedValueOnce(draft);
+
+            // Act
+            const result = await igService.getInterviewGuideCompetencies('111', 'en', '111');
+
+            // Assert
+            expect(result).toEqual(expectedRes);
+        });
+
+        test('should return base IG from CMS if there is no published content in CMS for user', async () => {
+            // Arrange
+            const draft = { status: S.Status.PUBLISHED, competencies: {}, whatever: 'whatever' },
+                igCompsBase = { whatever: 'whatever' },
+                expectedRes = { competencies: igCompsBase, status: S.Status.BASE };
+            getInterviewGuidesMock.mockResolvedValueOnce(null); //cms STANDART call
+            getInterviewGuidesMock.mockResolvedValueOnce(igCompsBase); //cms BASE call
+            jest.spyOn(igService as any, 'getInterviewGuideDraft').mockResolvedValueOnce(draft);
+
+            // Act
+            const result = await igService.getInterviewGuideCompetencies('111', 'en', '111');
+
+            // Assert
+            expect(result).toEqual(expectedRes);
+        });
+
+        test('should generate a new draft and return it if there is no stored one', async () => {
+            // Arrange
+            const draft = { status: S.Status.MODIFIED, competencies: {}, whatever: 'whatever' },
+                expectedRes = { competencies: draft.competencies, status: draft.status };
+
+            getInterviewGuidesMock.mockResolvedValueOnce({}); //cms STANDART call
+            getInterviewGuidesMock.mockResolvedValueOnce({}); //cms BASE call
+
+            jest.spyOn(igService as any, 'getInterviewGuideDraft').mockResolvedValueOnce(null);
+            jest.spyOn(igService as any, 'upsertDraftWithCustomContent').mockResolvedValueOnce({});
+            jest.spyOn(igService as any, 'getInterviewGuideDraft').mockResolvedValueOnce(draft);
+
+            // Act
+            const result = await igService.getInterviewGuideCompetencies('111', 'en', '111');
+
+            // Assert
+            expect(result).toEqual(expectedRes);
+        });
+    });
+
+    describe('getInterviewGuideCompetency', () => {
+        test('should return Competency from draft if it exist and status not PUBLISHED', async () => {
+            // Arrange
+            const draftComp = { status: S.Status.MODIFIED, competency: { whatever: 'whatever' } },
+                expectedRes = { whatever: 'whatever', status: draftComp.status };
+            getCompetencyMock.mockResolvedValueOnce(undefined); //cms STANDART call
+            getCompetencyMock.mockResolvedValueOnce(undefined); //cms BASE call
+            jest.spyOn(igService as any, 'getInterviewGuideDraftCompetencyRoot').mockResolvedValueOnce(draftComp);
+
+            // Act
+            const result = await igService.getInterviewGuideCompetency('111', 'en', '111');
+
+            // Assert
+            expect(result).toEqual(expectedRes);
+        });
+
+        test('should return Competency from cms if there is no draft or it is published', async () => {
+            // Arrange
+            const draftComp1 = { status: S.Status.PUBLISHED, competency: { whatever: 'whatever' } },
+                draftComp2 = undefined,
+                cmsComp = { whatever: 'whateverCMS' },
+                expectedRes = Object.assign({ ...cmsComp }, { status: S.Status.PUBLISHED });
+            // Act
+            for (let draftComp in [draftComp1, draftComp2]) {
+                getCompetencyMock.mockResolvedValueOnce(cmsComp); //cms STANDART call
+                getCompetencyMock.mockResolvedValueOnce(undefined); //cms BASE call
+                jest.spyOn(igService as any, 'getInterviewGuideDraftCompetencyRoot').mockResolvedValueOnce(draftComp);
+                const result = await igService.getInterviewGuideCompetency('111', 'en', '111');
+
+                // Assert
+                expect(result).toEqual(expectedRes);
+            }
+        });
+
+        test('should return base Competency from cms there is no published content in CMS and there is no draft', async () => {
+            // Arrange
+            const draftComp = undefined,
+                cmsComp = { whatever: 'whateverCMS' },
+                expectedRes = { ...cmsComp, status: S.Status.BASE };
+            getCompetencyMock.mockResolvedValueOnce(undefined); //cms STANDART call
+            getCompetencyMock.mockResolvedValueOnce(cmsComp); //cms BASE call
+            jest.spyOn(igService as any, 'getInterviewGuideDraftCompetencyRoot').mockResolvedValueOnce(draftComp);
+
+            // Act
+            const result = await igService.getInterviewGuideCompetency('111', 'en', '111');
+
+            // Assert
+            expect(result).toEqual(expectedRes);
+        });
+
+        test('should return {} for non-existent Competency', async () => {
+            // Arrange
+            getCompetencyMock.mockResolvedValueOnce(undefined); //cms STANDART call
+            getCompetencyMock.mockResolvedValueOnce(undefined); //cms BASE call
+            jest.spyOn(igService as any, 'getInterviewGuideDraftCompetencyRoot').mockResolvedValueOnce(undefined);
+
+            // Act
+            const result = await igService.getInterviewGuideCompetency('111', 'en', '111');
+
+            // Assert
+            expect(result).toEqual({});
+        });
+    });
+
+    describe('getCompetencyBaseContent', () => {
+        test('should return base Competency with comp name from draft if it exist', async () => {
+            // Arrange
+            const draftComp = { status: S.Status.MODIFIED, competency: { name: 'whatever1' } },
+                baseComp = { name: 'whatever2', whatever: 'whatever3' },
+                expectedRes = Object.assign({ ...baseComp }, { status: S.Status.BASE, name: draftComp.competency.name });
+
+            getCompetencyMock.mockResolvedValueOnce(baseComp); //cms BASE call
+            jest.spyOn(igService as any, 'getInterviewGuideDraftCompetencyRoot').mockResolvedValueOnce(draftComp);
+
+            // Act
+            const result = await igService.getCompetencyBaseContent('111', 'en', '111');
+
+            // Assert
+            expect(result).toEqual(expectedRes);
+        });
+
+        test('should return base Competency with original name if comp dont exist in draft', async () => {
+            // Arrange
+            const draftComp = undefined,
+                baseComp = { name: 'whatever2', whatever: 'whatever3' },
+                expectedRes = Object.assign({ ...baseComp }, { status: S.Status.BASE, name: baseComp.name });
+
+            getCompetencyMock.mockResolvedValueOnce(baseComp); //cms BASE call
+            jest.spyOn(igService as any, 'getInterviewGuideDraftCompetencyRoot').mockResolvedValueOnce(draftComp);
+
+            // Act
+            const result = await igService.getCompetencyBaseContent('111', 'en', '111');
+
+            // Assert
+            expect(result).toEqual(expectedRes);
+        });
+
+        test('should throw error if base Competency not found', async () => {
+            // Arrange
+            const draftComp = { status: S.Status.MODIFIED, competency: { name: 'whatever1' } },
+                baseComp = undefined;
+
+            getCompetencyMock.mockResolvedValueOnce(baseComp); //cms BASE call
+            jest.spyOn(igService as any, 'getInterviewGuideDraftCompetencyRoot').mockResolvedValueOnce(draftComp);
+
+            // Act
+            const resultFn = async () => await igService.getCompetencyBaseContent('111', 'en', '111');
+
+            // Assert
+            expect(resultFn).rejects.toThrowError(HttpException);
+        });
+    });
+
+    describe('putInterviewGuideDraft', () => {
+        test('for not custom Competency if there is not draft should create draft weith provided comp and insert', async () => {
+            // Arrange
+            jest.spyOn(igService as any, 'getInterviewGuideDraft').mockResolvedValueOnce(null);
+            jest.spyOn(igService as any, 'getCmsStandartOrBaseContent').mockResolvedValueOnce({});
+            getInterviewGuidesMock.mockResolvedValueOnce({});
+            generateNewDraftMock.mockReturnValueOnce({});
+
+            // Act
+            const result = await igService.putInterviewGuideDraft(IgMock.igCmsMappedCompBin.id, '111', 'en', '111', IgMock.igCmsMappedCompBin);
+
+            // Assert
+            expect(mongoMock.insertMany).toBeCalled();
+            expect(result).toEqual(okResponse);
+        });
+        test('for not custom Competency if there is draft should update', async () => {
+            // Arrange
+            jest.spyOn(igService as any, 'getInterviewGuideDraft').mockResolvedValueOnce({});
+            getInterviewGuidesMock.mockResolvedValueOnce({});
+            generateNewDraftMock.mockReturnValueOnce({});
+
+            // Act
+            const result = await igService.putInterviewGuideDraft(IgMock.igCmsMappedCompBin.id, '111', 'en', '111', IgMock.igCmsMappedCompBin);
+
+            // Assert
+            expect(mongoMock.updateOne).toBeCalled();
+            expect(result).toEqual(okResponse);
+        });
+        // test('for custom Competency should call updateCustomCompetencyData', async () => {
+        //     //Assert
+        //     updateCustomCompetencyDataMock.mockResolvedValueOnce({});
+
+        //     // Act
+        //     const result = await igService.putInterviewGuideDraft(
+        //         IgMock.igCmsMappedCompBin.id,
+        //         '111',
+        //         'en',
+        //         '111',
+        //         Object.assign({ ...IgMock.igCmsMappedCompBin }, { isCustom: true }),
+        //     );
+
+        //     // Assert
+        //     expect(updateCustomCompetencyDataMock).toBeCalled();
+        //     expect(result).toEqual(okResponse);
+        // });
+        test('should do nothing and return ok in isCustom prop not a bolean value', async () => {
+            //Assert
+            updateCustomCompetencyDataMock.mockResolvedValueOnce({});
+            const compWrongCustStatus = Object.assign({ ...IgMock.igCmsMappedCompBin }, { isCustom: 'whatever' });
+
+            // Act
+            const result = await igService.putInterviewGuideDraft(IgMock.igCmsMappedCompBin.id, '111', 'en', '111', compWrongCustStatus);
+
+            // Assert
+            expect(mongoMock.updateOne).toBeCalledTimes(0);
+            expect(mongoMock.insertMany).toBeCalledTimes(0);
+            expect(updateCustomCompetencyDataMock).toBeCalledTimes(0);
+            expect(result).toEqual(okResponse);
+        });
+    });
+
+    describe('publishInterviewGuideDraft', () => {
+        test('should publish draft if it exist and update status', async () => {
+            // Arrange
+            const clientDt = { clientId: 111, locale: 'en' },
+                status = { changed: 'changed' },
+                draft = { draft: 'draft1' };
+            jest.spyOn(igService as any, 'getInterviewGuideDraft').mockResolvedValueOnce({});
+            changeStatusMock.mockReturnValueOnce(status);
+            draftToCmsStructureMock.mockReturnValueOnce(draft);
+            publishInterviewGuideMock.mockResolvedValueOnce({});
+
+            getInterviewGuidesMock.mockResolvedValueOnce({});
+            generateNewDraftMock.mockReturnValueOnce({});
+
+            mongoMock.updateOne.mockResolvedValueOnce({});
+
+            // Act
+            const result = await igService.publishInterviewGuideDraft(String(clientDt.clientId), clientDt.locale, '111');
+
+            // Assert
+            expect(changeStatusMock).toBeCalled();
+            expect(draftToCmsStructureMock).toBeCalled();
+            expect(publishInterviewGuideMock).toBeCalledWith(draft);
+            expect(mongoMock.updateOne).toBeCalledWith(clientDt, status);
+            expect(result).toEqual(okResponse);
+        });
+        test('should not publish and return OK if draft not exist', async () => {
+            // Arrange
+            const clientDt = { clientId: 111, locale: 'en' };
+            jest.spyOn(igService as any, 'getInterviewGuideDraft').mockResolvedValueOnce(null);
+
+            // Act
+            const result = await igService.publishInterviewGuideDraft(String(clientDt.clientId), clientDt.locale, '111');
+
+            // Assert
+            expect(publishInterviewGuideMock).toBeCalledTimes(0);
+            expect(mongoMock.updateOne).toBeCalledTimes(0);
+            expect(result).toEqual(okResponse);
+        });
+        test('should throw HttpException on publish error', async () => {
+            // Arrange
+            const clientDt = { clientId: 111, locale: 'en' },
+                status = { changed: 'changed' },
+                draft = { draft: 'draft1' };
+            jest.spyOn(igService as any, 'getInterviewGuideDraft').mockResolvedValueOnce({});
+            changeStatusMock.mockReturnValueOnce(status);
+            draftToCmsStructureMock.mockReturnValueOnce(draft);
+            publishInterviewGuideMock.mockImplementationOnce(() => {
+                throw Error();
+            });
+
+            // Act
+            const resultFn = async () => await igService.publishInterviewGuideDraft(String(clientDt.clientId), clientDt.locale, '111');
+
+            // Assert
+            expect(resultFn).rejects.toThrowError(HttpException);
+        });
+    });
+
+    describe('upsertDraftCustomContent', () => {
+        test('if there is customContent with custom standart name - draft should be updated properly', async () => {
+            // Arrange
+            const mockDraft = JSON.parse(JSON.stringify(IgMock.draft));
+            getCustomCompsMock.mockResolvedValueOnce(IgMock.updatedStandartCompsFromDB);
+            mongoMock.findOneLeanMock.mockResolvedValueOnce(mockDraft);
+            mongoMock.findOneLeanMock.mockResolvedValueOnce(mockDraft);
+
+            // Act
+            const result = await igService.upsertDraftWithCustomContent(String(IgMock.draft.clientId), IgMock.draft.locale, String(IgMock.draft.createdBy));
+
+            // Assert
+            expect(mongoMock.updateOne).toBeCalledTimes(2);
+            expect(mongoMock.updateOne).toHaveBeenNthCalledWith(2, { clientId: 111, locale: 'en' }, IgMock.draftWithUpdatedStandartNames);
+            expect(result).toEqual(okResponse);
+        });
+        test('if there is no updates in standart content - draft should not be updated', async () => {
+            // Arrange
+            const mockDraft = JSON.parse(JSON.stringify(IgMock.draft));
+            getCustomCompsMock.mockResolvedValueOnce(IgMock.standartCompsFromDB);
+            mongoMock.findOneLeanMock.mockResolvedValueOnce(mockDraft);
+            mongoMock.findOneLeanMock.mockResolvedValueOnce(mockDraft);
+
+            // Act
+            const result = await igService.upsertDraftWithCustomContent(String(IgMock.draft.clientId), IgMock.draft.locale, String(IgMock.draft.createdBy));
+
+            // Assert
+            expect(mongoMock.updateOne).toBeCalledTimes(0);
+            expect(result).toEqual(okResponse);
+        });
+        test('if there is no draft should generate it only on firt cust comp in array', async () => {
+            // Arrange
+
+            getCustomCompsMock.mockResolvedValueOnce(IgMock.updatedStandartCompsFromDB);
+
+            mongoMock.findOneLeanMock.mockResolvedValueOnce(null);
+            const getCmsStandartOrBaseContentMock = jest.spyOn(igService as any, 'getCmsStandartOrBaseContent').mockResolvedValueOnce({});
+            generateDraftTemplateMock.mockReturnValueOnce(IgMock.draft);
+            mongoMock.insertMany.mockReturnValueOnce({});
+
+            mongoMock.findOneLeanMock.mockResolvedValueOnce(IgMock.draft);
+
+            // Act
+            const result = await igService.upsertDraftWithCustomContent(String(IgMock.draft.clientId), IgMock.draft.locale, String(IgMock.draft.createdBy));
+
+            // Assert
+            expect(getCmsStandartOrBaseContentMock).toBeCalledTimes(1);
+            expect(result).toEqual(okResponse);
+        });
+        test('if there is no customContent do nothing and return ok', async () => {
+            // Arrange
+            getCustomCompsMock.mockResolvedValueOnce(null);
+            const getCmsStandartOrBaseContentMock = jest.spyOn(igService as any, 'getCmsStandartOrBaseContent');
+
+            // Act
+            const result = await igService.upsertDraftWithCustomContent(String(IgMock.draft.clientId), IgMock.draft.locale, String(IgMock.draft.createdBy));
+
+            // Assert
+            expect(getCmsStandartOrBaseContentMock).toBeCalledTimes(0);
+            expect(mongoMock.updateOne).toBeCalledTimes(0);
+            expect(mongoMock.insertMany).toBeCalledTimes(0);
+            expect(mongoMock.findOneLeanMock).toBeCalledTimes(0);
+            expect(result).toEqual(okResponse);
+        });
+        test('should throw HttpException on error', async () => {
+            // Arrange
+            getCustomCompsMock.mockImplementationOnce(() => {
+                throw new Error();
+            });
+
+            // Act
+            const resultF = igService.upsertDraftWithCustomContent(String(IgMock.draft.clientId), IgMock.draft.locale, String(IgMock.draft.createdBy));
+
+            // Assert
+            await expect(resultF).rejects.toThrowError(HttpException);
+        });
+    });
+});

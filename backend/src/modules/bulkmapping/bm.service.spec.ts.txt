@@ -1,0 +1,389 @@
+import { BmService } from './bm.service';
+import {
+    bulkPublishDBResponse,
+    bulkPublishQueryParams,
+    bulkPublishResponse,
+    competencyLevelMock,
+    competencyLevelQuery,
+    competencyLevelResult,
+    competencyModelMock,
+    competencyModelQuery,
+    competencyModelResult,
+    getDatasetFromStreamParsed,
+    itemModificationId,
+    modelVersionMock,
+    modelVersionResult,
+    SkillCategoriesDbResponse,
+    SkillCategoriesResponse,
+    SkillsQueryMock,
+    spsDataQuery,
+    spsDataResult,
+    spsDataResultEmpty,
+    spsIdsDbMock,
+    spsMetadata,
+    spsMetadataResult,
+    spsMetadataResultEmpty,
+    stagePostBody,
+} from './bm.service.fixture';
+import { Test, TestingModule } from '@nestjs/testing';
+import { MssqlUtils, okResponse } from '../../common/common.utils';
+import { ProfilesRepository, SubCategoryRepository } from './bm-mssql.repository';
+import { BmMssqlService } from './bm-mssql.service';
+
+describe('BmService', () => {
+    let module: TestingModule;
+    let bmService: BmService;
+    const getClientProfilesAndIdsForBulkBCMock = jest.fn(),
+        getClientProfilesIdsForBulkBCMock = jest.fn(),
+        getBulkBCProfileMetadataMock = jest.fn(),
+        getClientsPublishedCompetencyModelMock = jest.fn(),
+        getCompetenceModelMock = jest.fn(),
+        getClientPublishedCompetenciesMock = jest.fn(),
+        getBulkBCClientsCompetencyLevelsMock = jest.fn(),
+        selectBulkMapItemIdMock = jest.fn(),
+        insertBulkMapItemIdMock = jest.fn(),
+        insertBulkMapProfilesMock = jest.fn(),
+        insertBulkMapSubCategoryMock = jest.fn(),
+        selectClientPublishedSkillsMock = jest.fn(),
+        getBulkPublishStatusMock = jest.fn();
+
+    beforeAll(async () => {
+        module = await Test.createTestingModule({
+            providers: [
+                BmService,
+                {
+                    provide: BmMssqlService,
+                    useValue: {
+                        getClientProfilesAndIdsForBulkBC: getClientProfilesAndIdsForBulkBCMock,
+                        getClientProfilesIdsForBulkBC: getClientProfilesIdsForBulkBCMock,
+                        getBulkBCProfileMetadata: getBulkBCProfileMetadataMock,
+                        getClientsPublishedCompetencyModel: getClientsPublishedCompetencyModelMock,
+                        getCompetenceModel: getCompetenceModelMock,
+                        getClientPublishedCompetencies: getClientPublishedCompetenciesMock,
+                        getBulkBCClientsCompetencyLevels: getBulkBCClientsCompetencyLevelsMock,
+                        selectBulkMapItemId: selectBulkMapItemIdMock,
+                        insertBulkMapItemId: insertBulkMapItemIdMock,
+                        selectClientPublishedSkills: selectClientPublishedSkillsMock,
+                        getBulkMappingPublishStatus: getBulkPublishStatusMock,
+                    },
+                },
+                MssqlUtils,
+                { provide: ProfilesRepository, useValue: { insertBulkMapProfiles: insertBulkMapProfilesMock } },
+                { provide: SubCategoryRepository, useValue: { insertBulkMapSubCategory: insertBulkMapSubCategoryMock } },
+            ],
+        }).compile();
+
+        bmService = module.get(BmService);
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+        jest.clearAllTimers();
+    });
+
+    describe('getSPs', () => {
+        const q = spsDataQuery;
+        test('should map data from db correctly', async () => {
+            // Arrange
+            getClientProfilesAndIdsForBulkBCMock.mockResolvedValueOnce(getDatasetFromStreamParsed);
+            getClientProfilesIdsForBulkBCMock.mockResolvedValueOnce(spsIdsDbMock);
+            // Act
+            const result = await bmService.getSPs(q);
+            // Assert
+            expect(result).toEqual(spsDataResult);
+        });
+        test('should return empty result if no data in DB', async () => {
+            // Arrange
+            getClientProfilesAndIdsForBulkBCMock.mockResolvedValueOnce([[], []]);
+            getClientProfilesIdsForBulkBCMock.mockResolvedValueOnce([]);
+
+            // Act
+            const result = await bmService.getSPs(q);
+
+            // Assert
+            expect(result).toEqual(spsDataResultEmpty);
+        });
+        test('query parsing should not fail on incorrect params', async () => {
+            // Arrange
+            getClientProfilesAndIdsForBulkBCMock.mockResolvedValueOnce(getDatasetFromStreamParsed);
+            getClientProfilesIdsForBulkBCMock.mockResolvedValueOnce(spsIdsDbMock);
+
+            // Act
+            const resultF = await bmService.getSPs(Object.assign(q, { sortBy: 'incorrect' }, { sortColumn: 'incorrect' }));
+
+            // Assert
+            expect(resultF).toBeDefined();
+        });
+        test('should throw HttpException on error', async () => {
+            // Arrange
+            getClientProfilesAndIdsForBulkBCMock.mockImplementationOnce(() => {
+                throw new Error();
+            });
+
+            // Act
+            const resultF = bmService.getSPs(q);
+
+            // Assert
+            await expect(resultF).rejects.toThrowError(HttpException);
+        });
+    });
+
+    describe('getFilters', () => {
+        const q = spsDataQuery;
+        test('should map data from db correctly', async () => {
+            // Arrange
+            getBulkBCProfileMetadataMock.mockResolvedValueOnce(spsMetadata);
+            selectBulkMapItemIdMock.mockResolvedValue(itemModificationId);
+            // Act
+            const result = await bmService.getFilters(q);
+
+            // Assert
+            expect(result).toEqual(spsMetadataResult);
+        });
+        test('should retrun empty filters array in response if no data in DB', async () => {
+            // Arrange
+            getBulkBCProfileMetadataMock.mockResolvedValueOnce([]);
+            selectBulkMapItemIdMock.mockResolvedValue([]);
+
+            // Act
+            const result = await bmService.getFilters(q);
+
+            // Assert
+            expect(result).toEqual(spsMetadataResultEmpty);
+        });
+        test('should throw HttpException on error', async () => {
+            // Arrange
+            getBulkBCProfileMetadataMock.mockImplementationOnce(() => {
+                throw new Error();
+            });
+
+            // Act
+            const resultF = bmService.getFilters(q);
+
+            // Assert
+            await expect(resultF).rejects.toThrowError(HttpException);
+        });
+    });
+
+    describe('getCompetenceModelVersion', () => {
+        const q = spsDataQuery;
+        test('should map data from db correctly', async () => {
+            //Arrange
+            getClientsPublishedCompetencyModelMock.mockResolvedValueOnce([modelVersionMock]);
+
+            // Act
+            const result = await bmService.getCompetenceModelVersion(q);
+
+            // Assert
+            expect(result).toEqual(modelVersionResult);
+        });
+        test('throw HttpException on error if no data in DB', async () => {
+            // Arrange
+            getClientsPublishedCompetencyModelMock.mockResolvedValueOnce([]);
+
+            // Act
+            const resultF = bmService.getCompetenceModelVersion(q);
+
+            // Assert
+            await expect(resultF).rejects.toThrowError(HttpException);
+        });
+        test('should throw HttpException on error', async () => {
+            // Arrange
+            getClientsPublishedCompetencyModelMock.mockImplementationOnce(() => {
+                throw new Error();
+            });
+
+            // Act
+            const resultF = bmService.getCompetenceModelVersion(q);
+
+            // Assert
+            await expect(resultF).rejects.toThrowError(HttpException);
+        });
+    });
+
+    describe('getCompetenceModel', () => {
+        const q = competencyModelQuery;
+        test('should map data from db correctly', async () => {
+            //Arrange
+            getClientPublishedCompetenciesMock.mockResolvedValueOnce(competencyModelMock);
+
+            // Act
+            const result = await bmService.getCompetenceModel(q);
+
+            // Assert
+            expect(result).toEqual(competencyModelResult);
+        });
+        test('throw HttpException on error if no data in DB', async () => {
+            // Arrange
+            getClientPublishedCompetenciesMock.mockResolvedValueOnce([]);
+
+            // Act
+            const resultF = bmService.getCompetenceModel(q);
+
+            // Assert
+            await expect(resultF).rejects.toThrowError(HttpException);
+        });
+        test('should throw HttpException on error', async () => {
+            // Arrange
+            getClientPublishedCompetenciesMock.mockImplementationOnce(() => {
+                throw new Error();
+            });
+
+            // Act
+            const resultF = bmService.getCompetenceModel(q);
+
+            // Assert
+            await expect(resultF).rejects.toThrowError(HttpException);
+        });
+    });
+
+    describe('getCompLevels', () => {
+        const q = competencyLevelQuery;
+        test('should map data from db correctly', async () => {
+            //Arrange
+            getBulkBCClientsCompetencyLevelsMock.mockResolvedValueOnce(competencyLevelMock);
+
+            // Act
+            const result = await bmService.getCompLevels(q);
+
+            // Assert
+            expect(result).toEqual(competencyLevelResult);
+        });
+        test('throw HttpException on error if no data in DB', async () => {
+            // Arrange
+            getBulkBCClientsCompetencyLevelsMock.mockResolvedValueOnce([]);
+
+            // Act
+            const resultF = bmService.getCompLevels(q);
+
+            // Assert
+            await expect(resultF).rejects.toThrowError(HttpException);
+        });
+        test('should throw HttpException on error', async () => {
+            // Arrange
+            getBulkBCClientsCompetencyLevelsMock.mockImplementationOnce(() => {
+                throw new Error();
+            });
+
+            // Act
+            const resultF = bmService.getCompLevels(q);
+
+            // Assert
+            await expect(resultF).rejects.toThrowError(HttpException);
+        });
+    });
+
+    describe('stageBulkMap', () => {
+        const q = competencyLevelQuery;
+        test('should select and insert data to db correctly', async () => {
+            //Arrange
+            selectBulkMapItemIdMock.mockResolvedValueOnce(itemModificationId);
+
+            // Act
+            const result = await bmService.stageBulkMap(q, stagePostBody);
+
+            // Assert
+            expect(result).toEqual(okResponse);
+        });
+        test('throw HttpException on error if no data returned from DB', async () => {
+            // Arrange
+            selectBulkMapItemIdMock.mockResolvedValueOnce([]);
+
+            // Act
+            const resultF = bmService.stageBulkMap(q, stagePostBody);
+
+            // Assert
+            await expect(resultF).rejects.toThrowError(HttpException);
+        });
+        test('should throw HttpException on error in getting data from db', async () => {
+            // Arrange
+            selectBulkMapItemIdMock.mockImplementationOnce(() => {
+                throw new Error();
+            });
+
+            // Act
+            const resultF = bmService.stageBulkMap(q, stagePostBody);
+
+            // Assert
+            await expect(resultF).rejects.toBeInstanceOf(HttpException);
+        });
+        test('should throw HttpException on error in inserting data from db', async () => {
+            // Arrange
+            selectBulkMapItemIdMock.mockResolvedValueOnce(itemModificationId);
+
+            const insertMocks = [insertBulkMapItemIdMock, insertBulkMapProfilesMock, insertBulkMapSubCategoryMock];
+
+            for (const insertMock of insertMocks) {
+                insertMock.mockImplementationOnce(() => {
+                    throw new Error();
+                });
+                // Act
+                const resultF = bmService.stageBulkMap(q, stagePostBody);
+                // Assert
+                await expect(resultF).rejects.toThrowError(HttpException);
+            }
+        });
+    });
+
+    describe('getSkillsModel', () => {
+        test('should return expected response', async () => {
+            // Arrange
+            selectClientPublishedSkillsMock.mockResolvedValueOnce(SkillCategoriesDbResponse);
+            // Act
+            const result = await bmService.getSkillsModel(SkillsQueryMock);
+            // Assert
+            expect(result).toEqual(SkillCategoriesResponse);
+        });
+
+        test('throw HttpException on error if no data returned from DB', async () => {
+            // Arrange
+            selectClientPublishedSkillsMock.mockResolvedValueOnce([]);
+            // Act
+            const result = bmService.getSkillsModel(SkillsQueryMock);
+            // Assert
+            await expect(result).rejects.toThrowError(Error);
+        });
+
+        test('should throw HttpException on error in getting data from db', async () => {
+            // Arrange
+            selectClientPublishedSkillsMock.mockImplementationOnce(() => {
+                throw new Error();
+            });
+            // Act
+            const resultF = bmService.getSkillsModel(SkillsQueryMock);
+            // Assert
+            await expect(resultF).rejects.toBeInstanceOf(HttpException);
+        });
+    });
+
+    describe('getBulkMappingPublishStatus', () => {
+        test('should select results from db correctly', async () => {
+            //Arrange
+            getBulkPublishStatusMock.mockResolvedValueOnce(bulkPublishDBResponse);
+            // Act
+            const result = await bmService.getBulkMappingPublishStatus(bulkPublishQueryParams);
+
+            // Assert
+            expect(result).toEqual(bulkPublishResponse);
+        });
+        test('should map db results to response', async () => {
+            // Act
+            const result = await bmService.convertBulkPublishDBResponseToBulkPublishStatusResponse(bulkPublishDBResponse[0]);
+
+            // Assert
+            expect(result).toEqual(bulkPublishResponse);
+        });
+        test('should kfException on error retrieving publish status from DB', async () => {
+            // Arrange
+            getBulkPublishStatusMock.mockImplementationOnce(() => {
+                throw new Error();
+            });
+
+            // Act
+            const result = bmService.getBulkMappingPublishStatus(bulkPublishQueryParams);
+
+            // Assert
+            await expect(result).rejects.toBeInstanceOf(Error);
+        });
+    });
+});
